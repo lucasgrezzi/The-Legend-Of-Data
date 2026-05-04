@@ -3,6 +3,7 @@
 import type { Mission } from "@/types";
 import DataFilePreviewComponent from "./DataFilePreview";
 import Link from "next/link";
+import TypewriterText from "@/components/ui/TypewriterText";
 
 const TRACK_COLOR: Record<string, string> = {
   python:  "var(--color-python)",
@@ -13,9 +14,9 @@ const TRACK_COLOR: Record<string, string> = {
 
 const TRACK_ICON: Record<string, string> = {
   python:  "🐍",
-  sql:     "🗄️",
-  pandas:  "🔨",
-  dataviz: "📊",
+  sql:     "🏛️",
+  pandas:  "⚒️",
+  dataviz: "🌠",
 };
 
 interface MissionPanelProps {
@@ -25,6 +26,127 @@ interface MissionPanelProps {
   validated: boolean;
   prevId: number | null;
   nextId: number | null;
+}
+
+function SectionHeader({
+  icon,
+  label,
+  color,
+}: {
+  icon: string;
+  label: string;
+  color: string;
+}) {
+  return (
+    <div className="section-header">
+      <span className="section-icon">{icon}</span>
+      <span className="section-label" style={{ color }}>
+        {label}
+      </span>
+      <div className="section-line" style={{ background: color }} />
+    </div>
+  );
+}
+
+function TutorialSteps({ text, trackColor }: { text: string; trackColor: string }) {
+  const lines = text.split("\n");
+  let stepCount = 0;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {lines.map((line, i) => {
+        const trimmed = line.trim();
+
+        if (!trimmed) return <div key={i} style={{ height: 4 }} />;
+
+        if (trimmed.startsWith("•")) {
+          stepCount++;
+          const content = trimmed.slice(1).trim();
+          return (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                gap: 14,
+                padding: "12px 16px",
+                background: "rgba(74,174,255,0.05)",
+                border: "1px solid rgba(74,174,255,0.18)",
+                borderRadius: 10,
+                alignItems: "flex-start",
+              }}
+            >
+              <span
+                style={{
+                  background: trackColor,
+                  color: "#000",
+                  borderRadius: "50%",
+                  width: 26,
+                  height: 26,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 12,
+                  fontWeight: 800,
+                  flexShrink: 0,
+                  fontFamily: "var(--font-body)",
+                  marginTop: 1,
+                }}
+              >
+                {stepCount}
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: 14,
+                  lineHeight: 1.7,
+                  color: "var(--color-text)",
+                }}
+              >
+                {content}
+              </span>
+            </div>
+          );
+        }
+
+        if (line.startsWith("  ") || line.startsWith("\t")) {
+          return (
+            <code
+              key={i}
+              style={{
+                display: "block",
+                fontFamily: "var(--font-body)",
+                fontSize: 13,
+                color: "var(--color-accent)",
+                background: "var(--color-bg)",
+                padding: "5px 14px",
+                borderRadius: 6,
+                marginLeft: 16,
+                borderLeft: `2px solid ${trackColor}55`,
+              }}
+            >
+              {trimmed}
+            </code>
+          );
+        }
+
+        return (
+          <p
+            key={i}
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 13,
+              color: "var(--color-muted)",
+              fontWeight: 600,
+              marginTop: stepCount > 0 ? 8 : 0,
+              marginBottom: 0,
+            }}
+          >
+            {trimmed}
+          </p>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function MissionPanel({
@@ -37,71 +159,87 @@ export default function MissionPanel({
 }: MissionPanelProps) {
   const trackColor = TRACK_COLOR[mission.track] ?? "#fff";
   const trackIcon  = TRACK_ICON[mission.track] ?? "◆";
+  const isNarrative = mission.validationType === "narrative";
 
   return (
     <div className="flex flex-col h-full">
 
       {/* ── Scrollable content ── */}
-      <div className="flex-1 overflow-y-auto px-8 py-6" style={{ paddingBottom: 0 }}>
+      <div className="flex-1 overflow-y-auto px-8 py-7" style={{ paddingBottom: 0 }}>
 
         {/* Chapter label */}
-        <p className="pixel-chapter mb-3">
-          {String(trackIndex + 1).padStart(2, "0")}. {mission.chapterTitle}
+        <p className="pixel-chapter mb-4">
+          &gt; {String(trackIndex + 1).padStart(2, "0")} — {mission.chapterTitle}
         </p>
 
-        {/* Title */}
+        {/* ── Título principal (grande, bold, JetBrains Mono) ── */}
         <h1
-          className="mb-4"
+          className="mb-5"
           style={{
-            fontFamily: "var(--font-pixel)",
-            fontSize: 13,
-            lineHeight: 1.7,
+            fontFamily: "var(--font-body)",
+            fontSize: 28,
+            fontWeight: 800,
+            lineHeight: 1.25,
             color: "var(--color-text)",
+            letterSpacing: "-0.5px",
+            textShadow: "0 0 40px rgba(240,192,64,0.15), 0 2px 8px rgba(0,0,0,0.6)",
           }}
         >
           {mission.missionTitle}
         </h1>
 
         {/* Track badge */}
-        <div className="track-badge mb-5" style={{ color: trackColor }}>
-          <span>{trackIcon}</span>
-          <span style={{ textTransform: "capitalize" }}>{mission.track}</span>
+        <div
+          className={`track-badge track-${mission.track} mb-7`}
+        >
+          <span style={{ fontSize: 16, lineHeight: 1 }}>{trackIcon}</span>
+          <span style={{ textTransform: "uppercase", letterSpacing: 2 }}>{mission.track}</span>
         </div>
 
-        {/* Narrative */}
-        <p
-          className="mb-5"
+        {/* ── Narrativa (typewriter) ── */}
+        <div
+          className="mb-6"
           style={{
-            fontFamily: "var(--font-body)",
-            fontSize: 15,
-            color: "var(--color-text)",
-            lineHeight: 1.7,
-            whiteSpace: "pre-line",
+            background: "rgba(240,192,64,0.04)",
+            border: "1px solid rgba(240,192,64,0.16)",
+            borderRadius: 14,
+            padding: "20px 24px",
           }}
         >
-          {mission.narrative}
-        </p>
+          <SectionHeader icon="📯" label="LORE" color="var(--color-accent)" />
+          <TypewriterText
+            text={mission.narrative}
+            speed={16}
+            delay={350}
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: 14,
+              color: "var(--color-text)",
+              lineHeight: 1.85,
+            }}
+          />
+        </div>
 
-        {/* Theory */}
+        {/* ── Tutorial / Teoria ── */}
         {mission.theory && (
-          <div className="mb-5">
-            <p
-              className="pixel-label mb-2"
-              style={{ color: trackColor }}
-            >
-              📖 Teoria
-            </p>
+          <div
+            className="mb-5"
+            style={{
+              background: "rgba(74,174,255,0.04)",
+              border: "1px solid rgba(74,174,255,0.16)",
+              borderRadius: 14,
+              padding: "20px 24px",
+            }}
+          >
+            <SectionHeader icon="🔮" label="GRIMÓRIO" color={trackColor} />
             <pre
               style={{
                 fontFamily: "var(--font-body)",
-                fontSize: 14,
+                fontSize: 13,
                 color: "var(--color-text)",
-                background: "var(--color-panel)",
-                border: "1px solid var(--color-border)",
-                padding: "14px 16px",
                 whiteSpace: "pre-wrap",
-                lineHeight: 1.7,
-                overflowX: "auto",
+                lineHeight: 1.85,
+                margin: 0,
               }}
             >
               {mission.theory}
@@ -109,28 +247,23 @@ export default function MissionPanel({
           </div>
         )}
 
-        {/* Instructions */}
-        <div className="mb-5">
-          <p className="pixel-label mb-2" style={{ color: trackColor }}>
-            ⚔️ Missão
-          </p>
-          <pre
+        {/* ── Missão: passos do tutorial ── */}
+        {!isNarrative && (
+          <div
+            className="mb-5"
             style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 15,
-              color: "var(--color-text)",
-              background: "rgba(74,174,255,0.06)",
-              border: "1px solid rgba(74,174,255,0.2)",
-              padding: "14px 16px",
-              whiteSpace: "pre-wrap",
-              lineHeight: 1.7,
+              background: "var(--color-panel)",
+              border: `1px solid ${trackColor}33`,
+              borderRadius: 14,
+              padding: "20px 24px",
             }}
           >
-            {mission.instructions}
-          </pre>
-        </div>
+            <SectionHeader icon="🗡️" label="QUEST" color={trackColor} />
+            <TutorialSteps text={mission.instructions} trackColor={trackColor} />
+          </div>
+        )}
 
-        {/* Data file preview */}
+        {/* ── Data file preview ── */}
         {mission.dataFile && (
           <div className="mb-6">
             <DataFilePreviewComponent dataFile={mission.dataFile} />
@@ -138,60 +271,47 @@ export default function MissionPanel({
         )}
       </div>
 
-      {/* ── Fixed footer ── */}
+      {/* ── Rodapé fixo ── */}
       <div
-        className="shrink-0 flex items-center justify-between px-8 py-3"
+        className="shrink-0 flex items-center justify-between px-8 py-4"
         style={{
           background: "var(--color-surface)",
           borderTop: "1px solid var(--color-border)",
         }}
       >
-        {/* Exercise counter + XP */}
         <div className="flex items-center gap-3">
-          <span className="pixel-label" style={{ color: "var(--color-muted)" }}>
-            {mission.missionTitle}
-          </span>
           <span
-            className="pixel-label px-2 py-1"
+            className="pixel-label px-3 py-1"
             style={{
               background: "var(--color-panel)",
+              color: "var(--color-muted)",
+              border: "1px solid var(--color-border)",
+              borderRadius: 20,
+            }}
+          >
+            {trackIndex + 1}/{trackTotal}
+          </span>
+          <span
+            className="pixel-label px-3 py-1"
+            style={{
+              background: "rgba(240,192,64,0.1)",
               color: "var(--color-xp)",
-              border: "1px solid var(--color-border)",
+              border: "1px solid rgba(240,192,64,0.25)",
+              borderRadius: 20,
             }}
           >
-            Exercise {trackIndex + 1}/{trackTotal}
-          </span>
-          <span
-            className="pixel-label px-2 py-1"
-            style={{
-              background: "var(--color-panel)",
-              color: trackColor,
-              border: "1px solid var(--color-border)",
-            }}
-          >
-            +{mission.xpReward} XP
+            ✦ +{mission.xpReward} XP
           </span>
         </div>
 
-        {/* Back / Next */}
         <div className="flex gap-2">
           {prevId !== null ? (
             <Link href={`/mission/${prevId}`}>
-              <button
-                className="btn-run"
-                style={{ fontSize: 7, padding: "8px 16px" }}
-              >
-                ← Back
-              </button>
+              <button className="btn-nav">← Voltar</button>
             </Link>
           ) : (
             <Link href="/map">
-              <button
-                className="btn-run"
-                style={{ fontSize: 7, padding: "8px 16px" }}
-              >
-                🗺️ Mapa
-              </button>
+              <button className="btn-nav">⬡ Mapa</button>
             </Link>
           )}
 
@@ -201,22 +321,20 @@ export default function MissionPanel({
               onClick={(e) => { if (!validated) e.preventDefault(); }}
             >
               <button
-                className="btn-submit"
-                style={{ padding: "8px 20px", opacity: validated ? 1 : 0.35, cursor: validated ? "pointer" : "not-allowed" }}
+                className="btn-next"
                 disabled={!validated}
+                style={{ opacity: validated ? 1 : 0.35, cursor: validated ? "pointer" : "not-allowed" }}
               >
-                Next →
+                Próximo →
               </button>
             </Link>
           ) : validated ? (
             <Link href="/map">
-              <button className="btn-submit" style={{ padding: "8px 20px" }}>
-                ★ Fim
-              </button>
+              <button className="btn-next">⭐ Concluído</button>
             </Link>
           ) : (
-            <button className="btn-submit" style={{ padding: "8px 20px", opacity: 0.35 }} disabled>
-              Next →
+            <button className="btn-next" disabled style={{ opacity: 0.35 }}>
+              Próximo →
             </button>
           )}
         </div>

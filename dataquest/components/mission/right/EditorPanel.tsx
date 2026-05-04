@@ -20,6 +20,11 @@ const LANG_ICON: Record<string, string> = {
   sql: "🗄️",
 };
 
+const LANG_COLOR: Record<string, string> = {
+  python: "var(--color-python)",
+  sql:    "var(--color-sql)",
+};
+
 export default function EditorPanel({
   mission,
   pyodideStatus,
@@ -57,23 +62,24 @@ export default function EditorPanel({
   const isLoading = pyodideStatus === "loading";
   const busy = isRunning || isSubmitting || isLoading;
   const fileName = mission.editorLanguage === "python" ? "script.py" : "query.sql";
+  const langColor = LANG_COLOR[mission.editorLanguage] ?? "var(--color-submit)";
 
   return (
     <div className="flex flex-col h-full">
 
       {/* File tab */}
       <div
-        className="flex items-center px-4 shrink-0"
+        className="flex items-center gap-3 px-4 shrink-0"
         style={{
           background: "var(--color-bg)",
           borderBottom: "1px solid var(--color-border)",
-          height: 40,
+          height: 44,
         }}
       >
         <div
           className="flex items-center gap-2 px-4 py-1"
           style={{
-            borderBottom: `2px solid var(--color-submit)`,
+            borderBottom: `2px solid ${langColor}`,
             color: "var(--color-text)",
             fontFamily: "var(--font-body)",
             fontSize: 13,
@@ -87,16 +93,17 @@ export default function EditorPanel({
       {/* Engine loading banner */}
       {isLoading && (
         <div
-          className="px-4 py-2 shrink-0"
+          className="px-5 py-2 shrink-0 flex items-center gap-3"
           style={{
             background: "rgba(240,192,64,0.08)",
-            borderBottom: "1px solid var(--color-border)",
+            borderBottom: "1px solid rgba(240,192,64,0.2)",
             color: "var(--color-accent)",
             fontFamily: "var(--font-pixel)",
             fontSize: 7,
           }}
         >
-          ⏳ Despertando o Arquivo Antigo...
+          <span style={{ animation: "blink 1s step-end infinite" }}>⏳</span>
+          Despertando o Arquivo Antigo...
         </div>
       )}
 
@@ -111,41 +118,44 @@ export default function EditorPanel({
 
       {/* Action buttons row */}
       <div
-        className="flex items-center justify-between px-4 py-2 shrink-0"
-        style={{ background: "var(--color-bg)", borderTop: "1px solid var(--color-border)" }}
+        className="flex items-center justify-between px-5 py-3 shrink-0"
+        style={{
+          background: "var(--color-bg)",
+          borderTop: "1px solid var(--color-border)",
+        }}
       >
         {/* Icon buttons: copy, clear */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <button className="icon-btn" onClick={handleCopy} title="Copiar código">
             ⎘
           </button>
-          <button className="icon-btn" onClick={handleClear} title="Limpar editor">
+          <button className="icon-btn" onClick={handleClear} title="Resetar editor">
             ↺
           </button>
         </div>
 
         {/* Run + Submit */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <button
             className="btn-run"
             onClick={handleRun}
             disabled={busy}
           >
-            {isRunning ? "⏳" : "▶"} Run
+            {isRunning ? "⏳" : "▶"} Executar
           </button>
           <button
             className="btn-submit"
             onClick={handleSubmit}
             disabled={busy || validated}
           >
-            {validated ? "✓ Concluída" : isSubmitting ? "Verificando..." : "Submit answer"}
+            {validated ? "✓ Concluída" : isSubmitting ? "Verificando..." : "Enviar Resposta"}
           </button>
         </div>
       </div>
 
       {/* Terminal section */}
       <div className="shrink-0" style={{ borderTop: "1px solid var(--color-border)" }}>
-        <div className="terminal-label">Terminal</div>
+        <div className="terminal-label">● Terminal</div>
         <TerminalOutput
           stdout={result?.stdout ?? ""}
           stderr={result?.stderr ?? ""}

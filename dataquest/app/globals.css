@@ -2,17 +2,16 @@
 @import "nes.css/css/nes.min.css";
 
 :root {
-  /* Fonts */
   --font-pixel: var(--font-press-start), 'Courier New', monospace;
-  --font-body:  var(--font-inter), system-ui, sans-serif;
+  --font-body:  var(--font-code), 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 
-  /* Colors — dark navy palette like Codédex */
   --color-bg:       #0e1117;
   --color-surface:  #161b27;
   --color-panel:    #1c2333;
   --color-border:   #2a3142;
   --color-accent:   #f0c040;
   --color-submit:   #4aaeff;
+  --color-run:      #22c55e;
   --color-python:   #4fc3f7;
   --color-sql:      #6bcb77;
   --color-pandas:   #ffb74d;
@@ -20,6 +19,10 @@
   --color-xp:       #f0c040;
   --color-text:     #e2e8f0;
   --color-muted:    #8892a4;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
 }
 
 * { box-sizing: border-box; }
@@ -31,26 +34,65 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
-/* ── Pixel headings (Press Start 2P only for titles/labels) ── */
+/* ── Typewriter cursor ── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.typewriter-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  background: currentColor;
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 0.85s step-end infinite;
+}
+
+/* ── Pixel headings (Press Start 2P — apenas labels e badges) ── */
 .pixel-title {
   font-family: var(--font-pixel);
-  font-size: 11px;
-  line-height: 1.8;
+  font-size: 12px;
+  line-height: 1.9;
   letter-spacing: 0.5px;
 }
 .pixel-chapter {
   font-family: var(--font-pixel);
   font-size: 9px;
   color: var(--color-muted);
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 .pixel-label {
   font-family: var(--font-pixel);
-  font-size: 7px;
-  letter-spacing: 0.5px;
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+
+/* ── Section header RPG (emoji grande + pixel label + linha) ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.section-header .section-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.section-header .section-label {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  letter-spacing: 3px;
+  flex-shrink: 0;
+}
+.section-header .section-line {
+  flex: 1;
+  height: 1px;
+  opacity: 0.25;
 }
 
 /* ── Track badge ── */
@@ -59,16 +101,18 @@ body {
   font-size: 8px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
 }
-.track-python  { color: var(--color-python);  }
-.track-sql     { color: var(--color-sql);     }
-.track-pandas  { color: var(--color-pandas);  }
-.track-dataviz { color: var(--color-dataviz); }
+.track-python  { color: var(--color-python);  border: 1px solid rgba(79,195,247,0.3);  background: rgba(79,195,247,0.08); }
+.track-sql     { color: var(--color-sql);     border: 1px solid rgba(107,203,119,0.3); background: rgba(107,203,119,0.08); }
+.track-pandas  { color: var(--color-pandas);  border: 1px solid rgba(255,183,77,0.3);  background: rgba(255,183,77,0.08); }
+.track-dataviz { color: var(--color-dataviz); border: 1px solid rgba(244,143,177,0.3); background: rgba(244,143,177,0.08); }
 
 /* ── Terminal ── */
 .terminal {
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-body);
   font-size: 13px;
   background: #060a10;
   color: #00e676;
@@ -82,12 +126,13 @@ body {
 .terminal.has-error { color: #ff5252; }
 .terminal-label {
   font-family: var(--font-pixel);
-  font-size: 7px;
+  font-size: 8px;
   color: var(--color-muted);
   padding: 6px 16px;
   background: var(--color-panel);
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
+  letter-spacing: 1px;
 }
 
 /* ── Table preview ── */
@@ -99,14 +144,14 @@ body {
 }
 .table-preview th {
   background: var(--color-panel);
-  padding: 5px 10px;
+  padding: 6px 12px;
   border: 1px solid var(--color-border);
   color: var(--color-accent);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 .table-preview td {
-  padding: 4px 10px;
+  padding: 5px 12px;
   border: 1px solid var(--color-border);
   color: var(--color-text);
 }
@@ -114,52 +159,94 @@ body {
   background: rgba(255,255,255,0.02);
 }
 
-/* ── Submit button ── */
+/* ── Submit button (azul) ── */
 .btn-submit {
-  background: var(--color-submit);
-  color: #000;
+  background: linear-gradient(135deg, #4aaeff 0%, #0082e5 100%);
+  color: #fff;
   font-family: var(--font-pixel);
-  font-size: 7px;
+  font-size: 8px;
   border: none;
-  padding: 10px 20px;
+  padding: 11px 24px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(74,174,255,0.35);
+  letter-spacing: 1px;
 }
-.btn-submit:hover  { opacity: 0.88; }
-.btn-submit:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-submit:hover  { opacity: 0.9; box-shadow: 0 6px 22px rgba(74,174,255,0.5); transform: translateY(-1px); }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-/* ── Run button ── */
+/* ── Run button (verde) ── */
 .btn-run {
-  background: var(--color-panel);
-  color: var(--color-text);
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
   font-family: var(--font-pixel);
-  font-size: 7px;
-  border: 1px solid var(--color-border);
-  padding: 10px 18px;
+  font-size: 8px;
+  border: none;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(34,197,94,0.3);
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  letter-spacing: 1px;
 }
-.btn-run:hover    { background: var(--color-border); }
-.btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-run:hover    { opacity: 0.9; box-shadow: 0 6px 22px rgba(34,197,94,0.45); transform: translateY(-1px); }
+.btn-run:active   { transform: translateY(0); }
+.btn-run:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-/* ── Icon buttons row ── */
+/* ── Nav button (neutro) ── */
+.btn-nav {
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  border: 1px solid var(--color-border);
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  background: var(--color-panel);
+  color: var(--color-text);
+  letter-spacing: 1px;
+}
+.btn-nav:hover { background: var(--color-border); transform: translateY(-1px); }
+
+/* ── Next button (dourado) ── */
+.btn-next {
+  background: linear-gradient(135deg, #f0c040 0%, #d4a010 100%);
+  color: #000;
+  font-family: var(--font-pixel);
+  font-size: 8px;
+  border: none;
+  padding: 10px 22px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 4px 16px rgba(240,192,64,0.3);
+  letter-spacing: 1px;
+}
+.btn-next:hover  { opacity: 0.9; box-shadow: 0 6px 22px rgba(240,192,64,0.45); transform: translateY(-1px); }
+.btn-next:active { transform: translateY(0); }
+.btn-next:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+/* ── Icon buttons ── */
 .icon-btn {
   background: var(--color-panel);
   border: 1px solid var(--color-border);
   color: var(--color-muted);
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 14px;
-  transition: color 0.15s;
+  font-size: 15px;
+  transition: color 0.15s, background 0.15s, transform 0.1s;
 }
-.icon-btn:hover { color: var(--color-text); }
+.icon-btn:hover { color: var(--color-text); background: var(--color-border); transform: translateY(-1px); }
 
 /* ── NES.css dark override ── */
 .nes-container.is-dark {

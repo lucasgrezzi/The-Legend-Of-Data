@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Press_Start_2P, Inter } from "next/font/google";
+import { Press_Start_2P, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const pressStart = Press_Start_2P({
@@ -9,9 +9,10 @@ const pressStart = Press_Start_2P({
   display: "swap",
 });
 
-const inter = Inter({
+const jetbrainsMono = JetBrains_Mono({
+  weight: ["400", "500", "700", "800"],
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-code",
   display: "swap",
 });
 
@@ -26,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${pressStart.variable} ${inter.variable} h-full`}>
+    <html lang="pt-BR" className={`${pressStart.variable} ${jetbrainsMono.variable} h-full`}>
       <body className="min-h-full">{children}</body>
     </html>
   );
