@@ -11,10 +11,11 @@ const mission4: Mission = {
   id: 4,
   track: "pandas",
   type: "pandas",
-  chapterTitle: "A Forja de Dados — Capitulo I",
+  chapterTitle: "A Forja de Dados — Capítulo I",
   missionTitle: "A Forja Desperta",
-  narrative: `A Forja dos Arquivistas e onde os fragmentos de dados brutos — as reliquias imperfeitas — sao transformados. Com as ferramentas certas, um Arquivista pode filtrar, reorganizar e purificar qualquer conjunto de dados.`,
-  theory: `Pandas e a biblioteca Python para manipulacao de dados.
+  concept: "Pandas: ler CSV e filtrar linhas",
+  narrative: `A Forja dos Arquivistas é onde os fragmentos de dados brutos — as relíquias imperfeitas — são transformados. Com as ferramentas certas, um Arquivista pode filtrar, reorganizar e purificar qualquer conjunto de dados.`,
+  theory: `Pandas é a biblioteca Python para manipulação de dados.
 
   import pandas as pd
 
@@ -29,7 +30,7 @@ df.shape retorna (linhas, colunas).
 df.columns lista os nomes das colunas.`,
   instructions: `1. Leia o arquivo /data/mission.csv com pd.read_csv()
 2. Filtre para manter apenas produtos com valor > 150
-3. Imprima o numero de linhas com print(len(filtrado))
+3. Imprima o número de linhas com print(len(filtrado))
 
 Dica: df[df["coluna"] > valor] filtra linhas.`,
   codeTemplate: `import pandas as pd

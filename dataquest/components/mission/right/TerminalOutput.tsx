@@ -13,11 +13,11 @@ export default function TerminalOutput({ stdout, stderr, isRunning }: TerminalOu
   return (
     <div className={`terminal ${hasError ? "has-error" : ""}`}>
       {isRunning ? (
-        <span style={{ color: "#ffff00" }}>▌ Executando...</span>
+        <span style={{ color: "var(--color-accent)" }}>▌ Executando…</span>
       ) : content ? (
         content
       ) : (
-        <span style={{ color: "#555" }}>{">"} Aguardando execucao...</span>
+        <span style={{ color: "#4b5566" }}>{">"} Aguardando execução… pressione ▶ Executar ou Ctrl+Enter</span>
       )}
     </div>
   );

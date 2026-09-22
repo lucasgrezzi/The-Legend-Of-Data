@@ -10,7 +10,7 @@ function validateExact(stdout: string, mission: Mission): ValidationResult {
     passed,
     feedback: passed
       ? `Perfeito! +${mission.xpReward} XP conquistados!`
-      : `Output incorreto.\n\nEsperado:\n${mission.expectedOutput}\n\nObtido:\n${stdout}`,
+      : `Saída incorreta.\n\nEsperado:\n${mission.expectedOutput}\n\nObtido:\n${stdout}`,
     xpEarned: passed ? mission.xpReward : 0,
   };
 }
@@ -27,7 +27,7 @@ function validateTable(
   try {
     expected = JSON.parse(mission.expectedOutput);
   } catch {
-    return { passed: false, feedback: "Configuracao de missao invalida.", xpEarned: 0 };
+    return { passed: false, feedback: "Configuração de missão inválida.", xpEarned: 0 };
   }
 
   const headersMatch = expected.headers.every((h) =>
@@ -44,7 +44,7 @@ function validateTable(
   if (tableData.rows.length !== expected.rowCount) {
     return {
       passed: false,
-      feedback: `Numero de linhas incorreto.\nEsperado: ${expected.rowCount}\nObtido: ${tableData.rows.length}`,
+      feedback: `Número de linhas incorreto.\nEsperado: ${expected.rowCount}\nObtido: ${tableData.rows.length}`,
       xpEarned: 0,
     };
   }
@@ -64,24 +64,52 @@ function validateChart(
   return {
     passed,
     feedback: passed
-      ? `Grafico gerado! +${mission.xpReward} XP conquistados!`
-      : "Nenhum grafico foi gerado. Use matplotlib para criar um grafico.",
+      ? `Gráfico gerado! +${mission.xpReward} XP conquistados!`
+      : "Nenhum gráfico foi gerado. Use matplotlib para criar um gráfico.",
     xpEarned: passed ? mission.xpReward : 0,
   };
 }
 
+/** Primeiro padrão obrigatório que falta no código (ou null se todos aparecem) */
+function missingCode(code: string, mission: Mission): string | null {
+  // ignora comentários para o aluno não "passar" só escrevendo o padrão num comentário
+  const clean = code.split("\n").map((l) => l.replace(/#.*$|--.*$/, "")).join("\n");
+  const miss = mission.requiredCode?.find((r) => !new RegExp(r.pattern).test(clean));
+  return miss ? miss.hint : null;
+}
+
 export function validateOutput(
+  result: RunResult,
+  mission: Mission,
+  code = ""
+): ValidationResult {
+  const base = validateResult(result, mission);
+  if (!base.passed) return base;
+  const hint = missingCode(code, mission);
+  if (hint) {
+    return {
+      passed: false,
+      feedback: `A saída está certa, mas o feitiço ainda não foi escrito do jeito pedido.
+
+Dica: ${hint}`,
+      xpEarned: 0,
+    };
+  }
+  return base;
+}
+
+function validateResult(
   result: RunResult,
   mission: Mission
 ): ValidationResult {
   if (mission.validationType === "narrative") {
-    return { passed: true, feedback: "Missao concluida!", xpEarned: mission.xpReward };
+    return { passed: true, feedback: "Missão concluída!", xpEarned: mission.xpReward };
   }
 
   if (!result.success) {
     return {
       passed: false,
-      feedback: `Erro de execucao:\n${result.stderr}`,
+      feedback: `Erro de execução:\n${result.stderr}`,
       xpEarned: 0,
     };
   }
@@ -99,11 +127,11 @@ export function validateOutput(
         passed,
         feedback: passed
           ? `Perfeito! +${mission.xpReward} XP conquistados!`
-          : `Output nao contem o esperado.`,
+          : `A saída não contém o esperado.`,
         xpEarned: passed ? mission.xpReward : 0,
       };
     }
     default:
-      return { passed: true, feedback: "Missao concluida!", xpEarned: mission.xpReward };
+      return { passed: true, feedback: "Missão concluída!", xpEarned: mission.xpReward };
   }
 }

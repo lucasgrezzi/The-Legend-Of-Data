@@ -11,9 +11,10 @@ const mission3: Mission = {
   id: 3,
   track: "sql",
   type: "sql",
-  chapterTitle: "As Catacumbas de Dados — Capitulo I",
-  missionTitle: "A Primeira Escavacao",
-  narrative: `As Catacumbas guardam registros de todas as transacoes do Imperio. Cada tabela e uma sala diferente. Para encontrar as reliquias mais valiosas, o Arquivista precisa dominar a linguagem de consulta das Catacumbas: o SQL.`,
+  chapterTitle: "As Catacumbas de Dados — Capítulo I",
+  missionTitle: "A Primeira Escavação",
+  concept: "SQL: SELECT, WHERE e ORDER BY",
+  narrative: `As Catacumbas guardam registros de todas as transações do Império. Cada tabela é uma sala diferente. Para encontrar as relíquias mais valiosas, o Arquivista precisa dominar a linguagem de consulta das Catacumbas: o SQL.`,
   theory: `SELECT escolhe quais colunas ver.
 WHERE filtra as linhas:
 
@@ -22,14 +23,14 @@ WHERE filtra as linhas:
   WHERE valor > 100
   ORDER BY valor DESC;
 
-A tabela vendas contem as colunas:
+A tabela vendas contém as colunas:
   id | produto | valor | regiao`,
   instructions: `Consulte a tabela vendas e retorne apenas
 as colunas produto e valor para os registros
 onde valor seja maior que 150.
 
 Ordene por valor em ordem decrescente.`,
-  codeTemplate: `-- Missao 3: A Primeira Escavacao
+  codeTemplate: `-- A Primeira Escavação
 SELECT ___, ___
 FROM vendas
 WHERE ___ > ___
@@ -54,7 +55,7 @@ ORDER BY ___ DESC;`,
     ],
     rawCsv: VENDAS_CSV,
   },
-  unlockCondition: { requiredMissionIds: [1, 2] },
+  unlockCondition: { requiredMissionIds: [2] },
 };
 
 export default mission3;

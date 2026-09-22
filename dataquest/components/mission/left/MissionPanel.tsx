@@ -1,23 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import type { Mission } from "@/types";
+import { TRACKS } from "@/lib/tracks";
 import DataFilePreviewComponent from "./DataFilePreview";
 import Link from "next/link";
 import TypewriterText from "@/components/ui/TypewriterText";
-
-const TRACK_COLOR: Record<string, string> = {
-  python:  "var(--color-python)",
-  sql:     "var(--color-sql)",
-  pandas:  "var(--color-pandas)",
-  dataviz: "var(--color-dataviz)",
-};
-
-const TRACK_ICON: Record<string, string> = {
-  python:  "🐍",
-  sql:     "🏛️",
-  pandas:  "⚒️",
-  dataviz: "🌠",
-};
+import RichText from "@/components/ui/RichText";
+import GrimoireGate from "./GrimoireGate";
+import { GRIMOIRE_UNLOCK_FAILS, grimoireXP } from "@/lib/xp";
 
 interface MissionPanelProps {
   mission: Mission;
@@ -26,17 +17,15 @@ interface MissionPanelProps {
   validated: boolean;
   prevId: number | null;
   nextId: number | null;
+  /** Envios errados nesta missão */
+  fails: number;
+  grimoireOpened: boolean;
+  onOpenGrimoire: () => void;
 }
 
-function SectionHeader({
-  icon,
-  label,
-  color,
-}: {
-  icon: string;
-  label: string;
-  color: string;
-}) {
+type TabId = "lore" | "grimorio" | "dados";
+
+function SectionHeader({ icon, label, color }: { icon: string; label: string; color: string }) {
   return (
     <div className="section-header">
       <span className="section-icon">{icon}</span>
@@ -48,107 +37,6 @@ function SectionHeader({
   );
 }
 
-function TutorialSteps({ text, trackColor }: { text: string; trackColor: string }) {
-  const lines = text.split("\n");
-  let stepCount = 0;
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {lines.map((line, i) => {
-        const trimmed = line.trim();
-
-        if (!trimmed) return <div key={i} style={{ height: 4 }} />;
-
-        if (trimmed.startsWith("•")) {
-          stepCount++;
-          const content = trimmed.slice(1).trim();
-          return (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                gap: 14,
-                padding: "12px 16px",
-                background: "rgba(74,174,255,0.05)",
-                border: "1px solid rgba(74,174,255,0.18)",
-                borderRadius: 10,
-                alignItems: "flex-start",
-              }}
-            >
-              <span
-                style={{
-                  background: trackColor,
-                  color: "#000",
-                  borderRadius: "50%",
-                  width: 26,
-                  height: 26,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 12,
-                  fontWeight: 800,
-                  flexShrink: 0,
-                  fontFamily: "var(--font-body)",
-                  marginTop: 1,
-                }}
-              >
-                {stepCount}
-              </span>
-              <span
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: 14,
-                  lineHeight: 1.7,
-                  color: "var(--color-text)",
-                }}
-              >
-                {content}
-              </span>
-            </div>
-          );
-        }
-
-        if (line.startsWith("  ") || line.startsWith("\t")) {
-          return (
-            <code
-              key={i}
-              style={{
-                display: "block",
-                fontFamily: "var(--font-body)",
-                fontSize: 13,
-                color: "var(--color-accent)",
-                background: "var(--color-bg)",
-                padding: "5px 14px",
-                borderRadius: 6,
-                marginLeft: 16,
-                borderLeft: `2px solid ${trackColor}55`,
-              }}
-            >
-              {trimmed}
-            </code>
-          );
-        }
-
-        return (
-          <p
-            key={i}
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 13,
-              color: "var(--color-muted)",
-              fontWeight: 600,
-              marginTop: stepCount > 0 ? 8 : 0,
-              marginBottom: 0,
-            }}
-          >
-            {trimmed}
-          </p>
-        );
-      })}
-    </div>
-  );
-}
-
 export default function MissionPanel({
   mission,
   trackIndex,
@@ -156,25 +44,40 @@ export default function MissionPanel({
   validated,
   prevId,
   nextId,
+  fails,
+  grimoireOpened,
+  onOpenGrimoire,
 }: MissionPanelProps) {
-  const trackColor = TRACK_COLOR[mission.track] ?? "#fff";
-  const trackIcon  = TRACK_ICON[mission.track] ?? "◆";
+  const track = TRACKS[mission.track];
   const isNarrative = mission.validationType === "narrative";
+  const [tab, setTab] = useState<TabId>("lore");
+
+  // Grimório livre na missão narrativa e depois de concluir; senão, só após errar e aceitar a penalidade
+  const grimoireFree = isNarrative || validated;
+  const grimoireVisible = grimoireFree || grimoireOpened;
+  const grimoireUnlocked = fails >= GRIMOIRE_UNLOCK_FAILS;
+  const penalized = grimoireOpened && !validated;
+
+  const tabs: { id: TabId; icon: string; label: string }[] = [
+    { id: "lore", icon: "📯", label: "Lore" },
+    ...(mission.theory ? [{ id: "grimorio" as const, icon: grimoireVisible || grimoireUnlocked ? "🔮" : "🔒", label: "Grimório" }] : []),
+    ...(mission.dataFile ? [{ id: "dados" as const, icon: "📂", label: "Dados" }] : []),
+  ];
 
   return (
     <div className="flex flex-col h-full">
 
-      {/* ── Scrollable content ── */}
-      <div className="flex-1 overflow-y-auto px-8 py-7" style={{ paddingBottom: 0 }}>
+      {/* ── Conteúdo rolável ── */}
+      <div className="flex-1 overflow-y-auto px-8 pt-7 pb-8">
 
         {/* Chapter label */}
-        <p className="pixel-chapter mb-4">
+        <p className="pixel-chapter mb-3">
           &gt; {String(trackIndex + 1).padStart(2, "0")} — {mission.chapterTitle}
         </p>
 
-        {/* ── Título principal (grande, bold, JetBrains Mono) ── */}
+        {/* Título */}
         <h1
-          className="mb-5"
+          className="mb-1"
           style={{
             fontFamily: "var(--font-body)",
             fontSize: 28,
@@ -187,155 +90,142 @@ export default function MissionPanel({
         >
           {mission.missionTitle}
         </h1>
+        <p className="mb-4" style={{ margin: "0 0 16px", fontSize: 15, color: "var(--color-muted)" }}>
+          Você vai aprender: <b style={{ color: track.color }}>{mission.concept}</b>
+        </p>
 
-        {/* Track badge */}
-        <div
-          className={`track-badge track-${mission.track} mb-7`}
-        >
-          <span style={{ fontSize: 16, lineHeight: 1 }}>{trackIcon}</span>
-          <span style={{ textTransform: "uppercase", letterSpacing: 2 }}>{mission.track}</span>
-        </div>
-
-        {/* ── Narrativa (typewriter) ── */}
-        <div
-          className="mb-6"
-          style={{
-            background: "rgba(240,192,64,0.04)",
-            border: "1px solid rgba(240,192,64,0.16)",
-            borderRadius: 14,
-            padding: "20px 24px",
-          }}
-        >
-          <SectionHeader icon="📯" label="LORE" color="var(--color-accent)" />
-          <TypewriterText
-            text={mission.narrative}
-            speed={16}
-            delay={350}
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 14,
-              color: "var(--color-text)",
-              lineHeight: 1.85,
-            }}
-          />
-        </div>
-
-        {/* ── Tutorial / Teoria ── */}
-        {mission.theory && (
-          <div
-            className="mb-5"
-            style={{
-              background: "rgba(74,174,255,0.04)",
-              border: "1px solid rgba(74,174,255,0.16)",
-              borderRadius: 14,
-              padding: "20px 24px",
-            }}
+        {/* Badges */}
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          <span className={`track-badge track-${mission.track}`}>
+            <span style={{ textTransform: "uppercase", letterSpacing: 2 }}>{track.name}</span>
+          </span>
+          <span
+            className="track-badge"
+            style={{ color: "var(--color-xp)", border: "1px solid rgba(240,192,64,0.3)", background: "rgba(240,192,64,0.08)" }}
           >
-            <SectionHeader icon="🔮" label="GRIMÓRIO" color={trackColor} />
-            <pre
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: 13,
-                color: "var(--color-text)",
-                whiteSpace: "pre-wrap",
-                lineHeight: 1.85,
-                margin: 0,
-              }}
+            ✦ +{penalized ? grimoireXP(mission.xpReward) : mission.xpReward} XP
+          </span>
+          {penalized && (
+            <span className="track-badge" style={{ color: "var(--color-muted)", border: "1px solid var(--color-border)", background: "var(--color-panel)" }}>
+              Grimório aberto: −50% XP
+            </span>
+          )}
+          {validated && !isNarrative && (
+            <span
+              className="track-badge"
+              style={{ color: "var(--color-run)", border: "1px solid rgba(34,197,94,0.35)", background: "rgba(34,197,94,0.08)" }}
             >
-              {mission.theory}
-            </pre>
-          </div>
-        )}
+              ✓ Concluída
+            </span>
+          )}
+        </div>
 
-        {/* ── Missão: passos do tutorial ── */}
+        {/* ── QUEST: o objetivo sempre visível no topo ── */}
         {!isNarrative && (
           <div
-            className="mb-5"
+            className="mb-6"
             style={{
-              background: "var(--color-panel)",
-              border: `1px solid ${trackColor}33`,
+              background: `linear-gradient(180deg, rgba(${track.rgb},0.08), rgba(${track.rgb},0.02))`,
+              border: `1px solid rgba(${track.rgb},0.35)`,
               borderRadius: 14,
-              padding: "20px 24px",
+              padding: "18px 22px",
+              boxShadow: `0 0 0 1px rgba(${track.rgb},0.05), 0 8px 24px rgba(0,0,0,0.25)`,
             }}
           >
-            <SectionHeader icon="🗡️" label="QUEST" color={trackColor} />
-            <TutorialSteps text={mission.instructions} trackColor={trackColor} />
+            <SectionHeader icon="🗡️" label="QUEST" color={track.color} />
+            <RichText text={mission.instructions} color={track.color} numbered />
+            {!validated && fails > 0 && (
+              <p style={{ margin: "14px 0 0", paddingTop: 12, borderTop: `1px solid rgba(${track.rgb},0.2)`, fontSize: 12, color: "var(--color-muted)" }}>
+                Tentativas erradas: <b style={{ color: "var(--color-error)" }}>{fails}</b>
+                {!grimoireOpened && (grimoireUnlocked
+                  ? " · o Grimório já pode ser aberto (−50% XP)"
+                  : ` · o Grimório abre após ${GRIMOIRE_UNLOCK_FAILS}`)}
+              </p>
+            )}
           </div>
         )}
 
-        {/* ── Data file preview ── */}
-        {mission.dataFile && (
-          <div className="mb-6">
-            <DataFilePreviewComponent dataFile={mission.dataFile} />
+        {/* ── Abas: Lore / Grimório / Dados ── */}
+        <div
+          style={{
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: 14,
+            overflow: "hidden",
+          }}
+        >
+          <div className="tabs px-3 pt-2" role="tablist" style={{ background: "var(--color-panel)" }}>
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                role="tab"
+                className="tab"
+                aria-selected={tab === t.id}
+                onClick={() => setTab(t.id)}
+                style={{ ["--tab-color" as string]: t.id === "lore" ? "var(--color-accent)" : track.color }}
+              >
+                <span className="tab-icon">{t.icon}</span>
+                {t.label}
+              </button>
+            ))}
           </div>
-        )}
+
+          <div style={{ padding: "20px 24px" }}>
+            {/* Painéis ficam montados para o typewriter não reiniciar ao trocar de aba */}
+            <div hidden={tab !== "lore"}>
+              <TypewriterText
+                text={mission.narrative}
+                speed={16}
+                delay={350}
+                style={{ fontSize: 14, color: "var(--color-text)", lineHeight: 1.85 }}
+              />
+            </div>
+            {mission.theory && (
+              <div hidden={tab !== "grimorio"}>
+                {grimoireVisible ? (
+                  <RichText text={mission.theory} color={track.color} />
+                ) : (
+                  <GrimoireGate fails={fails} xpReward={mission.xpReward} onOpen={onOpenGrimoire} />
+                )}
+              </div>
+            )}
+            {mission.dataFile && (
+              <div hidden={tab !== "dados"}>
+                <DataFilePreviewComponent dataFile={mission.dataFile} />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ── Rodapé fixo ── */}
       <div
         className="shrink-0 flex items-center justify-between px-8 py-4"
-        style={{
-          background: "var(--color-surface)",
-          borderTop: "1px solid var(--color-border)",
-        }}
+        style={{ background: "var(--color-surface)", borderTop: "1px solid var(--color-border)" }}
       >
-        <div className="flex items-center gap-3">
-          <span
-            className="pixel-label px-3 py-1"
-            style={{
-              background: "var(--color-panel)",
-              color: "var(--color-muted)",
-              border: "1px solid var(--color-border)",
-              borderRadius: 20,
-            }}
-          >
-            {trackIndex + 1}/{trackTotal}
-          </span>
-          <span
-            className="pixel-label px-3 py-1"
-            style={{
-              background: "rgba(240,192,64,0.1)",
-              color: "var(--color-xp)",
-              border: "1px solid rgba(240,192,64,0.25)",
-              borderRadius: 20,
-            }}
-          >
-            ✦ +{mission.xpReward} XP
-          </span>
-        </div>
+        <span className="pixel-label" style={{ color: "var(--color-muted)" }}>
+          Missão {trackIndex + 1} de {trackTotal}
+        </span>
 
         <div className="flex gap-2">
           {prevId !== null ? (
-            <Link href={`/mission/${prevId}`}>
-              <button className="btn-nav">← Voltar</button>
-            </Link>
+            <Link href={`/mission/${prevId}`} className="btn-nav">← Voltar</Link>
           ) : (
-            <Link href="/map">
-              <button className="btn-nav">⬡ Mapa</button>
-            </Link>
+            <Link href="/map" className="btn-nav">⬡ Mapa</Link>
           )}
 
           {nextId !== null ? (
-            <Link
-              href={validated ? `/mission/${nextId}` : "#"}
-              onClick={(e) => { if (!validated) e.preventDefault(); }}
-            >
-              <button
-                className="btn-next"
-                disabled={!validated}
-                style={{ opacity: validated ? 1 : 0.35, cursor: validated ? "pointer" : "not-allowed" }}
-              >
-                Próximo →
+            validated ? (
+              <Link href={`/mission/${nextId}`} className="btn-next">Próximo →</Link>
+            ) : (
+              <button className="btn-next" disabled title="Envie uma resposta correta para avançar">
+                <span style={{ fontFamily: "var(--font-body)" }}>🔒</span> Próximo
               </button>
-            </Link>
+            )
           ) : validated ? (
-            <Link href="/map">
-              <button className="btn-next">⭐ Concluído</button>
-            </Link>
+            <Link href="/map" className="btn-next"><span style={{ fontFamily: "var(--font-body)" }}>⭐</span> Concluído</Link>
           ) : (
-            <button className="btn-next" disabled style={{ opacity: 0.35 }}>
-              Próximo →
-            </button>
+            <button className="btn-next" disabled><span style={{ fontFamily: "var(--font-body)" }}>🔒</span> Próximo</button>
           )}
         </div>
       </div>

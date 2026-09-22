@@ -4,26 +4,35 @@ const mission0: Mission = {
   id: 0,
   track: "python",
   type: "narrative",
-  chapterTitle: "Prologo — O Despertar do Arquivista",
+  chapterTitle: "Prólogo — O Despertar do Arquivista",
   missionTitle: "O Chamado do Arquivo",
-  narrative: `O ano e 847 da Era dos Dados. As Catacumbas do Grande Arquivo foram seladas ha tres geracoes apos a Grande Corrupcao — quando os dados foram fragmentados, desordenados e perdidos para sempre.
+  concept: "Como o jogo funciona",
+  narrative: `O ano é 847 da Era dos Dados. As Catacumbas do Grande Arquivo foram seladas há três gerações após a Grande Corrupção — quando os dados foram fragmentados, desordenados e perdidos para sempre.
 
-Voce foi escolhido pela Guilda dos Arquivistas para adentrar as ruinas e restaurar o conhecimento perdido.
+Você foi escolhido pela Guilda dos Arquivistas para adentrar as ruínas e restaurar o conhecimento perdido.
 
-Sua jornada comeca agora.`,
-  theory: `Bem-vindo a Guilda dos Arquivistas! Nesta jornada voce aprendera:
+Sua jornada começa agora.`,
+  theory: `Aqui você aprende programação e análise de dados jogando. A Guilda dos Arquivistas é o grupo de heróis que usa código para organizar os dados do reino — e agora você faz parte dela. Nesta jornada você aprenderá:
 
-• PYTHON — A Linguagem dos Antigos: feiticos e encantamentos para manipular o mundo digital.
+• PYTHON — A Linguagem dos Antigos: feitiços e encantamentos para manipular o mundo digital.
 
-• SQL — As Catacumbas de Dados: a arte de minerar reliquias de depositos gigantescos.
+• SQL — As Catacumbas de Dados: a arte de minerar relíquias de depósitos gigantescos.
 
-• PANDAS — A Forja de Dados: onde fragmentos brutos sao lapidados em sabedoria.
+• PANDAS — A Forja de Dados: onde fragmentos brutos são lapidados em sabedoria.
 
-• DATA VIZ — O Farol da Verdade: graficos que iluminam padroes ocultos.
+• DATA VIZ — O Farol da Verdade: gráficos que iluminam padrões ocultos.
 
-Cada missao completa te da XP. Acumule XP para desbloquear novas trilhas!`,
-  instructions: "Leia o chamado e pressione Proximo para comecar sua jornada.",
-  codeTemplate: "# Nenhum codigo necessario nesta missao.\n# Pressione Proximo para continuar.",
+Como jogar:
+
+• Leia a QUEST (o objetivo) e escreva o código no editor à direita.
+
+• ▶ Executar roda o código para você testar. Enviar Resposta valida e dá XP.
+
+• Travou? Depois de 3 respostas erradas o Grimório (a explicação) pode ser aberto — mas a missão passa a valer só metade do XP.
+
+Cada missão completa te dá XP. Acumule XP para subir de nível e desbloquear novas trilhas!`,
+  instructions: "Leia o chamado e pressione Próximo para começar sua jornada.",
+  codeTemplate: "# Nenhum código necessário nesta missão.\n# Pressione Próximo para continuar.",
   editorLanguage: "python",
   validationType: "narrative",
   expectedOutput: "",

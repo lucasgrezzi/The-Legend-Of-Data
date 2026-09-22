@@ -2,111 +2,101 @@
 
 import Link from "next/link";
 import type { Mission } from "@/types";
+import { TRACKS } from "@/lib/tracks";
+import Sprite from "@/components/ui/Sprite";
+
+export type PinState = "locked" | "available" | "completed";
 
 interface MissionPinProps {
   mission: Mission;
-  completed: boolean;
-  unlocked: boolean;
-  trackColor: string;
+  state: PinState;
+  /** posição do centro do nó, em % da largura e px do topo */
+  x: number;
+  y: number;
+  isNext: boolean;
+  lockReasons: string[];
+  /** XP realmente ganho (pode ser metade se usou o Grimório) */
+  xpEarned?: number;
 }
 
-export default function MissionPin({ mission, completed, unlocked, trackColor }: MissionPinProps) {
-  const locked = !unlocked;
+const STATE_LABEL: Record<PinState, string> = {
+  locked: "Bloqueada",
+  available: "Disponível",
+  completed: "Concluída",
+};
 
-  const card = (
+const LABEL_GAP = 16;
+const NODE_R = 40;
+
+export default function MissionPin({ mission, state, x, y, isNext, lockReasons, xpEarned }: MissionPinProps) {
+  const track = TRACKS[mission.track];
+  const locked = state === "locked";
+  const labelOnRight = x <= 50;
+  const halfXP = state === "completed" && xpEarned !== undefined && xpEarned < mission.xpReward;
+
+  const sprite =
+    state === "completed" ? "/assets/sprites/missao-concluida.png"
+    : locked ? "/assets/sprites/missao-bloqueada.png"
+    : track.sprite;
+
+  const node = (
     <div
+      className={`map-node is-${state}`}
       style={{
-        background: completed
-          ? `linear-gradient(135deg, ${trackColor}22, ${trackColor}44)`
-          : "var(--color-panel)",
-        border: `1px solid ${completed ? trackColor : locked ? "var(--color-border)" : trackColor + "55"}`,
-        padding: "12px 16px",
+        left: `${x}%`,
+        top: y,
+        borderColor: state === "completed" ? track.color : undefined,
         cursor: locked ? "not-allowed" : "pointer",
-        opacity: locked ? 0.45 : 1,
-        minWidth: 175,
-        borderRadius: 12,
-        transition: "transform 0.15s, box-shadow 0.15s",
-        boxShadow: completed ? `0 4px 16px ${trackColor}30` : "0 2px 8px rgba(0,0,0,0.3)",
       }}
-      className="flex items-center gap-3"
-      onMouseEnter={(e) => {
-        if (locked) return;
-        const el = e.currentTarget as HTMLDivElement;
-        el.style.transform = "translateY(-3px)";
-        el.style.boxShadow = completed ? `0 10px 28px ${trackColor}45` : "0 8px 22px rgba(0,0,0,0.45)";
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget as HTMLDivElement;
-        el.style.transform = "translateY(0)";
-        el.style.boxShadow = completed ? `0 4px 16px ${trackColor}30` : "0 2px 8px rgba(0,0,0,0.3)";
-      }}
+      title={locked ? `Bloqueada — ${lockReasons.join("; ")}` : mission.missionTitle}
     >
-      {/* Ícone de estado */}
-      <div
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: 10,
-          overflow: "hidden",
-          flexShrink: 0,
-          border: `1px solid ${completed ? trackColor + "55" : "var(--color-border)"}`,
-          background: "var(--color-surface)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {locked ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src="/assets/interrogacao.png"
-            alt="Bloqueado"
-            style={{ width: "100%", height: "100%", objectFit: "contain", padding: 4 }}
-          />
-        ) : completed ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src="/assets/bau_tesouro.jpg"
-            alt="Concluído"
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
-        ) : (
-          <span style={{ fontSize: 20 }}>⚡</span>
-        )}
-      </div>
-
-      {/* Texto */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <p
-          style={{
-            fontFamily: "var(--font-pixel)",
-            fontSize: 7,
-            color: completed ? trackColor : locked ? "var(--color-muted)" : "var(--color-text)",
-            lineHeight: 1.7,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {mission.missionTitle}
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-pixel)",
-            fontSize: 6,
-            color: completed ? trackColor + "bb" : "var(--color-muted)",
-            marginTop: 4,
-          }}
-        >
-          ✦ +{mission.xpReward} XP
-        </p>
-      </div>
+      <Sprite src={sprite} size={64} />
     </div>
   );
 
-  if (locked) return card;
+  const title = (
+    <span style={{ fontSize: 14, fontWeight: 800, lineHeight: 1.35, color: locked ? "var(--color-muted)" : "var(--color-text)" }}>
+      {mission.missionTitle}
+    </span>
+  );
+
   return (
-    <Link href={`/mission/${mission.id}`} style={{ textDecoration: "none" }}>
-      {card}
-    </Link>
+    <>
+      {isNext && (
+        <span className="next-flag" style={{ left: `${x}%`, top: y - NODE_R - 10 }}>
+          ▼ PRÓXIMA
+        </span>
+      )}
+
+      {locked ? node : (
+        <Link href={`/mission/${mission.id}`} aria-label={mission.missionTitle}>{node}</Link>
+      )}
+
+      {/* Rótulo sempre dentro de um cartão sólido — nunca texto direto sobre o fundo */}
+      <div
+        className="map-label"
+        style={{
+          top: y,
+          ...(labelOnRight
+            ? { left: `calc(${x}% + ${NODE_R + LABEL_GAP}px)` }
+            : { right: `calc(${100 - x}% + ${NODE_R + LABEL_GAP}px)` }),
+          borderColor: state === "available" ? "rgba(240,192,64,0.45)" : undefined,
+        }}
+      >
+        {locked ? title : <Link href={`/mission/${mission.id}`}>{title}</Link>}
+        <span style={{ display: "block", marginTop: 2, fontSize: 12, color: locked ? "var(--color-muted)" : track.color, fontWeight: 700 }}>
+          {mission.concept}
+        </span>
+        <span style={{ display: "block", marginTop: 4, fontSize: 12, color: "var(--color-muted)" }}>
+          <span style={{ color: "var(--color-xp)" }}>
+            ✦ {halfXP ? `+${xpEarned}/${mission.xpReward}` : `+${mission.xpReward}`} XP
+          </span>
+          {" · "}
+          <span style={{ color: state === "completed" ? track.color : state === "available" ? "var(--color-accent)" : undefined }}>
+            {STATE_LABEL[state]}
+          </span>
+        </span>
+      </div>
+    </>
   );
 }

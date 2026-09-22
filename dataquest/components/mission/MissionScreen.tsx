@@ -1,120 +1,160 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import type { Mission, RunResult } from "@/types";
 import { validateOutput } from "@/lib/validation";
-import { MISSIONS } from "@/lib/missions";
-import { useGameStore } from "@/store/gameStore";
+import { MISSIONS, getNeighbors } from "@/lib/missions";
+import { TRACKS } from "@/lib/tracks";
+import { GRIMOIRE_UNLOCK_FAILS, grimoireXP, isMissionUnlocked, missingRequirements } from "@/lib/xp";
+import { getAttempts, useGameStore } from "@/store/gameStore";
 import { usePyodide } from "@/hooks/usePyodide";
 import { useDuckDB } from "@/hooks/useDuckDB";
+import { useHydrated } from "@/hooks/useHydrated";
 import MissionPanel from "./left/MissionPanel";
 import EditorPanel from "./right/EditorPanel";
-import PixelDialog from "@/components/ui/PixelDialog";
+import MissionResultDialog, { type MissionResult } from "@/components/ui/MissionResultDialog";
 import Link from "next/link";
+import Sprite from "@/components/ui/Sprite";
+import PlayerChip from "@/components/player/PlayerChip";
 
 interface MissionScreenProps {
   mission: Mission;
 }
 
-const TRACK_COLOR: Record<string, string> = {
-  python:  "var(--color-python)",
-  sql:     "var(--color-sql)",
-  pandas:  "var(--color-pandas)",
-  dataviz: "var(--color-dataviz)",
-};
+function FullScreenMessage({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen gap-5 px-6 text-center" style={{ background: "var(--color-bg)" }}>
+      {children}
+    </div>
+  );
+}
 
-const TRACK_ICON: Record<string, string> = {
-  python:  "🐍",
-  sql:     "🏛️",
-  pandas:  "⚒️",
-  dataviz: "🌠",
-};
+function LockedMission({ mission, reasons }: { mission: Mission; reasons: string[] }) {
+  return (
+    <FullScreenMessage>
+      <Sprite src="/assets/sprites/missao-bloqueada.png" size={96} />
+      <p className="pixel-title" style={{ color: "var(--color-accent)" }}>Missão Bloqueada</p>
+      <div>
+        <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>{mission.missionTitle}</h1>
+        <p style={{ margin: "4px 0 0", fontSize: 14, color: "var(--color-muted)" }}>{mission.concept}</p>
+      </div>
+      <div
+        className="text-left px-5 py-4"
+        style={{ background: "var(--color-panel)", border: "1px solid var(--color-border)", borderRadius: 12, maxWidth: 440, width: "100%" }}
+      >
+        <p className="pixel-label mb-3" style={{ color: "var(--color-muted)" }}>Para desbloquear:</p>
+        <ul style={{ margin: 0, paddingLeft: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 6, fontSize: 14 }}>
+          {reasons.map((r) => (
+            <li key={r}><span style={{ fontFamily: "var(--font-body)" }}>🔒</span> {r}</li>
+          ))}
+        </ul>
+      </div>
+      <Link href="/map" className="btn-next">⬡ Voltar ao Mapa</Link>
+    </FullScreenMessage>
+  );
+}
 
 export default function MissionScreen({ mission }: MissionScreenProps) {
-  const { totalXP, level, levelLabel, completeMission, completedMissionIds } = useGameStore();
+  const hydrated = useHydrated();
+  const router = useRouter();
+  const { profile, totalXP, completeMission, completedMissionIds, recordFail, openGrimoire } = useGameStore();
+  const attempts = useGameStore((s) => getAttempts(s, mission.id));
   const { status: pyodideStatus, runCode } = usePyodide();
   const { runSQL } = useDuckDB();
 
+  const unlocked = isMissionUnlocked(mission, completedMissionIds, totalXP);
   const alreadyCompleted = completedMissionIds.includes(mission.id);
-  const [validated, setValidated] = useState(
-    alreadyCompleted || mission.validationType === "narrative"
-  );
-  const [lastResult, setLastResult] = useState<RunResult | null>(null);
-  const [dialog, setDialog] = useState<{
-    open: boolean;
-    type: "success" | "error" | "info";
-    message: string;
-  }>({ open: false, type: "info", message: "" });
+  const isNarrative = mission.validationType === "narrative";
+  const validated = alreadyCompleted || isNarrative;
+  const [result, setResult] = useState<MissionResult | null>(null);
 
+  // Sem personagem criado → volta ao mapa (lá fica a criação de personagem)
   useEffect(() => {
-    if (mission.validationType === "narrative" && !alreadyCompleted) {
+    if (hydrated && !profile) router.replace("/map");
+  }, [hydrated, profile, router]);
+
+  // Missão narrativa: concluída ao abrir (só depois de ler o progresso salvo)
+  useEffect(() => {
+    if (hydrated && unlocked && isNarrative && !alreadyCompleted) {
       completeMission(mission.id, mission.xpReward);
-      setValidated(true);
     }
-  }, [mission, alreadyCompleted, completeMission]);
+  }, [hydrated, unlocked, isNarrative, alreadyCompleted, mission, completeMission]);
 
   const trackMissions = MISSIONS.filter((m) => m.track === mission.track);
   const trackIndex    = trackMissions.findIndex((m) => m.id === mission.id);
   const trackTotal    = trackMissions.length;
 
-  const prevId      = mission.id > 0 ? mission.id - 1 : null;
-  const nextMission = MISSIONS.find((m) => m.id === mission.id + 1);
-  const nextId      = nextMission ? nextMission.id : null;
+  const { prev, next } = getNeighbors(mission.id);
+  const prevId = prev?.id ?? null;
+  const nextId = next?.id ?? null;
 
   const handleRun = useCallback(
-    async (code: string): Promise<RunResult> => {
-      let result: RunResult;
-      if (mission.editorLanguage === "sql") {
-        result = await runSQL(code, mission.dataFile?.rawCsv);
-      } else {
-        result = await runCode(code, mission.dataFile?.rawCsv);
-      }
-      setLastResult(result);
-      return result;
-    },
+    (code: string): Promise<RunResult> =>
+      mission.editorLanguage === "sql"
+        ? runSQL(code, mission.dataFile?.rawCsv)
+        : runCode(code, mission.dataFile?.rawCsv),
     [mission, runCode, runSQL]
   );
 
   const handleSubmit = useCallback(
-    async (code: string): Promise<void> => {
-      let result = lastResult;
-      if (!result) {
-        result = await handleRun(code);
+    (run: RunResult, code: string) => {
+      const validation = validateOutput(run, mission, code);
+      const state = useGameStore.getState();
+      const prevXP = state.totalXP;
+      const { fails, grimoireOpened } = getAttempts(state, mission.id);
+      const xp = grimoireOpened ? grimoireXP(validation.xpEarned) : validation.xpEarned;
+
+      if (!alreadyCompleted) {
+        if (validation.passed) completeMission(mission.id, xp);
+        else recordFail(mission.id);
       }
-      const validation = validateOutput(result, mission);
-      if (validation.passed && !alreadyCompleted) {
-        completeMission(mission.id, validation.xpEarned);
-        setValidated(true);
-      }
-      setDialog({
-        open: true,
-        type: validation.passed ? "success" : "error",
-        message: validation.feedback,
+      setResult({
+        passed: validation.passed,
+        feedback: validation.feedback,
+        xpGained: validation.passed && !alreadyCompleted ? xp : 0,
+        prevXP,
+        penalized: validation.passed && !alreadyCompleted && grimoireOpened,
+        fails: alreadyCompleted || validation.passed ? undefined : fails + 1,
+        grimoireOpened,
       });
     },
-    [lastResult, handleRun, mission, alreadyCompleted, completeMission]
+    [mission, alreadyCompleted, completeMission, recordFail]
   );
 
-  const trackColor   = TRACK_COLOR[mission.track] ?? "var(--color-accent)";
-  const trackIcon    = TRACK_ICON[mission.track] ?? "◆";
-  const progressPct  = trackTotal > 0 ? ((trackIndex + 1) / trackTotal) * 100 : 0;
+  if (!hydrated || !profile) {
+    return (
+      <FullScreenMessage>
+        <p className="pixel-label" style={{ color: "var(--color-muted)", animation: "blink 1.2s step-end infinite" }}>
+          Abrindo o pergaminho…
+        </p>
+      </FullScreenMessage>
+    );
+  }
+
+  if (!unlocked) {
+    return <LockedMission mission={mission} reasons={missingRequirements(mission, completedMissionIds, totalXP, MISSIONS)} />;
+  }
+
+  const track = TRACKS[mission.track];
+  const trackDone = trackMissions.filter((m) => completedMissionIds.includes(m.id)).length;
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: "var(--color-bg)" }}>
 
       {/* ── Top bar ── */}
       <div
-        className="flex items-center justify-between px-6 py-3 shrink-0"
-        style={{ background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)" }}
+        className="flex items-center justify-between gap-6 px-6 shrink-0"
+        style={{ background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)", height: 64 }}
       >
-        {/* Left: logo + breadcrumb */}
-        <div className="flex items-center gap-3">
+        {/* Logo + breadcrumb */}
+        <div className="flex items-center gap-3 min-w-0">
           <Link
             href="/map"
-            className="no-underline"
+            className="no-underline shrink-0"
+            title="Voltar ao mapa"
             style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 18,
+              fontSize: 19,
               fontWeight: 800,
               color: "var(--color-accent)",
               letterSpacing: "-0.5px",
@@ -123,138 +163,99 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
           >
             DataQuest
           </Link>
-          <span style={{ color: "var(--color-border)", fontSize: 16 }}>/</span>
-          <span
-            style={{
-              fontFamily: "var(--font-pixel)",
-              fontSize: 8,
-              color: trackColor,
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-            }}
-          >
-            {trackIcon} {mission.track.charAt(0).toUpperCase() + mission.track.slice(1)}
-          </span>
-          <span style={{ color: "var(--color-border)", fontSize: 16 }}>/</span>
-          <span
-            style={{
-              fontFamily: "var(--font-pixel)",
-              fontSize: 7,
-              color: "var(--color-muted)",
-              maxWidth: 200,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
+          <span style={{ color: "var(--color-border)", fontSize: 18 }}>/</span>
+          <Link href="/map" className="flex items-center gap-2 shrink-0" style={{ color: track.color, fontSize: 14, fontWeight: 700 }}>
+            <Sprite src={track.sprite} size={32} /> {track.name}
+          </Link>
+          <span style={{ color: "var(--color-border)", fontSize: 18 }}>/</span>
+          <span className="truncate" style={{ color: "var(--color-muted)", fontSize: 14 }}>
             {mission.missionTitle}
           </span>
         </div>
 
-        {/* Center: progress bar da trilha */}
-        <div className="flex items-center gap-3" style={{ minWidth: 220 }}>
-          <div
-            style={{
-              flex: 1,
-              height: 8,
-              background: "var(--color-border)",
-              borderRadius: 20,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: `${progressPct}%`,
-                background: trackColor,
-                borderRadius: 20,
-                transition: "width 0.5s ease",
-                boxShadow: `0 0 8px ${trackColor}80`,
-              }}
-            />
+        {/* Progresso real da trilha: um segmento por missão */}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1.5">
+            {trackMissions.map((m) => {
+              const done = completedMissionIds.includes(m.id);
+              const current = m.id === mission.id;
+              const canOpen = isMissionUnlocked(m, completedMissionIds, totalXP);
+              const seg = (
+                <span
+                  style={{
+                    display: "block",
+                    width: 34,
+                    height: 10,
+                    borderRadius: 6,
+                    background: done ? track.color : "var(--color-border)",
+                    boxShadow: current ? `0 0 0 2px var(--color-surface), 0 0 0 4px ${track.color}` : undefined,
+                    opacity: done || current || canOpen ? 1 : 0.5,
+                  }}
+                />
+              );
+              return canOpen && !current ? (
+                <Link key={m.id} href={`/mission/${m.id}`} title={m.missionTitle}>{seg}</Link>
+              ) : (
+                <span key={m.id} title={m.missionTitle}>{seg}</span>
+              );
+            })}
           </div>
-          <span
-            style={{
-              fontFamily: "var(--font-pixel)",
-              fontSize: 7,
-              color: "var(--color-muted)",
-              minWidth: 30,
-            }}
-          >
-            {Math.round(progressPct)}%
+          <span style={{ fontSize: 12, color: "var(--color-muted)", whiteSpace: "nowrap" }}>
+            {trackDone}/{trackTotal} concluídas
           </span>
         </div>
 
-        {/* Right: XP + level */}
-        <div className="flex items-center gap-4">
-          <div
-            className="flex items-center gap-2 px-3 py-2"
-            style={{
-              background: "rgba(240,192,64,0.08)",
-              border: "1px solid rgba(240,192,64,0.2)",
-              borderRadius: 20,
-            }}
-          >
-            <span style={{ fontFamily: "var(--font-pixel)", fontSize: 9, color: "var(--color-xp)" }}>
-              ⭐ {totalXP} XP
-            </span>
-            <span style={{ color: "var(--color-border)" }}>·</span>
-            <span style={{ fontFamily: "var(--font-pixel)", fontSize: 7, color: "var(--color-muted)" }}>
-              Nv {level}
-            </span>
-          </div>
+        {/* Personagem + XP */}
+        <div className="shrink-0">
+          <PlayerChip profile={profile} totalXP={totalXP} />
         </div>
       </div>
 
-      {/* ── Two columns ── */}
+      {/* ── Duas colunas ── */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* Left 55% */}
-        <div
-          className="flex flex-col overflow-y-auto"
-          style={{
-            width: "55%",
-            borderRight: "1px solid var(--color-border)",
-          }}
-        >
+        {/* Esquerda 55% */}
+        <div className="flex flex-col overflow-hidden" style={{ width: "55%", borderRight: "1px solid var(--color-border)" }}>
           <MissionPanel
+            key={mission.id}
             mission={mission}
             trackIndex={trackIndex}
             trackTotal={trackTotal}
             validated={validated}
             prevId={prevId}
             nextId={nextId}
+            fails={attempts.fails}
+            grimoireOpened={attempts.grimoireOpened}
+            onOpenGrimoire={() => openGrimoire(mission.id)}
           />
         </div>
 
-        {/* Right 45% */}
-        <div
-          className="flex flex-col flex-1 overflow-hidden"
-          style={{ background: "var(--color-surface)" }}
-        >
-          {mission.validationType === "narrative" ? (
-            <div
-              className="flex flex-col items-center justify-center h-full gap-4"
-              style={{ padding: 32 }}
-            >
-              <span style={{ fontSize: 48 }}>📜</span>
-              <p
-                style={{
-                  fontFamily: "var(--font-pixel)",
-                  fontSize: 9,
-                  color: "var(--color-muted)",
-                  textAlign: "center",
-                  lineHeight: 2,
-                }}
-              >
-                Leia a história e pressione{" "}
-                <span style={{ color: "var(--color-accent)" }}>Próximo</span>{" "}
-                para começar.
+        {/* Direita 45% */}
+        <div className="flex flex-col flex-1 overflow-hidden" style={{ background: "var(--color-surface)" }}>
+          {isNarrative ? (
+            <div className="flex flex-col items-center justify-center h-full gap-6 px-10 text-center">
+              <div className="flex gap-3" style={{ animation: "float 3s ease-in-out infinite" }}>
+                {(["python", "sql", "pandas", "dataviz"] as const).map((t) => (
+                  <Sprite key={t} src={TRACKS[t].sprite} size={64} alt={TRACKS[t].name} />
+                ))}
+              </div>
+              <p style={{ fontSize: 15, color: "var(--color-muted)", maxWidth: 360, lineHeight: 1.8, margin: 0 }}>
+                Esta missão é só história — leia o chamado ao lado. A partir da próxima, você escreverá código aqui.
               </p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {(["python", "sql", "pandas", "dataviz"] as const).map((t) => (
+                  <span key={t} className={`track-badge track-${t}`}>
+                    {TRACKS[t].name}
+                  </span>
+                ))}
+              </div>
+              {nextId !== null && (
+                <Link href={`/mission/${nextId}`} className="btn-next">Começar a jornada →</Link>
+              )}
             </div>
           ) : (
             <EditorPanel
+              key={mission.id}
               mission={mission}
               pyodideStatus={pyodideStatus}
               onRun={handleRun}
@@ -265,11 +266,10 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
         </div>
       </div>
 
-      <PixelDialog
-        open={dialog.open}
-        type={dialog.type}
-        message={dialog.message}
-        onClose={() => setDialog((d) => ({ ...d, open: false }))}
+      <MissionResultDialog
+        result={result}
+        nextHref={nextId !== null ? `/mission/${nextId}` : null}
+        onClose={() => setResult(null)}
       />
     </div>
   );

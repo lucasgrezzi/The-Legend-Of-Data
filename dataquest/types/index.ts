@@ -20,6 +20,8 @@ export interface Mission {
   type: MissionType;
   chapterTitle: string;
   missionTitle: string;
+  /** O que a missão ensina, em linguagem direta (ex.: "if / elif / else") — aparece no mapa e no cabeçalho */
+  concept: string;
   narrative: string;
   theory: string;
   instructions: string;
@@ -30,6 +32,15 @@ export interface Mission {
   xpReward: number;
   dataFile?: DataFilePreview;
   unlockCondition?: UnlockCondition;
+  /** Trechos obrigatórios no código (regex) — impede "resolver" só com print da resposta */
+  requiredCode?: RequiredCode[];
+}
+
+export interface RequiredCode {
+  /** Regex (string) testada contra o código do aluno */
+  pattern: string;
+  /** Dica mostrada se o padrão não aparecer */
+  hint: string;
 }
 
 export interface TableData {
@@ -61,4 +72,19 @@ export interface UserProgress {
   currentMissionId: number;
   level: number;
   levelLabel: string;
+}
+
+export type Race = "elfo" | "anao" | "orc" | "goblin";
+
+export interface PlayerProfile {
+  name: string;
+  race: Race;
+}
+
+/** Histórico do jogador em uma missão (persistido) */
+export interface MissionAttempts {
+  /** Envios errados */
+  fails: number;
+  /** Abriu o Grimório antes de concluir → recompensa pela metade */
+  grimoireOpened: boolean;
 }

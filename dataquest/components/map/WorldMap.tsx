@@ -1,201 +1,241 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
+import type { Mission, Track } from "@/types";
 import { useGameStore } from "@/store/gameStore";
+import { useHydrated } from "@/hooks/useHydrated";
 import { MISSIONS } from "@/lib/missions";
-import MissionPin from "./MissionPin";
+import { TRACKS, TRACK_ORDER } from "@/lib/tracks";
+import { isMissionUnlocked, missingRequirements } from "@/lib/xp";
+import XPBar from "@/components/ui/XPBar";
+import Sprite from "@/components/ui/Sprite";
+import WorldBackground from "@/components/ui/WorldBackground";
+import CharacterCreation from "@/components/player/CharacterCreation";
+import PlayerChip from "@/components/player/PlayerChip";
+import MissionPin, { type PinState } from "./MissionPin";
 
-const TRACK_INFO: Record<string, {
-  label: string;
-  color: string;
-  icon: string;
-  imageSrc?: string;
-  desc: string;
-  bg: string;
-}> = {
-  python:  { label: "A Linguagem dos Antigos", color: "var(--color-python)",  icon: "🐍", imageSrc: "/assets/python.jpg",  desc: "Python",   bg: "rgba(79,195,247,0.05)" },
-  sql:     { label: "As Catacumbas de Dados",   color: "var(--color-sql)",     icon: "🏛️",                                  desc: "SQL",      bg: "rgba(107,203,119,0.05)" },
-  pandas:  { label: "A Forja de Dados",         color: "var(--color-pandas)",  icon: "⚒️",                                  desc: "Pandas",   bg: "rgba(255,183,77,0.05)" },
-  dataviz: { label: "O Farol da Verdade",       color: "var(--color-dataviz)", icon: "🌠",                                  desc: "Data Viz", bg: "rgba(244,143,177,0.05)" },
-};
+// ── Geometria do mapa (px verticais, % horizontais) ──
+const VIEW_W = 100;
+const REGION_H = 112;   // banner (88) + respiro (24)
+const NODE_H = 128;
+const ZIGZAG = [50, 70, 50, 30];
 
-const TRACK_ORDER = ["python", "sql", "pandas", "dataviz"];
+type Item =
+  | { kind: "region"; track: Track; y: number }
+  | { kind: "node"; mission: Mission; x: number; y: number };
+
+function layout(): { items: Item[]; height: number } {
+  const items: Item[] = [];
+  let y = 0;
+  let n = 0;
+  for (const track of TRACK_ORDER) {
+    items.push({ kind: "region", track, y });
+    y += REGION_H;
+    for (const mission of MISSIONS.filter((m) => m.track === track)) {
+      items.push({ kind: "node", mission, x: ZIGZAG[n % ZIGZAG.length], y: y + NODE_H / 2 });
+      y += NODE_H;
+      n++;
+    }
+    y += 8;
+  }
+  return { items, height: y };
+}
+
+const { items: ITEMS, height: MAP_H } = layout();
+const CONTENT_W = 680;
 
 export default function WorldMap() {
-  const { completedMissionIds, unlockedMissionIds, totalXP, level, levelLabel } = useGameStore();
+  const hydrated = useHydrated();
+  const { profile, setProfile, completedMissionIds, totalXP, xpByMission } = useGameStore();
+  const [editing, setEditing] = useState(false);
 
-  const missionsByTrack = TRACK_ORDER.map((track) => ({
-    track,
-    info: TRACK_INFO[track],
-    missions: MISSIONS.filter((m) => m.track === track),
-  }));
+  if (!hydrated) {
+    return <div className="min-h-screen" style={{ background: "var(--color-bg)" }} />;
+  }
 
-  const totalMissions  = MISSIONS.length;
-  const completedCount = completedMissionIds.length;
-  const progressPct    = totalMissions > 0 ? Math.round((completedCount / totalMissions) * 100) : 0;
+  // ── Primeira visita (ou edição): criação de personagem ──
+  if (!profile || editing) {
+    return (
+      <>
+        <WorldBackground />
+        <CharacterCreation
+          initial={editing ? profile : null}
+          onConfirm={(p) => { setProfile(p); setEditing(false); }}
+          onCancel={editing ? () => setEditing(false) : undefined}
+        />
+      </>
+    );
+  }
+
+  const stateOf = (m: Mission): PinState =>
+    completedMissionIds.includes(m.id) ? "completed"
+    : isMissionUnlocked(m, completedMissionIds, totalXP) ? "available"
+    : "locked";
+
+  const nextMission = MISSIONS.find((m) => stateOf(m) === "available");
+  const completedCount = completedMissionIds.filter((id) => MISSIONS.some((m) => m.id === id)).length;
+  const nodes = ITEMS.filter((i): i is Extract<Item, { kind: "node" }> => i.kind === "node");
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--color-bg)" }}>
+    <div className="min-h-screen flex flex-col">
+      <WorldBackground />
 
       {/* ── Top bar ── */}
-      <div
-        className="flex items-center justify-between px-8 py-4 shrink-0"
-        style={{ background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)" }}
+      <header
+        className="flex items-center justify-between gap-4 px-6 shrink-0 sticky top-0 z-20"
+        style={{ background: "rgba(22,27,39,0.94)", borderBottom: "1px solid var(--color-border)", height: 68, backdropFilter: "blur(6px)" }}
       >
         <div>
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 22,
-              fontWeight: 800,
-              color: "var(--color-accent)",
-              letterSpacing: "-0.5px",
-              textShadow: "0 0 30px rgba(240,192,64,0.35)",
-            }}
-          >
+          <span style={{ fontSize: 22, fontWeight: 800, color: "var(--color-accent)", letterSpacing: "-0.5px", textShadow: "0 0 30px rgba(240,192,64,0.35)" }}>
             DataQuest
           </span>
-          <p className="pixel-chapter mt-1">⬡ A Guilda dos Arquivistas</p>
+          <p style={{ margin: 0, fontSize: 12, color: "var(--color-muted)" }}>Aprenda Python, SQL e análise de dados jogando um RPG</p>
         </div>
+        <PlayerChip profile={profile} totalXP={totalXP} onClick={() => setEditing(true)} />
+      </header>
 
-        <div className="flex items-center gap-5">
-          <div className="text-right">
-            <p style={{ fontFamily: "var(--font-pixel)", fontSize: 10, color: "var(--color-xp)", letterSpacing: 0.5 }}>
-              ✦ {totalXP} XP
-            </p>
-            <p className="pixel-label mt-1" style={{ color: "var(--color-muted)" }}>
-              Nv {level} — {levelLabel}
-            </p>
-          </div>
+      <main className="flex-1 px-4 pt-8 pb-16">
+        <div className="mx-auto flex flex-col gap-8" style={{ maxWidth: CONTENT_W }}>
 
-          <div
-            className="pixel-label px-4 py-2"
-            style={{ background: "var(--color-panel)", border: "1px solid var(--color-border)", borderRadius: 20, color: "var(--color-text)" }}
-          >
-            {completedCount}/{totalMissions} missões
-          </div>
-        </div>
-      </div>
-
-      {/* ── Content ── */}
-      <div className="flex-1 overflow-y-auto px-8 py-10">
-
-        {/* Hero */}
-        <div className="text-center mb-10">
-          <p style={{ fontFamily: "var(--font-pixel)", fontSize: 9, color: "var(--color-muted)", letterSpacing: 4, marginBottom: 16 }}>
-            ⬡ ESCOLHA SUA TRILHA ⬡
-          </p>
-          <div style={{ maxWidth: 400, margin: "0 auto", background: "var(--color-border)", borderRadius: 20, height: 8, overflow: "hidden" }}>
-            <div
-              style={{
-                height: "100%",
-                width: `${progressPct}%`,
-                background: "linear-gradient(90deg, var(--color-python), var(--color-submit))",
-                borderRadius: 20,
-                transition: "width 0.6s ease",
-              }}
-            />
-          </div>
-          <p className="pixel-label mt-2" style={{ color: "var(--color-muted)" }}>
-            {progressPct}% concluído
-          </p>
-        </div>
-
-        {/* Tracks */}
-        <div className="flex flex-col gap-5 max-w-3xl mx-auto">
-          {missionsByTrack.map(({ track, info, missions }) => {
-            const trackUnlocked  = missions.some((m) => unlockedMissionIds.includes(m.id));
-            const trackCompleted = missions.filter((m) => completedMissionIds.includes(m.id)).length;
-            const trackPct       = missions.length > 0 ? Math.round((trackCompleted / missions.length) * 100) : 0;
-
-            return (
-              <div
-                key={track}
-                style={{
-                  background: trackUnlocked ? info.bg : "rgba(255,255,255,0.01)",
-                  border: `1px solid ${trackUnlocked ? info.color : "var(--color-border)"}`,
-                  borderRadius: 18,
-                  opacity: trackUnlocked ? 1 : 0.45,
-                  padding: "22px 26px",
-                  transition: "opacity 0.3s",
-                }}
-              >
-                {/* Track header */}
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-4">
-
-                    {/* Ícone da trilha — imagem ou emoji */}
-                    <div
-                      style={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: 14,
-                        border: `1px solid ${info.color}44`,
-                        overflow: "hidden",
-                        flexShrink: 0,
-                        background: "var(--color-panel)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {info.imageSrc ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={info.imageSrc}
-                          alt={info.desc}
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: 28 }}>{info.icon}</span>
-                      )}
-                    </div>
-
-                    <div>
-                      <p style={{ fontFamily: "var(--font-pixel)", fontSize: 10, color: info.color, letterSpacing: 0.5, marginBottom: 4 }}>
-                        {info.desc}
-                      </p>
-                      <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--color-muted)" }}>
-                        {info.label}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Track progress */}
-                  <div className="text-right" style={{ minWidth: 80 }}>
-                    <p className="pixel-label" style={{ color: info.color }}>
-                      {trackCompleted}/{missions.length}
-                    </p>
-                    <div style={{ width: 80, height: 5, background: "var(--color-border)", borderRadius: 10, marginTop: 6, overflow: "hidden" }}>
-                      <div
-                        style={{
-                          height: "100%",
-                          width: `${trackPct}%`,
-                          background: info.color,
-                          borderRadius: 10,
-                          transition: "width 0.5s ease",
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mission pins */}
-                <div className="flex flex-wrap gap-3">
-                  {missions.map((m) => (
-                    <MissionPin
-                      key={m.id}
-                      mission={m}
-                      completed={completedMissionIds.includes(m.id)}
-                      unlocked={unlockedMissionIds.includes(m.id)}
-                      trackColor={info.color}
-                    />
-                  ))}
-                </div>
+          {/* ── Painel do jogador ── */}
+          <section className="panel flex flex-col gap-5" style={{ padding: "22px 24px" }}>
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div>
+                <p className="pixel-chapter" style={{ margin: 0 }}>SUA JORNADA</p>
+                <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--color-muted)" }}>
+                  <b style={{ color: "var(--color-text)" }}>{completedCount}</b> de {MISSIONS.length} missões concluídas
+                </p>
               </div>
-            );
-          })}
+              {nextMission ? (
+                <Link href={`/mission/${nextMission.id}`} className="btn-next">
+                  ▶ {completedCount === 0 ? "Começar" : "Continuar"}
+                </Link>
+              ) : (
+                <span className="pixel-label" style={{ color: "var(--color-run)" }}>✓ Tudo concluído!</span>
+              )}
+            </div>
+            <XPBar totalXP={totalXP} />
+            {nextMission && (
+              <p className="flex items-center gap-2" style={{ margin: 0, fontSize: 13, color: "var(--color-muted)" }}>
+                Próxima:
+                <Sprite src={TRACKS[nextMission.track].sprite} size={32} />
+                <span style={{ color: TRACKS[nextMission.track].color, fontWeight: 700 }}>{nextMission.missionTitle}</span>
+                <span>— {nextMission.concept}</span>
+              </p>
+            )}
+          </section>
+
+          {/* ── Mapa: trilha contínua passando por todas as regiões ── */}
+          <section className="relative" style={{ height: MAP_H }}>
+            <svg
+              className="absolute inset-0"
+              width="100%"
+              height={MAP_H}
+              viewBox={`0 0 ${VIEW_W} ${MAP_H}`}
+              preserveAspectRatio="none"
+              aria-hidden
+              style={{ zIndex: 1 }}
+            >
+              {nodes.slice(1).map((b, i) => {
+                const a = nodes[i];
+                const midY = (a.y + b.y) / 2;
+                const reached = stateOf(b.mission) !== "locked";
+                return (
+                  <g key={b.mission.id}>
+                    {/* contorno escuro para a trilha ler bem sobre o fundo */}
+                    <path d={`M ${a.x} ${a.y} C ${a.x} ${midY}, ${b.x} ${midY}, ${b.x} ${b.y}`} fill="none"
+                      stroke="rgba(0,0,0,0.55)" strokeWidth={10} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                    <path d={`M ${a.x} ${a.y} C ${a.x} ${midY}, ${b.x} ${midY}, ${b.x} ${b.y}`} fill="none"
+                      stroke={reached ? "#f0c040" : "#6b7385"} strokeWidth={5}
+                      strokeDasharray={reached ? undefined : "1 11"} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  </g>
+                );
+              })}
+            </svg>
+
+            {ITEMS.map((item) => {
+              if (item.kind === "node") {
+                const state = stateOf(item.mission);
+                return (
+                  <MissionPin
+                    key={`n${item.mission.id}`}
+                    mission={item.mission}
+                    state={state}
+                    x={item.x}
+                    y={item.y}
+                    isNext={item.mission.id === nextMission?.id}
+                    xpEarned={xpByMission[item.mission.id]}
+                    lockReasons={state === "locked" ? missingRequirements(item.mission, completedMissionIds, totalXP, MISSIONS) : []}
+                  />
+                );
+              }
+
+              const info = TRACKS[item.track];
+              const missions = MISSIONS.filter((m) => m.track === item.track);
+              const done = missions.filter((m) => completedMissionIds.includes(m.id)).length;
+              const open = missions.some((m) => stateOf(m) !== "locked");
+              const reasons = missions[0] ? missingRequirements(missions[0], completedMissionIds, totalXP, MISSIONS) : [];
+
+              return (
+                <div
+                  key={`r${item.track}`}
+                  className="panel absolute left-0 right-0 flex items-center gap-4"
+                  style={{
+                    top: item.y,
+                    height: REGION_H - 24,
+                    zIndex: 3,
+                    padding: "0 20px 0 12px",
+                    borderRadius: 16,
+                    borderColor: open ? `rgba(${info.rgb},0.5)` : undefined,
+                    background: open
+                      ? `linear-gradient(90deg, rgba(${info.rgb},0.16), rgba(${info.rgb},0.03) 60%), rgba(22,27,39,0.96)`
+                      : undefined,
+                  }}
+                >
+                  <div
+                    className="flex items-center justify-center shrink-0"
+                    style={{
+                      width: 68, height: 68, borderRadius: 12,
+                      background: "var(--color-bg)",
+                      border: `1px solid ${open ? `rgba(${info.rgb},0.45)` : "var(--color-border)"}`,
+                      filter: open ? undefined : "grayscale(1)",
+                      opacity: open ? 1 : 0.55,
+                    }}
+                  >
+                    <Sprite src={info.sprite} size={64} alt={info.name} />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="pixel-label" style={{ margin: 0, color: open ? info.color : "var(--color-muted)" }}>
+                      {info.name.toUpperCase()}
+                    </p>
+                    <p style={{ margin: "2px 0 0", fontSize: 16, fontWeight: 800, color: open ? "var(--color-text)" : "var(--color-muted)" }}>
+                      {info.subtitle}
+                    </p>
+                    {!open && (
+                      <p className="truncate" style={{ margin: "2px 0 0", fontSize: 12, color: "var(--color-muted)" }}>
+                        🔒 {missions.length === 0 ? "Em breve — novas missões chegando" : `Requer: ${reasons.join(" · ")}`}
+                      </p>
+                    )}
+                  </div>
+
+                  {missions.length > 0 && (
+                    <div className="text-right shrink-0" style={{ width: 84 }}>
+                      <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: open ? info.color : "var(--color-muted)" }}>
+                        {done}/{missions.length}
+                      </p>
+                      <div style={{ height: 6, background: "var(--color-border)", borderRadius: 10, marginTop: 6, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${(done / missions.length) * 100}%`, background: info.color, borderRadius: 10, transition: "width 0.5s" }} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </section>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

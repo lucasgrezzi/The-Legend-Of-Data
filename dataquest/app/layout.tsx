@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DataQuest: A Guilda dos Arquivistas",
+  title: "DataQuest — Aprenda Python, SQL e dados jogando",
   description: "Plataforma gamificada de aprendizado em Python, SQL, Pandas e Data Visualization",
 };
 
