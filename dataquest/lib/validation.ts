@@ -49,6 +49,20 @@ function validateTable(
     };
   }
 
+  if (expected.firstRow) {
+    const got = tableData.rows[0] ?? [];
+    const same = expected.firstRow.every((v, i) => String(got[i]) === String(v));
+    if (!same) {
+      return {
+        passed: false,
+        feedback: `As linhas certas vieram, mas fora de ordem.
+Primeira linha esperada: ${expected.firstRow.join(", ")}
+Obtida: ${got.join(", ")}`,
+        xpEarned: 0,
+      };
+    }
+  }
+
   return {
     passed: true,
     feedback: `Perfeito! +${mission.xpReward} XP conquistados!`,

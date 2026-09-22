@@ -47,7 +47,7 @@ const CONTENT_W = 680;
 
 export default function WorldMap() {
   const hydrated = useHydrated();
-  const { profile, setProfile, completedMissionIds, totalXP, xpByMission } = useGameStore();
+  const { profile, setProfile, completedMissionIds, totalXP, coins, xpByMission } = useGameStore();
   const [editing, setEditing] = useState(false);
 
   if (!hydrated) {
@@ -92,7 +92,7 @@ export default function WorldMap() {
           </span>
           <p style={{ margin: 0, fontSize: 12, color: "var(--color-muted)" }}>Aprenda Python, SQL e análise de dados jogando um RPG</p>
         </div>
-        <PlayerChip profile={profile} totalXP={totalXP} onClick={() => setEditing(true)} />
+        <PlayerChip profile={profile} totalXP={totalXP} coins={coins} onClick={() => setEditing(true)} />
       </header>
 
       <main className="flex-1 px-4 pt-8 pb-16">

@@ -6,6 +6,8 @@ import mission3 from "@/data/missions/mission-3";
 import mission4 from "@/data/missions/mission-4";
 import mission5 from "@/data/missions/mission-5";
 import mission6 from "@/data/missions/mission-6";
+import mission7 from "@/data/missions/mission-7";
+import mission8 from "@/data/missions/mission-8";
 
 /**
  * Ordem de jogo. O `id` é estável (é a chave do progresso salvo) e NÃO define a ordem:
@@ -16,7 +18,9 @@ export const MISSIONS: Mission[] = [
   mission1, // Python — print() e variáveis
   mission5, // Python — variáveis e contas
   mission6, // Python — if / elif / else
-  mission2, // Python — for + if
+  mission2, // Python — for + range
+  mission7, // Python — listas
+  mission8, // Python — funções (chefe)
   mission3, // SQL
   mission4, // Pandas
 ];

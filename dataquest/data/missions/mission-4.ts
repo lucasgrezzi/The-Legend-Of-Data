@@ -15,38 +15,50 @@ const mission4: Mission = {
   missionTitle: "A Forja Desperta",
   concept: "Pandas: ler CSV e filtrar linhas",
   narrative: `A Forja dos Arquivistas é onde os fragmentos de dados brutos — as relíquias imperfeitas — são transformados. Com as ferramentas certas, um Arquivista pode filtrar, reorganizar e purificar qualquer conjunto de dados.`,
-  theory: `Pandas é a biblioteca Python para manipulação de dados.
+  theory: `Pandas é a biblioteca de Python para trabalhar com tabelas, chamadas DataFrames.
 
   import pandas as pd
+  df = pd.read_csv("caminho/do/arquivo.csv")
+  print(df.head())     # mostra as primeiras linhas
 
-  df = pd.read_csv("/data/mission.csv")
-  print(df.head())
+Para filtrar, escreva a condição dentro de df[ ... ] — só as linhas em que ela é verdadeira ficam:
 
-  # Filtrar linhas onde valor > 150
-  filtrado = df[df["valor"] > 150]
-  print(len(filtrado))
+  veteranos = df[df["nivel"] >= 10]
 
-df.shape retorna (linhas, colunas).
-df.columns lista os nomes das colunas.`,
-  instructions: `1. Leia o arquivo /data/mission.csv com pd.read_csv()
-2. Filtre para manter apenas produtos com valor > 150
-3. Imprima o número de linhas com print(len(filtrado))
+len() conta as linhas de um DataFrame:
 
-Dica: df[df["coluna"] > valor] filtra linhas.`,
+  print(len(veteranos))
+
+df.columns lista os nomes das colunas; df.shape mostra (linhas, colunas).`,
+  instructions: `A Forja recebeu o registro de vendas em /data/mission.csv. Descubra quantos produtos valem mais de 150 e informe só esse número — deixe o Pandas fazer a contagem.
+
+O ferreiro espera ouvir apenas:
+  3`,
+  hints: [
+    "Leia o arquivo com pd.read_csv(\"/data/mission.csv\") e guarde numa variável, como df.",
+    "Filtre com df[df[\"valor\"] > 150] e conte as linhas do resultado com len().",
+  ],
+  solution: `import pandas as pd
+
+df = pd.read_csv("/data/mission.csv")
+filtrado = df[df["valor"] > 150]
+print(len(filtrado))`,
   codeTemplate: `import pandas as pd
 
-# Leia o arquivo CSV
-df = pd.read_csv("___")
+# Leia o registro de vendas
 
-# Filtre os produtos com valor > 150
-filtrado = df[df["___"] > ___]
-
-# Imprima a quantidade de itens encontrados
-print(len(___))`,
+# Separe os produtos valiosos e conte-os
+`,
   editorLanguage: "python",
   validationType: "exact",
   expectedOutput: "3",
   xpReward: 30,
+  coinReward: 25,
+  requiredCode: [
+    { pattern: "read_csv\\(", hint: "Leia o arquivo com pd.read_csv(\"/data/mission.csv\")." },
+    { pattern: "\\[\\s*[\"']valor[\"']\\s*\\]\\s*>", hint: "Filtre o DataFrame pela coluna valor: df[df[\"valor\"] > 150]." },
+    { pattern: "\\blen\\(", hint: "Conte as linhas com len() — não digite o número." },
+  ],
   dataFile: {
     filename: "vendas.csv",
     headers: ["id", "produto", "valor", "regiao"],
@@ -59,7 +71,7 @@ print(len(___))`,
     ],
     rawCsv: VENDAS_CSV,
   },
-  unlockCondition: { requiredMissionIds: [2, 3] },
+  unlockCondition: { requiredMissionIds: [3] },
 };
 
 export default mission4;

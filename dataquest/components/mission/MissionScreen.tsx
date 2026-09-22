@@ -6,7 +6,7 @@ import type { Mission, RunResult } from "@/types";
 import { validateOutput } from "@/lib/validation";
 import { MISSIONS, getNeighbors } from "@/lib/missions";
 import { TRACKS } from "@/lib/tracks";
-import { GRIMOIRE_UNLOCK_FAILS, grimoireXP, isMissionUnlocked, missingRequirements } from "@/lib/xp";
+import { isMissionUnlocked, missingRequirements, solutionXP } from "@/lib/xp";
 import { getAttempts, useGameStore } from "@/store/gameStore";
 import { usePyodide } from "@/hooks/usePyodide";
 import { useDuckDB } from "@/hooks/useDuckDB";
@@ -58,7 +58,7 @@ function LockedMission({ mission, reasons }: { mission: Mission; reasons: string
 export default function MissionScreen({ mission }: MissionScreenProps) {
   const hydrated = useHydrated();
   const router = useRouter();
-  const { profile, totalXP, completeMission, completedMissionIds, recordFail, openGrimoire } = useGameStore();
+  const { profile, totalXP, coins, completeMission, completedMissionIds, recordFail, buyHint, revealSolution } = useGameStore();
   const attempts = useGameStore((s) => getAttempts(s, mission.id));
   const { status: pyodideStatus, runCode } = usePyodide();
   const { runSQL } = useDuckDB();
@@ -77,7 +77,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
   // Missão narrativa: concluída ao abrir (só depois de ler o progresso salvo)
   useEffect(() => {
     if (hydrated && unlocked && isNarrative && !alreadyCompleted) {
-      completeMission(mission.id, mission.xpReward);
+      completeMission(mission.id, mission.xpReward, mission.coinReward);
     }
   }, [hydrated, unlocked, isNarrative, alreadyCompleted, mission, completeMission]);
 
@@ -102,21 +102,23 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
       const validation = validateOutput(run, mission, code);
       const state = useGameStore.getState();
       const prevXP = state.totalXP;
-      const { fails, grimoireOpened } = getAttempts(state, mission.id);
-      const xp = grimoireOpened ? grimoireXP(validation.xpEarned) : validation.xpEarned;
+      const { fails, solutionRevealed } = getAttempts(state, mission.id);
+      const xp = solutionRevealed ? solutionXP(validation.xpEarned) : validation.xpEarned;
+      const firstWin = validation.passed && !alreadyCompleted;
 
       if (!alreadyCompleted) {
-        if (validation.passed) completeMission(mission.id, xp);
+        if (validation.passed) completeMission(mission.id, xp, mission.coinReward);
         else recordFail(mission.id);
       }
       setResult({
         passed: validation.passed,
         feedback: validation.feedback,
-        xpGained: validation.passed && !alreadyCompleted ? xp : 0,
+        xpGained: firstWin ? xp : 0,
+        coinsGained: firstWin ? mission.coinReward : 0,
         prevXP,
-        penalized: validation.passed && !alreadyCompleted && grimoireOpened,
+        penalized: firstWin && solutionRevealed,
         fails: alreadyCompleted || validation.passed ? undefined : fails + 1,
-        grimoireOpened,
+        solutionRevealed,
       });
     },
     [mission, alreadyCompleted, completeMission, recordFail]
@@ -207,7 +209,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
 
         {/* Personagem + XP */}
         <div className="shrink-0">
-          <PlayerChip profile={profile} totalXP={totalXP} />
+          <PlayerChip profile={profile} totalXP={totalXP} coins={coins} />
         </div>
       </div>
 
@@ -225,8 +227,11 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
             prevId={prevId}
             nextId={nextId}
             fails={attempts.fails}
-            grimoireOpened={attempts.grimoireOpened}
-            onOpenGrimoire={() => openGrimoire(mission.id)}
+            hintsBought={attempts.hintsBought}
+            solutionRevealed={attempts.solutionRevealed}
+            coins={coins}
+            onBuyHint={(cost) => buyHint(mission.id, cost)}
+            onRevealSolution={() => revealSolution(mission.id)}
           />
         </div>
 

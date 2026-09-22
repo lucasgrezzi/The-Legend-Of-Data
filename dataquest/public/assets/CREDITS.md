@@ -17,6 +17,7 @@ Licença CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/). Atribuiç
 | missao-concluida.png | dungeon/chest.png |
 | missao-bloqueada.png | dungeon/gateways/portal_unknown.png |
 | grimorio.png | item/book/glittering.png |
+| moedas.png | item/gold/gold_pile_3.png |
 
 ## Fundo (`bg/mapa-mundo.png`) — CC0
 Gerado por `scripts/gerar_fundo_mapa.py` a partir dos tiles Kenney **Tiny Town**

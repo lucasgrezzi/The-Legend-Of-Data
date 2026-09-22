@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Mission } from "@/types";
 import { TRACKS } from "@/lib/tracks";
 import DataFilePreviewComponent from "./DataFilePreview";
 import Link from "next/link";
 import TypewriterText from "@/components/ui/TypewriterText";
 import RichText from "@/components/ui/RichText";
-import GrimoireGate from "./GrimoireGate";
-import { GRIMOIRE_UNLOCK_FAILS, grimoireXP } from "@/lib/xp";
+import HintShop from "./HintShop";
+import { SOLUTION_UNLOCK_FAILS, solutionXP } from "@/lib/xp";
 
 interface MissionPanelProps {
   mission: Mission;
@@ -19,11 +19,14 @@ interface MissionPanelProps {
   nextId: number | null;
   /** Envios errados nesta missão */
   fails: number;
-  grimoireOpened: boolean;
-  onOpenGrimoire: () => void;
+  hintsBought: number;
+  solutionRevealed: boolean;
+  coins: number;
+  onBuyHint: (cost: number) => void;
+  onRevealSolution: () => void;
 }
 
-type TabId = "lore" | "grimorio" | "dados";
+type TabId = "lore" | "estudo" | "grimorio" | "dados";
 
 function SectionHeader({ icon, label, color }: { icon: string; label: string; color: string }) {
   return (
@@ -45,22 +48,29 @@ export default function MissionPanel({
   prevId,
   nextId,
   fails,
-  grimoireOpened,
-  onOpenGrimoire,
+  hintsBought,
+  solutionRevealed,
+  coins,
+  onBuyHint,
+  onRevealSolution,
 }: MissionPanelProps) {
   const track = TRACKS[mission.track];
   const isNarrative = mission.validationType === "narrative";
   const [tab, setTab] = useState<TabId>("lore");
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const openTab = (t: TabId) => {
+    setTab(t);
+    tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
-  // Grimório livre na missão narrativa e depois de concluir; senão, só após errar e aceitar a penalidade
-  const grimoireFree = isNarrative || validated;
-  const grimoireVisible = grimoireFree || grimoireOpened;
-  const grimoireUnlocked = fails >= GRIMOIRE_UNLOCK_FAILS;
-  const penalized = grimoireOpened && !validated;
+  // Solução revelada antes de concluir → a missão vale metade do XP
+  const penalized = solutionRevealed && !validated;
+  const hasGrimoire = mission.hints.length > 0 || !!mission.solution;
 
   const tabs: { id: TabId; icon: string; label: string }[] = [
     { id: "lore", icon: "📯", label: "Lore" },
-    ...(mission.theory ? [{ id: "grimorio" as const, icon: grimoireVisible || grimoireUnlocked ? "🔮" : "🔒", label: "Grimório" }] : []),
+    ...(mission.theory ? [{ id: "estudo" as const, icon: "📜", label: "Estudo" }] : []),
+    ...(hasGrimoire ? [{ id: "grimorio" as const, icon: "🔮", label: "Grimório" }] : []),
     ...(mission.dataFile ? [{ id: "dados" as const, icon: "📂", label: "Dados" }] : []),
   ];
 
@@ -103,11 +113,19 @@ export default function MissionPanel({
             className="track-badge"
             style={{ color: "var(--color-xp)", border: "1px solid rgba(240,192,64,0.3)", background: "rgba(240,192,64,0.08)" }}
           >
-            ✦ +{penalized ? grimoireXP(mission.xpReward) : mission.xpReward} XP
+            ✦ +{penalized ? solutionXP(mission.xpReward) : mission.xpReward} XP
           </span>
+          {mission.coinReward > 0 && (
+            <span
+              className="track-badge"
+              style={{ color: "var(--color-xp)", border: "1px solid rgba(240,192,64,0.3)", background: "rgba(240,192,64,0.08)" }}
+            >
+              +{mission.coinReward} moedas
+            </span>
+          )}
           {penalized && (
             <span className="track-badge" style={{ color: "var(--color-muted)", border: "1px solid var(--color-border)", background: "var(--color-panel)" }}>
-              Grimório aberto: −50% XP
+              Solução revelada: −50% XP
             </span>
           )}
           {validated && !isNarrative && (
@@ -134,20 +152,31 @@ export default function MissionPanel({
           >
             <SectionHeader icon="🗡️" label="QUEST" color={track.color} />
             <RichText text={mission.instructions} color={track.color} numbered />
-            {!validated && fails > 0 && (
-              <p style={{ margin: "14px 0 0", paddingTop: 12, borderTop: `1px solid rgba(${track.rgb},0.2)`, fontSize: 12, color: "var(--color-muted)" }}>
-                Tentativas erradas: <b style={{ color: "var(--color-error)" }}>{fails}</b>
-                {!grimoireOpened && (grimoireUnlocked
-                  ? " · o Grimório já pode ser aberto (−50% XP)"
-                  : ` · o Grimório abre após ${GRIMOIRE_UNLOCK_FAILS}`)}
-              </p>
-            )}
+            <p
+              className="flex flex-wrap items-center gap-x-4 gap-y-1"
+              style={{ margin: "14px 0 0", paddingTop: 12, borderTop: `1px solid rgba(${track.rgb},0.2)`, fontSize: 12, color: "var(--color-muted)" }}
+            >
+              {mission.theory && (
+                <button type="button" className="link-btn" onClick={() => openTab("estudo")}>📜 Não conhece a sintaxe? Leia o Estudo</button>
+              )}
+              {hasGrimoire && !validated && (
+                <button type="button" className="link-btn" onClick={() => openTab("grimorio")}>🔮 Dicas no Grimório</button>
+              )}
+              {!validated && fails > 0 && (
+                <span>
+                  Erros: <b style={{ color: "var(--color-error)" }}>{fails}</b>
+                  {!solutionRevealed && fails < SOLUTION_UNLOCK_FAILS && ` · solução libera após ${SOLUTION_UNLOCK_FAILS}`}
+                </span>
+              )}
+            </p>
           </div>
         )}
 
-        {/* ── Abas: Lore / Grimório / Dados ── */}
+        {/* ── Abas: Lore / Estudo / Grimório / Dados ── */}
         <div
+          ref={tabsRef}
           style={{
+            scrollMarginTop: 16,
             background: "var(--color-surface)",
             border: "1px solid var(--color-border)",
             borderRadius: 14,
@@ -181,12 +210,23 @@ export default function MissionPanel({
               />
             </div>
             {mission.theory && (
+              <div hidden={tab !== "estudo"}>
+                <RichText text={mission.theory} color={track.color} />
+              </div>
+            )}
+            {hasGrimoire && (
               <div hidden={tab !== "grimorio"}>
-                {grimoireVisible ? (
-                  <RichText text={mission.theory} color={track.color} />
-                ) : (
-                  <GrimoireGate fails={fails} xpReward={mission.xpReward} onOpen={onOpenGrimoire} />
-                )}
+                <HintShop
+                  mission={mission}
+                  color={track.color}
+                  coins={coins}
+                  fails={fails}
+                  hintsBought={hintsBought}
+                  solutionRevealed={solutionRevealed}
+                  free={validated}
+                  onBuyHint={onBuyHint}
+                  onRevealSolution={onRevealSolution}
+                />
               </div>
             )}
             {mission.dataFile && (

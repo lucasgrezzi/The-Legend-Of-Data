@@ -9,9 +9,11 @@ import { MISSIONS } from "@/lib/missions";
 interface GameState {
   profile: PlayerProfile | null;
   totalXP: number;
+  /** Moedas de ouro — ganhas ao concluir missões, gastas em dicas do Grimório */
+  coins: number;
   completedMissionIds: number[];
   unlockedMissionIds: number[];
-  /** XP efetivamente ganho por missão (metade se usou o Grimório) */
+  /** XP efetivamente ganho por missão (metade se revelou a solução) */
   xpByMission: Record<number, number>;
   attempts: Record<number, MissionAttempts>;
   currentMissionId: number;
@@ -19,13 +21,15 @@ interface GameState {
   levelLabel: string;
 
   setProfile: (profile: PlayerProfile) => void;
-  completeMission: (missionId: number, xpEarned: number) => void;
+  completeMission: (missionId: number, xpEarned: number, coinsEarned: number) => void;
   recordFail: (missionId: number) => void;
-  openGrimoire: (missionId: number) => void;
+  /** Compra a próxima dica; retorna false se não houver moedas suficientes */
+  buyHint: (missionId: number, cost: number) => boolean;
+  revealSolution: (missionId: number) => void;
   setCurrentMission: (missionId: number) => void;
 }
 
-const NO_ATTEMPTS: MissionAttempts = { fails: 0, grimoireOpened: false };
+const NO_ATTEMPTS: MissionAttempts = { fails: 0, hintsBought: 0, solutionRevealed: false };
 
 export function getAttempts(state: Pick<GameState, "attempts">, missionId: number): MissionAttempts {
   return state.attempts[missionId] ?? NO_ATTEMPTS;
@@ -34,6 +38,7 @@ export function getAttempts(state: Pick<GameState, "attempts">, missionId: numbe
 const initialState = {
   profile: null as PlayerProfile | null,
   totalXP: 0,
+  coins: 0,
   completedMissionIds: [] as number[],
   unlockedMissionIds: [0],
   xpByMission: {} as Record<number, number>,
@@ -45,12 +50,12 @@ const initialState = {
 
 export const useGameStore = create<GameState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
 
       setProfile: (profile) => set({ profile }),
 
-      completeMission: (missionId, xpEarned) =>
+      completeMission: (missionId, xpEarned, coinsEarned) =>
         set((state) => {
           if (state.completedMissionIds.includes(missionId)) return state;
           const newXP = state.totalXP + xpEarned;
@@ -59,6 +64,7 @@ export const useGameStore = create<GameState>()(
           const unlocked = computeUnlockedMissions(newCompleted, newXP, MISSIONS);
           return {
             totalXP: newXP,
+            coins: state.coins + coinsEarned,
             completedMissionIds: newCompleted,
             unlockedMissionIds: unlocked,
             xpByMission: { ...state.xpByMission, [missionId]: xpEarned },
@@ -73,10 +79,21 @@ export const useGameStore = create<GameState>()(
           return { attempts: { ...state.attempts, [missionId]: { ...a, fails: a.fails + 1 } } };
         }),
 
-      openGrimoire: (missionId) =>
+      buyHint: (missionId, cost) => {
+        const state = get();
+        if (state.coins < cost) return false;
+        const a = getAttempts(state, missionId);
+        set({
+          coins: state.coins - cost,
+          attempts: { ...state.attempts, [missionId]: { ...a, hintsBought: a.hintsBought + 1 } },
+        });
+        return true;
+      },
+
+      revealSolution: (missionId) =>
         set((state) => {
           const a = getAttempts(state, missionId);
-          return { attempts: { ...state.attempts, [missionId]: { ...a, grimoireOpened: true } } };
+          return { attempts: { ...state.attempts, [missionId]: { ...a, solutionRevealed: true } } };
         }),
 
       setCurrentMission: (missionId) =>
@@ -84,6 +101,20 @@ export const useGameStore = create<GameState>()(
     }),
     {
       name: "dataquest-progress",
+      version: 1,
+      // v0 → v1: moedas creditadas pelas missões já concluídas; grimoireOpened → solutionRevealed
+      migrate: (persisted, version) => {
+        const s = persisted as Record<string, unknown>;
+        if (version < 1) {
+          const completed = (s.completedMissionIds as number[] | undefined) ?? [];
+          s.coins = MISSIONS.filter((m) => completed.includes(m.id)).reduce((sum, m) => sum + m.coinReward, 0);
+          const old = (s.attempts as Record<number, { fails?: number; grimoireOpened?: boolean }> | undefined) ?? {};
+          s.attempts = Object.fromEntries(
+            Object.entries(old).map(([id, a]) => [id, { fails: a.fails ?? 0, hintsBought: 0, solutionRevealed: !!a.grimoireOpened }])
+          );
+        }
+        return s as unknown as GameState;
+      },
     }
   )
 );

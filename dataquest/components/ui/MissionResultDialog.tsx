@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { computeLevel, GRIMOIRE_UNLOCK_FAILS } from "@/lib/xp";
+import { computeLevel, SOLUTION_UNLOCK_FAILS } from "@/lib/xp";
 import XPBar from "./XPBar";
 import Sprite from "./Sprite";
 
@@ -10,13 +10,14 @@ export interface MissionResult {
   passed: boolean;
   feedback: string;
   xpGained: number;
+  coinsGained: number;
   /** XP total antes de ganhar esta recompensa */
   prevXP: number;
-  /** Concluiu com o Grimório aberto (ganhou metade) */
+  /** Concluiu depois de revelar a solução (ganhou metade do XP) */
   penalized?: boolean;
   /** Número da tentativa errada (só em erro, missão ainda não concluída) */
   fails?: number;
-  grimoireOpened?: boolean;
+  solutionRevealed?: boolean;
 }
 
 interface MissionResultDialogProps {
@@ -67,9 +68,14 @@ function SuccessBody({ result, nextHref, onClose }: { result: MissionResult; nex
             +{xp} XP
           </p>
         )}
+        {result.coinsGained > 0 && (
+          <p className="flex items-center gap-1" style={{ margin: "2px 0 0", fontSize: 18, fontWeight: 800, color: "var(--color-xp)" }}>
+            <Sprite src="/assets/sprites/moedas.png" size={32} /> +{result.coinsGained} moedas
+          </p>
+        )}
         {result.penalized && (
           <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--color-muted)" }}>
-            Metade da recompensa — o Grimório foi aberto nesta missão.
+            Metade do XP — a solução foi revelada no Grimório.
           </p>
         )}
       </div>
@@ -141,11 +147,11 @@ function ErrorBody({ result, onClose }: { result: MissionResult; onClose: () => 
         {result.fails !== undefined && (
           <p style={{ margin: "12px 0 0", fontSize: 13, color: "var(--color-muted)" }}>
             Tentativa errada nº <b style={{ color: "var(--color-error)" }}>{result.fails}</b>.{" "}
-            {result.grimoireOpened
-              ? "O Grimório está aberto na aba ao lado."
-              : result.fails >= GRIMOIRE_UNLOCK_FAILS
-                ? "O Grimório já pode ser aberto — mas custa metade do XP."
-                : `O Grimório abre após ${GRIMOIRE_UNLOCK_FAILS} tentativas erradas.`}
+            {result.solutionRevealed
+              ? "A solução está no Grimório."
+              : result.fails >= SOLUTION_UNLOCK_FAILS
+                ? "A solução completa já pode ser revelada no Grimório — mas custa metade do XP."
+                : "Releia o Estudo ou compre uma dica no Grimório."}
           </p>
         )}
       </div>

@@ -1,10 +1,13 @@
 import type { Mission } from "@/types";
 
-/** Após quantos envios errados o Grimório pode ser aberto */
-export const GRIMOIRE_UNLOCK_FAILS = 3;
+/** Após quantos envios errados a SOLUÇÃO completa do Grimório pode ser revelada */
+export const SOLUTION_UNLOCK_FAILS = 3;
 
-/** XP de uma missão concluída com o Grimório aberto */
-export const grimoireXP = (reward: number) => Math.floor(reward / 2);
+/** XP de uma missão concluída depois de revelar a solução */
+export const solutionXP = (reward: number) => Math.floor(reward / 2);
+
+/** Preço (em moedas) da dica de índice i — cada dica custa mais que a anterior */
+export const hintCost = (i: number) => 5 * (i + 1);
 
 export const LEVEL_THRESHOLDS = [
   { minXP: 0,   label: "Aprendiz" },

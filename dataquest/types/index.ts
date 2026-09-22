@@ -23,8 +23,16 @@ export interface Mission {
   /** O que a missão ensina, em linguagem direta (ex.: "if / elif / else") — aparece no mapa e no cabeçalho */
   concept: string;
   narrative: string;
+  /** Aba "Estudo" (livre): ensina a sintaxe da fase com um exemplo DIFERENTE da resposta */
   theory: string;
+  /** QUEST: direcionamento — o objetivo e a saída esperada, sem entregar o passo a passo */
   instructions: string;
+  /** Dicas do Grimório, da mais leve à mais específica. Compradas com moedas, em ordem. */
+  hints: string[];
+  /** Código da solução completa (Grimório, após N erros, custa metade do XP) */
+  solution: string;
+  /** Moedas ganhas ao concluir a missão (1ª vez) */
+  coinReward: number;
   codeTemplate: string;
   editorLanguage: "python" | "sql";
   expectedOutput: string;
@@ -85,6 +93,8 @@ export interface PlayerProfile {
 export interface MissionAttempts {
   /** Envios errados */
   fails: number;
-  /** Abriu o Grimório antes de concluir → recompensa pela metade */
-  grimoireOpened: boolean;
+  /** Quantas dicas do Grimório já comprou (compradas em ordem) */
+  hintsBought: number;
+  /** Revelou a solução completa antes de concluir → XP pela metade */
+  solutionRevealed: boolean;
 }
