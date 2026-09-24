@@ -59,6 +59,21 @@ body {
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(-4px); }
 }
+@keyframes rise {
+  0%   { opacity: 0; transform: translateY(18px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-6px); }
@@ -417,6 +432,60 @@ body {
 ::-webkit-scrollbar       { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--color-bg); }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+
+/* ── Telas de entrada (login → personagem): mesma moldura e animações ── */
+/* Entrada em cascata: style={{ "--d": "120ms" }} define o atraso de cada bloco */
+.anim-rise { animation: rise 0.55s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: var(--d, 0ms); }
+.anim-bob  { animation: bob 2.6s ease-in-out infinite; animation-delay: var(--d, 0ms); }
+
+.gate-logo {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin: 0;
+  background: linear-gradient(90deg, #f0c040 0%, #ffe08a 25%, #f0c040 50%, #ffe08a 75%, #f0c040 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 6s linear infinite;
+  filter: drop-shadow(0 0 22px rgba(240,192,64,0.35));
+}
+
+.stepper { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.step { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--color-muted); }
+.step-dot {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800;
+  background: var(--color-panel); border: 1px solid var(--color-border); color: var(--color-muted);
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+.step.is-active { color: var(--color-text); }
+.step.is-active .step-dot { background: var(--color-accent); border-color: var(--color-accent); color: #1a1405; box-shadow: 0 0 0 4px rgba(240,192,64,0.18); }
+.step.is-done .step-dot { background: rgba(34,197,94,0.15); border-color: var(--color-run); color: var(--color-run); }
+.step-line { width: 28px; height: 2px; border-radius: 2px; background: var(--color-border); }
+
+/* Abas Entrar / Criar conta com indicador deslizante */
+.auth-tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; border-radius: 12px; background: var(--color-bg); border: 1px solid var(--color-border); }
+.auth-tab {
+  position: relative; z-index: 1; padding: 10px 0; border: none; background: none; cursor: pointer;
+  font-family: var(--font-body); font-size: 14px; font-weight: 800; color: var(--color-muted); transition: color 0.2s;
+}
+.auth-tab[aria-selected="true"] { color: #1a1405; }
+.auth-tab-indicator {
+  position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 9px;
+  background: linear-gradient(180deg, #ffd766, #f0c040);
+  box-shadow: 0 4px 14px rgba(240,192,64,0.3);
+  transition: transform 0.28s cubic-bezier(.3,.9,.3,1.1);
+}
+.auth-tabs[data-mode="signup"] .auth-tab-indicator { transform: translateX(100%); }
+
+.spinner {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid rgba(240,192,64,0.25); border-top-color: var(--color-accent);
+  animation: spin 0.8s linear infinite;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

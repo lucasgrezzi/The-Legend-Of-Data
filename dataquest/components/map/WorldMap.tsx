@@ -12,6 +12,8 @@ import XPBar from "@/components/ui/XPBar";
 import Sprite from "@/components/ui/Sprite";
 import WorldBackground from "@/components/ui/WorldBackground";
 import CharacterCreation from "@/components/player/CharacterCreation";
+import LoginScreen from "@/components/account/LoginScreen";
+import GateShell, { delay } from "@/components/ui/GateShell";
 import PlayerChip from "@/components/player/PlayerChip";
 import AccountButton from "@/components/account/AccountButton";
 import { supabase } from "@/lib/supabase";
@@ -46,36 +48,60 @@ function layout(): { items: Item[]; height: number } {
 }
 
 const { items: ITEMS, height: MAP_H } = layout();
+
+function GateLoading({ text }: { text: string }) {
+  return (
+    <GateShell maxWidth={480}>
+      <section className="panel flex items-center justify-center gap-3" style={{ padding: "22px" }}>
+        <span className="spinner" aria-hidden />
+        <span style={{ fontSize: 14, color: "var(--color-muted)" }}>{text}</span>
+      </section>
+    </GateShell>
+  );
+}
 const CONTENT_W = 680;
 
 export default function WorldMap() {
   const hydrated = useHydrated();
   const { profile, setProfile, completedMissionIds, totalXP, coins, xpByMission } = useGameStore();
   const [editing, setEditing] = useState(false);
+  const accountReady = useAccountStore((s) => s.ready);
   const loggedIn = useAccountStore((s) => s.email !== null);
+  const sync = useAccountStore((s) => s.sync);
 
   if (!hydrated) {
     return <div className="min-h-screen" style={{ background: "var(--color-bg)" }} />;
   }
 
-  // ── Primeira visita (ou edição): criação de personagem ──
+  // ── Primeira visita: conta (se o Supabase estiver configurado) → personagem ──
+  if (!profile && !editing && supabase) {
+    if (!accountReady || (loggedIn && sync === "loading")) {
+      return <GateLoading text={loggedIn ? "Carregando seu progresso…" : "Abrindo os portões…"} />;
+    }
+    if (!loggedIn) return <LoginScreen />;
+    if (sync === "error") {
+      return (
+        <GateShell maxWidth={480} corner={<AccountButton />}>
+          <section className="panel text-center" style={{ padding: "28px" }}>
+            <p style={{ margin: "0 0 16px", color: "var(--color-error)", fontSize: 14, lineHeight: 1.6 }}>
+              Não foi possível carregar seu progresso da nuvem. Verifique sua conexão.
+            </p>
+            <button type="button" className="btn-next" onClick={() => window.location.reload()}>Tentar de novo</button>
+          </section>
+        </GateShell>
+      );
+    }
+  }
+
   if (!profile || editing) {
     return (
-      <>
-        <WorldBackground />
-        {/* Quem já tem conta pode entrar e recuperar o progresso em vez de criar um personagem novo */}
-        {!editing && supabase && !loggedIn && (
-          <div className="panel fixed flex items-center gap-3" style={{ top: 16, right: 24, zIndex: 20, padding: "6px 6px 6px 14px", borderRadius: 12 }}>
-            <span style={{ fontSize: 13, color: "var(--color-muted)" }}>Já tem conta?</span>
-            <AccountButton />
-          </div>
-        )}
-        <CharacterCreation
-          initial={editing ? profile : null}
-          onConfirm={(p) => { setProfile(p); setEditing(false); }}
-          onCancel={editing ? () => setEditing(false) : undefined}
-        />
-      </>
+      <CharacterCreation
+        initial={editing ? profile : null}
+        onConfirm={(p) => { setProfile(p); setEditing(false); }}
+        onCancel={editing ? () => setEditing(false) : undefined}
+        showSteps={!editing && loggedIn}
+        corner={!editing && loggedIn ? <AccountButton /> : undefined}
+      />
     );
   }
 
@@ -118,7 +144,7 @@ export default function WorldMap() {
         <div className="mx-auto flex flex-col gap-8" style={{ maxWidth: CONTENT_W }}>
 
           {/* ── Painel do jogador ── */}
-          <section className="panel flex flex-col gap-5" style={{ padding: "22px 24px" }}>
+          <section className="panel anim-rise flex flex-col gap-5" style={{ padding: "22px 24px" }}>
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div>
                 <p className="pixel-chapter" style={{ margin: 0 }}>SUA JORNADA</p>
@@ -146,7 +172,7 @@ export default function WorldMap() {
           </section>
 
           {/* ── Mapa: trilha contínua passando por todas as regiões ── */}
-          <section className="relative" style={{ height: MAP_H }}>
+          <section className="relative anim-rise" style={{ height: MAP_H, ...delay(150) }}>
             <svg
               className="absolute inset-0"
               width="100%"

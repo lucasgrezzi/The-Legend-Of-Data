@@ -23,10 +23,13 @@ function waitForLocalProgress(): Promise<void> {
 async function upload(userId: string): Promise<void> {
   if (!supabase) return;
   const snapshot = progressSnapshot(useGameStore.getState());
-  // Sem personagem ainda não há o que salvar (nome e raça são obrigatórios no banco)
-  if (!snapshot.profile) return;
-
   const { setSync } = useAccountStore.getState();
+  // Sem personagem ainda não há o que salvar (nome e raça são obrigatórios no banco)
+  if (!snapshot.profile) {
+    setSync("idle");
+    return;
+  }
+
   setSync("saving");
   const { error } = await supabase.from("saves").upsert({
     user_id: userId,
@@ -45,8 +48,8 @@ async function upload(userId: string): Promise<void> {
  * Ao entrar: junta o progresso do navegador com o da nuvem — fica o que tiver MAIS XP
  * (quem jogou como convidado e depois criou a conta não perde nada).
  */
-async function reconcile(userId: string): Promise<void> {
-  if (!supabase) return;
+async function reconcile(userId: string): Promise<boolean> {
+  if (!supabase) return false;
   const { setSync } = useAccountStore.getState();
   setSync("loading");
   await waitForLocalProgress();
@@ -55,7 +58,7 @@ async function reconcile(userId: string): Promise<void> {
   if (error) {
     setSync("error");
     console.error("[DataQuest] Falha ao carregar da nuvem:", error.message);
-    return;
+    return false;
   }
 
   const cloud = data?.state as CloudSave | undefined;
@@ -66,6 +69,7 @@ async function reconcile(userId: string): Promise<void> {
   } else {
     await upload(userId);
   }
+  return true;
 }
 
 /** Montado uma vez no layout: acompanha a sessão e salva o progresso na nuvem a cada mudança. */
@@ -77,6 +81,8 @@ export default function CloudSync() {
     }
 
     let userId: string | null = null;
+    // Só sobe mudanças depois de carregar o save da nuvem — nunca sobrescreve a nuvem sem ter lido antes
+    let syncedId: string | null = null;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let applyingRemote = false;
 
@@ -86,6 +92,7 @@ export default function CloudSync() {
 
       if (event === "SIGNED_OUT") {
         userId = null;
+        syncedId = null;
         clearTimeout(timer);
         useGameStore.getState().resetProgress();
         useAccountStore.getState().setSync("idle");
@@ -93,19 +100,23 @@ export default function CloudSync() {
       }
       if (nextId && nextId !== userId) {
         userId = nextId;
+        syncedId = null;
+        // "loading" já aqui: o mapa espera o save da nuvem em vez de mostrar a criação de personagem
+        useAccountStore.getState().setSync("loading");
         // Fora do callback: o supabase-js não deve ser chamado de dentro do onAuthStateChange
         setTimeout(async () => {
           applyingRemote = true;
-          await reconcile(nextId);
+          const ok = await reconcile(nextId);
           applyingRemote = false;
+          if (ok && userId === nextId) syncedId = nextId;
         }, 0);
       }
     });
 
     const unsubStore = useGameStore.subscribe(() => {
-      if (!userId || applyingRemote) return;
+      if (!syncedId || applyingRemote) return;
       clearTimeout(timer);
-      const id = userId;
+      const id = syncedId;
       timer = setTimeout(() => upload(id), SAVE_DEBOUNCE_MS);
     });
 

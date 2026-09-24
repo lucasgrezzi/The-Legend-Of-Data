@@ -20,13 +20,15 @@ export function authErrorMessage(message: string): string {
   return message;
 }
 
-const TITLES: Record<Mode, string> = {
-  login: "Entrar na conta",
-  signup: "Criar conta",
-  forgot: "Recuperar senha",
-};
+interface AuthFormProps {
+  /** Chamado quando a pessoa entrou (ou criou a conta já logada) */
+  onDone?: () => void;
+  /** Botão extra ao lado do principal (ex.: "Cancelar" na janela) */
+  secondaryAction?: React.ReactNode;
+}
 
-export default function AuthDialog({ onClose }: { onClose: () => void }) {
+/** Formulário de conta — usado na tela de login (primeiro acesso) e na janela "Entrar" do mapa */
+export function AuthForm({ onDone, secondaryAction }: AuthFormProps) {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,7 +54,7 @@ export default function AuthDialog({ onClose }: { onClose: () => void }) {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        onClose();
+        onDone?.();
       } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -61,7 +63,7 @@ export default function AuthDialog({ onClose }: { onClose: () => void }) {
         });
         if (error) throw error;
         if (data.session) {
-          onClose();
+          onDone?.();
         } else {
           setNotice("Conta criada! Enviamos um link de confirmação para o seu e-mail — clique nele e depois entre aqui.");
           setMode("login");
@@ -79,86 +81,103 @@ export default function AuthDialog({ onClose }: { onClose: () => void }) {
   };
 
   return (
+    <form onSubmit={submit} className="flex flex-col">
+      {mode === "forgot" ? (
+        <div className="anim-rise" style={{ marginBottom: 18 }}>
+          <button type="button" className="link-btn" onClick={() => switchMode("login")}>← Voltar para o login</button>
+          <p style={{ margin: "12px 0 0", fontSize: 13, color: "var(--color-muted)", lineHeight: 1.6 }}>
+            Digite o e-mail da sua conta e enviaremos um link para criar uma nova senha.
+          </p>
+        </div>
+      ) : (
+        <div className="auth-tabs" role="tablist" data-mode={mode} style={{ marginBottom: 20 }}>
+          <span className="auth-tab-indicator" aria-hidden />
+          <button type="button" role="tab" className="auth-tab" aria-selected={mode === "login"} onClick={() => switchMode("login")}>
+            Entrar
+          </button>
+          <button type="button" role="tab" className="auth-tab" aria-selected={mode === "signup"} onClick={() => switchMode("signup")}>
+            Criar conta
+          </button>
+        </div>
+      )}
+
+      <label className="block mb-4">
+        <span className="pixel-label" style={{ color: "var(--color-muted)" }}>E-mail</span>
+        <input
+          type="email"
+          required
+          autoFocus
+          autoComplete="email"
+          placeholder="voce@empresa.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="field mt-2"
+        />
+      </label>
+
+      {mode !== "forgot" && (
+        <label className="block">
+          <span className="pixel-label" style={{ color: "var(--color-muted)" }}>Senha</span>
+          <input
+            type="password"
+            required
+            minLength={PASSWORD_MIN}
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
+            placeholder={mode === "signup" ? `Mínimo de ${PASSWORD_MIN} caracteres` : ""}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="field mt-2"
+          />
+        </label>
+      )}
+
+      {mode === "login" && (
+        <button type="button" className="link-btn" onClick={() => switchMode("forgot")} style={{ alignSelf: "flex-end", marginTop: 10 }}>
+          Esqueci minha senha
+        </button>
+      )}
+
+      {error && (
+        <p key={error} role="alert" className="anim-rise" style={{ margin: "14px 0 0", fontSize: 13, color: "var(--color-error)", lineHeight: 1.5 }}>{error}</p>
+      )}
+      {notice && (
+        <p role="status" className="anim-rise" style={{ margin: "14px 0 0", fontSize: 13, color: "var(--color-run)", lineHeight: 1.5 }}>{notice}</p>
+      )}
+
+      <div className="flex items-center justify-end gap-2" style={{ marginTop: 22 }}>
+        {secondaryAction}
+        <button type="submit" className="btn-next" disabled={busy} style={{ minWidth: 160, justifyContent: "center" }}>
+          {busy ? "Aguarde…" : mode === "login" ? "Entrar →" : mode === "signup" ? "Criar conta →" : "Enviar link"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+/** Janela "Entrar" aberta pelo botão ☁️ do mapa (para quem já joga sem conta) */
+export default function AuthDialog({ onClose }: { onClose: () => void }) {
+  return (
     <div className="modal-backdrop" onClick={onClose}>
-      <form
+      <div
         className="modal"
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-title"
         onClick={(e) => e.stopPropagation()}
-        onSubmit={submit}
-        style={{ padding: "28px 28px 24px" }}
+        style={{ padding: "26px 28px 24px" }}
       >
         <p className="pixel-chapter" style={{ margin: 0 }}>CONTA</p>
         <h2 id="auth-title" style={{ fontSize: 22, fontWeight: 800, margin: "10px 0 6px", color: "var(--color-accent)" }}>
-          {TITLES[mode]}
+          Salve seu progresso
         </h2>
         <p style={{ margin: "0 0 20px", fontSize: 13, color: "var(--color-muted)", lineHeight: 1.6 }}>
-          {mode === "forgot"
-            ? "Digite o e-mail da sua conta e enviaremos um link para criar uma nova senha."
-            : "Com uma conta, seu progresso fica salvo na nuvem (continue em qualquer aparelho) e você aparece no ranking."}
+          Com uma conta, seu progresso fica na nuvem (continue em qualquer aparelho) e você aparece no ranking.
         </p>
-
-        <label className="block mb-4">
-          <span className="pixel-label" style={{ color: "var(--color-muted)" }}>E-mail</span>
-          <input
-            type="email"
-            required
-            autoFocus
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="field mt-2"
-          />
-        </label>
-
-        {mode !== "forgot" && (
-          <label className="block mb-2">
-            <span className="pixel-label" style={{ color: "var(--color-muted)" }}>Senha</span>
-            <input
-              type="password"
-              required
-              minLength={PASSWORD_MIN}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="field mt-2"
-            />
-            {mode === "signup" && (
-              <span style={{ display: "block", marginTop: 6, fontSize: 12, color: "var(--color-muted)" }}>
-                Mínimo de {PASSWORD_MIN} caracteres.
-              </span>
-            )}
-          </label>
-        )}
-
-        {mode === "login" && (
-          <button type="button" className="link-btn" onClick={() => switchMode("forgot")} style={{ marginBottom: 4 }}>
-            Esqueci minha senha
-          </button>
-        )}
-
-        {error && (
-          <p role="alert" style={{ margin: "14px 0 0", fontSize: 13, color: "var(--color-error)", lineHeight: 1.5 }}>{error}</p>
-        )}
-        {notice && (
-          <p role="status" style={{ margin: "14px 0 0", fontSize: 13, color: "var(--color-run)", lineHeight: 1.5 }}>{notice}</p>
-        )}
-
-        <div className="flex items-center justify-between gap-3 flex-wrap" style={{ marginTop: 22, paddingTop: 18, borderTop: "1px solid var(--color-border)" }}>
-          <span style={{ fontSize: 13, color: "var(--color-muted)" }}>
-            {mode === "login" && <>Não tem conta? <button type="button" className="link-btn" onClick={() => switchMode("signup")}>Criar conta</button></>}
-            {mode === "signup" && <>Já tem conta? <button type="button" className="link-btn" onClick={() => switchMode("login")}>Entrar</button></>}
-            {mode === "forgot" && <button type="button" className="link-btn" onClick={() => switchMode("login")}>← Voltar</button>}
-          </span>
-          <div className="flex gap-2">
-            <button type="button" className="btn-nav" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn-next" disabled={busy}>
-              {busy ? "Aguarde…" : mode === "login" ? "Entrar" : mode === "signup" ? "Criar conta" : "Enviar link"}
-            </button>
-          </div>
-        </div>
-      </form>
+        <AuthForm
+          onDone={onClose}
+          secondaryAction={<button type="button" className="btn-nav" onClick={onClose}>Cancelar</button>}
+        />
+      </div>
     </div>
   );
 }

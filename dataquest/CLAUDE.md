@@ -89,7 +89,7 @@ direcionamento, dicas bloqueadas pagas com moedas ganhas a cada fase, dificuldad
 
 ### Sessão 5 — Contas (Supabase), save na nuvem e ranking (2026-09-24)
 Site publicado na **Vercel** (Root Directory `dataquest`, deploy automático a cada push no `master`).
-- **Login opcional com e-mail e senha** (escolha do usuário). Sem conta, joga como antes (só localStorage).
+- **Login com e-mail e senha** (escolha do usuário). Sem Supabase configurado, joga como antes (só localStorage).
 - `lib/supabase.ts`: cliente criado só se `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
   (ou `..._ANON_KEY`) existirem; sem elas, botões de conta/ranking **somem** e o build funciona igual.
 - `supabase/schema.sql`: tabela `saves` (1 linha por conta, RLS: só o dono lê/grava; `state` jsonb = snapshot
@@ -101,6 +101,13 @@ Site publicado na **Vercel** (Root Directory `dataquest`, deploy automático a c
   Save na nuvem com versão diferente é ignorado — ao subir a versão do store, tratar a migração ali também.
 - UI: `AccountButton` (☁️ Entrar / "Salvo na nuvem" + Sair) e link 🏆 Ranking no topo do mapa; "Já tem conta?"
   na criação de personagem; `/ranking` (`Leaderboard`); `/conta/nova-senha` (link do "Esqueci minha senha").
+- **Depois (pedido do usuário): login ANTES do personagem para quem é novo.** `/map` sem profile →
+  `LoginScreen` (abas Entrar/Criar conta, esqueci a senha) → `CharacterCreation` → mapa. Quem já tem
+  personagem local sem conta continua jogando (pode entrar pelo ☁️). Enquanto o save da nuvem carrega, mostra
+  "Carregando seu progresso…"; se falhar, tela de erro (nunca sobrescreve a nuvem sem ter lido — `syncedId`).
+  Moldura comum `components/ui/GateShell.tsx` (logo com brilho, indicador Conta → Personagem → Jornada,
+  entrada em cascata `.anim-rise` + `delay(ms)`); `AuthForm` é o mesmo na tela e na janela do mapa.
+  Confirmação de e-mail DESLIGADA no Supabase (decisão do usuário: cadastrou, já joga).
 - **Configuração no Supabase** (feita pelo usuário): rodar `schema.sql`; Auth → URL Configuration: Site URL =
   domínio da Vercel e Redirect URLs `https://<dominio>/**` e `http://localhost:3000/**`; variáveis na Vercel
   e em `dataquest/.env.local` (ignorado pelo git).
