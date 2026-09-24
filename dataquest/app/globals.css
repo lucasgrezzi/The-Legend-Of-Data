@@ -439,7 +439,8 @@ body {
 .anim-bob  { animation: bob 2.6s ease-in-out infinite; animation-delay: var(--d, 0ms); }
 
 .gate-logo {
-  font-size: 40px;
+  font-size: 26px;
+  line-height: 1.2;
   font-weight: 800;
   letter-spacing: -1px;
   margin: 0;
@@ -455,7 +456,7 @@ body {
 .stepper { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
 .step { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--color-muted); }
 .step-dot {
-  width: 24px; height: 24px; border-radius: 50%;
+  width: 22px; height: 22px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 800;
   background: var(--color-panel); border: 1px solid var(--color-border); color: var(--color-muted);
@@ -469,7 +470,7 @@ body {
 /* Abas Entrar / Criar conta com indicador deslizante */
 .auth-tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; border-radius: 12px; background: var(--color-bg); border: 1px solid var(--color-border); }
 .auth-tab {
-  position: relative; z-index: 1; padding: 10px 0; border: none; background: none; cursor: pointer;
+  position: relative; z-index: 1; padding: 8px 0; border: none; background: none; cursor: pointer;
   font-family: var(--font-body); font-size: 14px; font-weight: 800; color: var(--color-muted); transition: color 0.2s;
 }
 .auth-tab[aria-selected="true"] { color: #1a1405; }
@@ -514,6 +515,7 @@ body {
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
+.field.field-sm { font-size: 15px; padding: 10px 12px; }
 .field:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(240,192,64,0.18); }
 
 /* ── Criação de personagem ── */
@@ -544,6 +546,8 @@ body {
   border: 1px solid var(--color-border);
   margin-bottom: 6px;
 }
+.race-card.race-card-sm { padding: 12px 10px; gap: 4px; }
+.race-card.race-card-sm .race-portrait { width: 72px; height: 72px; margin-bottom: 2px; }
 .player-chip { transition: border-color 0.15s, background 0.15s; font-family: var(--font-body); color: inherit; }
 .player-chip:hover { border-color: #3a4358 !important; background: var(--color-border) !important; }
 

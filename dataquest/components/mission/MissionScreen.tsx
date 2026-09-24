@@ -10,7 +10,7 @@ import { isMissionUnlocked, missingRequirements, solutionXP } from "@/lib/xp";
 import { getAttempts, useGameStore } from "@/store/gameStore";
 import { usePyodide } from "@/hooks/usePyodide";
 import { useDuckDB } from "@/hooks/useDuckDB";
-import { useHydrated } from "@/hooks/useHydrated";
+import { useGate } from "@/hooks/useGate";
 import MissionPanel from "./left/MissionPanel";
 import EditorPanel from "./right/EditorPanel";
 import MissionResultDialog, { type MissionResult } from "@/components/ui/MissionResultDialog";
@@ -56,7 +56,7 @@ function LockedMission({ mission, reasons }: { mission: Mission; reasons: string
 }
 
 export default function MissionScreen({ mission }: MissionScreenProps) {
-  const hydrated = useHydrated();
+  const gate = useGate();
   const router = useRouter();
   const { profile, totalXP, coins, completeMission, completedMissionIds, recordFail, buyHint, revealSolution } = useGameStore();
   const attempts = useGameStore((s) => getAttempts(s, mission.id));
@@ -69,17 +69,17 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
   const validated = alreadyCompleted || isNarrative;
   const [result, setResult] = useState<MissionResult | null>(null);
 
-  // Sem personagem criado → volta ao mapa (lá fica a criação de personagem)
+  // Sem conta ou sem personagem → volta ao mapa (lá ficam o login e a criação de personagem)
   useEffect(() => {
-    if (hydrated && !profile) router.replace("/map");
-  }, [hydrated, profile, router]);
+    if (gate !== "loading" && gate !== "play") router.replace("/map");
+  }, [gate, router]);
 
   // Missão narrativa: concluída ao abrir (só depois de ler o progresso salvo)
   useEffect(() => {
-    if (hydrated && unlocked && isNarrative && !alreadyCompleted) {
+    if (gate === "play" && unlocked && isNarrative && !alreadyCompleted) {
       completeMission(mission.id, mission.xpReward, mission.coinReward);
     }
-  }, [hydrated, unlocked, isNarrative, alreadyCompleted, mission, completeMission]);
+  }, [gate, unlocked, isNarrative, alreadyCompleted, mission, completeMission]);
 
   const trackMissions = MISSIONS.filter((m) => m.track === mission.track);
   const trackIndex    = trackMissions.findIndex((m) => m.id === mission.id);
@@ -124,7 +124,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
     [mission, alreadyCompleted, completeMission, recordFail]
   );
 
-  if (!hydrated || !profile) {
+  if (gate !== "play" || !profile) {
     return (
       <FullScreenMessage>
         <p className="pixel-label" style={{ color: "var(--color-muted)", animation: "blink 1.2s step-end infinite" }}>

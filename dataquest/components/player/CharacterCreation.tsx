@@ -33,20 +33,20 @@ export default function CharacterCreation({ initial, onConfirm, onCancel, showSt
   };
 
   return (
-    <GateShell step={showSteps ? 2 : undefined} maxWidth={860} corner={corner}>
-      <form onSubmit={submit} className="panel w-full" style={{ padding: "32px 32px 28px" }}>
+    <GateShell step={showSteps ? 2 : undefined} maxWidth={760} corner={corner}>
+      <form onSubmit={submit} className="panel w-full" style={{ padding: "18px 24px" }}>
 
-        <div className="text-center mb-8">
-          <h2 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 8px", color: "var(--color-accent)", textShadow: "0 0 30px rgba(240,192,64,0.35)" }}>
+        <div className="text-center mb-3">
+          <h2 style={{ fontSize: 21, fontWeight: 800, margin: "0 0 2px", color: "var(--color-accent)", textShadow: "0 0 30px rgba(240,192,64,0.35)" }}>
             {initial ? "Editar personagem" : "Crie seu personagem"}
           </h2>
-          <p style={{ margin: 0, color: "var(--color-muted)", fontSize: 14 }}>
-            Aqui você aprende Python, SQL e análise de dados resolvendo missões de RPG. Para começar, escolha seu nome e sua raça — cada raça faz parte de uma guilda.
+          <p style={{ margin: 0, color: "var(--color-muted)", fontSize: 13 }}>
+            Escolha seu nome e sua raça — cada raça faz parte de uma guilda.
           </p>
         </div>
 
         {/* Nome */}
-        <label className="block mb-8">
+        <label className="block mb-3">
           <span className="pixel-label" style={{ color: "var(--color-muted)" }}>Seu nome</span>
           <input
             autoFocus
@@ -54,16 +54,16 @@ export default function CharacterCreation({ initial, onConfirm, onCancel, showSt
             maxLength={NAME_MAX}
             onChange={(e) => setName(e.target.value)}
             placeholder="Ex.: Lyra, Thorin, Grok…"
-            className="field mt-2"
+            className="field field-sm mt-2"
           />
-          <span style={{ display: "block", marginTop: 6, fontSize: 12, color: "var(--color-muted)", textAlign: "right" }}>
+          <span style={{ display: "block", marginTop: 4, fontSize: 11, color: "var(--color-muted)", textAlign: "right" }}>
             {trimmed.length}/{NAME_MAX}
           </span>
         </label>
 
         {/* Raças */}
         <span className="pixel-label" style={{ color: "var(--color-muted)" }}>Sua raça</span>
-        <div className="grid gap-3 mt-3 mb-8" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
+        <div className="grid gap-3 mt-2 mb-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
           {RACE_ORDER.map((r, i) => {
             const info = RACES[r];
             const selected = race === r;
@@ -73,7 +73,8 @@ export default function CharacterCreation({ initial, onConfirm, onCancel, showSt
                 type="button"
                 onClick={() => setRace(r)}
                 aria-pressed={selected}
-                className="race-card anim-rise"
+                title={info.motto}
+                className="race-card race-card-sm anim-rise"
                 style={{
                   ...delay(260 + i * 90),
                   borderColor: selected ? info.color : undefined,
@@ -82,19 +83,19 @@ export default function CharacterCreation({ initial, onConfirm, onCancel, showSt
                 }}
               >
                 <div className="race-portrait" style={{ borderColor: selected ? `rgba(${info.rgb},0.6)` : undefined }}>
-                  <Sprite src={info.sprite} size={96} alt={info.name} />
+                  <Sprite src={info.sprite} size={64} alt={info.name} />
                 </div>
-                <span style={{ fontSize: 18, fontWeight: 800, color: selected ? info.color : "var(--color-text)" }}>{info.name}</span>
+                <span style={{ fontSize: 16, fontWeight: 800, color: selected ? info.color : "var(--color-text)" }}>{info.name}</span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: "var(--color-text)", opacity: 0.85 }}>{info.guild}</span>
-                <span style={{ fontSize: 12, color: "var(--color-muted)", lineHeight: 1.5 }}>{info.motto}</span>
+                
               </button>
             );
           })}
         </div>
 
         {/* Confirmação */}
-        <div className="flex flex-wrap items-center justify-between gap-4 pt-6" style={{ borderTop: "1px solid var(--color-border)" }}>
-          <p style={{ margin: 0, fontSize: 14, color: "var(--color-muted)", minHeight: 22 }}>
+        <div className="flex flex-wrap items-center justify-between gap-4 pt-3" style={{ borderTop: "1px solid var(--color-border)" }}>
+          <p style={{ margin: 0, fontSize: 13, color: "var(--color-muted)", minHeight: 20 }}>
             {ready && chosen ? (
               <>Boas-vindas, <b style={{ color: "var(--color-text)" }}>{trimmed}</b>! Sua guilda: <b style={{ color: chosen.color }}>{chosen.guild}</b>.</>
             ) : (

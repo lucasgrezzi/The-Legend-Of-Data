@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabase";
 import { useAccountStore, type SyncStatus } from "@/store/accountStore";
 import AuthDialog from "./AuthDialog";
@@ -32,7 +33,8 @@ export default function AccountButton() {
         >
           <span style={{ fontSize: 15 }}>☁️</span> Entrar
         </button>
-        {dialogOpen && <AuthDialog onClose={() => setDialogOpen(false)} />}
+        {/* Portal: a top bar tem backdrop-filter, que prenderia o position:fixed da janela dentro dela (cortada) */}
+        {dialogOpen && createPortal(<AuthDialog onClose={() => setDialogOpen(false)} />, document.body)}
       </>
     );
   }

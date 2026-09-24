@@ -21,7 +21,7 @@ interface GateShellProps {
  */
 export default function GateShell({ step, maxWidth, corner, children }: GateShellProps) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-6">
       <WorldBackground />
 
       {corner && (
@@ -30,32 +30,34 @@ export default function GateShell({ step, maxWidth, corner, children }: GateShel
         </div>
       )}
 
-      <div className="w-full flex flex-col items-center gap-6" style={{ maxWidth }}>
-        {/* Logo + tagline dentro de um painel (texto nunca direto sobre a imagem) */}
-        <div className="panel anim-rise text-center" style={{ padding: "18px 28px", borderRadius: 16 }}>
-          <h1 className="gate-logo">DataQuest</h1>
-          <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--color-muted)" }}>
-            Aprenda Python, SQL e análise de dados jogando um RPG
-          </p>
-        </div>
+      <div className="w-full flex flex-col items-center gap-3" style={{ maxWidth }}>
+        {/* Logo + tagline + etapas num único painel compacto (texto nunca direto sobre a imagem) */}
+        <header className="panel anim-rise flex flex-col items-center gap-2" style={{ padding: "10px 22px", borderRadius: 14 }}>
+          <div className="text-center">
+            <h1 className="gate-logo">DataQuest</h1>
+            <p style={{ margin: 0, fontSize: 12, color: "var(--color-muted)", whiteSpace: "nowrap" }}>
+              Aprenda Python, SQL e análise de dados jogando um RPG
+            </p>
+          </div>
 
-        {step && (
-          <nav className="panel stepper anim-rise" aria-label="Etapas" style={{ padding: "10px 18px", borderRadius: 999, ...delay(80) }}>
-            {STEPS.map((label, i) => {
-              const n = i + 1;
-              const state = n < step ? "is-done" : n === step ? "is-active" : "";
-              return (
-                <span key={label} className="flex items-center gap-[10px]">
-                  {i > 0 && <span className="step-line" aria-hidden />}
-                  <span className={`step ${state}`} aria-current={n === step ? "step" : undefined}>
-                    <span className="step-dot">{n < step ? "✓" : n}</span>
-                    {label}
+          {step && (
+            <nav className="stepper" aria-label="Etapas" style={{ paddingTop: 8, borderTop: "1px solid var(--color-border)", width: "100%" }}>
+              {STEPS.map((label, i) => {
+                const n = i + 1;
+                const state = n < step ? "is-done" : n === step ? "is-active" : "";
+                return (
+                  <span key={label} className="flex items-center gap-[10px]">
+                    {i > 0 && <span className="step-line" aria-hidden />}
+                    <span className={`step ${state}`} aria-current={n === step ? "step" : undefined}>
+                      <span className="step-dot">{n < step ? "✓" : n}</span>
+                      {label}
+                    </span>
                   </span>
-                </span>
-              );
-            })}
-          </nav>
-        )}
+                );
+              })}
+            </nav>
+          )}
+        </header>
 
         <div className="w-full anim-rise" style={delay(160)}>
           {children}

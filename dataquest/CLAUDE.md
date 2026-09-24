@@ -108,6 +108,12 @@ Site publicado na **Vercel** (Root Directory `dataquest`, deploy automático a c
   Moldura comum `components/ui/GateShell.tsx` (logo com brilho, indicador Conta → Personagem → Jornada,
   entrada em cascata `.anim-rise` + `delay(ms)`); `AuthForm` é o mesmo na tela e na janela do mapa.
   Confirmação de e-mail DESLIGADA no Supabase (decisão do usuário: cadastrou, já joga).
+- **Login OBRIGATÓRIO para todos** (pedido seguinte do usuário): `hooks/useGate.ts` decide a etapa
+  (`loading` → `login` → `cloud-error` → `character` → `play`) e é usado no mapa e na missão. Mesmo quem tem
+  personagem local sem conta cai no login (ao entrar, fica o save com mais XP). Dentro do jogo não há "Entrar"
+  na barra. `AuthDialog` agora abre via portal (`document.body`): o `backdrop-filter` da top bar prendia o
+  `position: fixed` e cortava a janela. Telas de entrada compactas: cabem em 1366×768 sem rolar (logo +
+  etapas num painel só; lema da raça virou `title` da carta).
 - **Configuração no Supabase** (feita pelo usuário): rodar `schema.sql`; Auth → URL Configuration: Site URL =
   domínio da Vercel e Redirect URLs `https://<dominio>/**` e `http://localhost:3000/**`; variáveis na Vercel
   e em `dataquest/.env.local` (ignorado pelo git).

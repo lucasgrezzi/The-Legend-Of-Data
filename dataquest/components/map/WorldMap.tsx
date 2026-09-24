@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Mission, Track } from "@/types";
 import { useGameStore } from "@/store/gameStore";
-import { useHydrated } from "@/hooks/useHydrated";
+import { useGate } from "@/hooks/useGate";
 import { MISSIONS } from "@/lib/missions";
 import { TRACKS, TRACK_ORDER } from "@/lib/tracks";
 import { isMissionUnlocked, missingRequirements } from "@/lib/xp";
@@ -62,38 +62,29 @@ function GateLoading({ text }: { text: string }) {
 const CONTENT_W = 680;
 
 export default function WorldMap() {
-  const hydrated = useHydrated();
+  const gate = useGate();
   const { profile, setProfile, completedMissionIds, totalXP, coins, xpByMission } = useGameStore();
   const [editing, setEditing] = useState(false);
-  const accountReady = useAccountStore((s) => s.ready);
   const loggedIn = useAccountStore((s) => s.email !== null);
-  const sync = useAccountStore((s) => s.sync);
 
-  if (!hydrated) {
-    return <div className="min-h-screen" style={{ background: "var(--color-bg)" }} />;
+  // ── Entrada: conta (sempre primeiro, se o Supabase estiver configurado) → personagem → mapa ──
+  if (gate === "loading") {
+    return <GateLoading text={loggedIn ? "Carregando seu progresso…" : "Abrindo os portões…"} />;
   }
-
-  // ── Primeira visita: conta (se o Supabase estiver configurado) → personagem ──
-  if (!profile && !editing && supabase) {
-    if (!accountReady || (loggedIn && sync === "loading")) {
-      return <GateLoading text={loggedIn ? "Carregando seu progresso…" : "Abrindo os portões…"} />;
-    }
-    if (!loggedIn) return <LoginScreen />;
-    if (sync === "error") {
-      return (
-        <GateShell maxWidth={480} corner={<AccountButton />}>
-          <section className="panel text-center" style={{ padding: "28px" }}>
-            <p style={{ margin: "0 0 16px", color: "var(--color-error)", fontSize: 14, lineHeight: 1.6 }}>
-              Não foi possível carregar seu progresso da nuvem. Verifique sua conexão.
-            </p>
-            <button type="button" className="btn-next" onClick={() => window.location.reload()}>Tentar de novo</button>
-          </section>
-        </GateShell>
-      );
-    }
+  if (gate === "login") return <LoginScreen />;
+  if (gate === "cloud-error") {
+    return (
+      <GateShell maxWidth={440} corner={<AccountButton />}>
+        <section className="panel text-center" style={{ padding: "24px" }}>
+          <p style={{ margin: "0 0 16px", color: "var(--color-error)", fontSize: 14, lineHeight: 1.6 }}>
+            Não foi possível carregar seu progresso da nuvem. Verifique sua conexão.
+          </p>
+          <button type="button" className="btn-next" onClick={() => window.location.reload()}>Tentar de novo</button>
+        </section>
+      </GateShell>
+    );
   }
-
-  if (!profile || editing) {
+  if (gate === "character" || !profile || editing) {
     return (
       <CharacterCreation
         initial={editing ? profile : null}

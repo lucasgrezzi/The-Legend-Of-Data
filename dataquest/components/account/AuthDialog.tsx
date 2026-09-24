@@ -90,7 +90,7 @@ export function AuthForm({ onDone, secondaryAction }: AuthFormProps) {
           </p>
         </div>
       ) : (
-        <div className="auth-tabs" role="tablist" data-mode={mode} style={{ marginBottom: 20 }}>
+        <div className="auth-tabs" role="tablist" data-mode={mode} style={{ marginBottom: 16 }}>
           <span className="auth-tab-indicator" aria-hidden />
           <button type="button" role="tab" className="auth-tab" aria-selected={mode === "login"} onClick={() => switchMode("login")}>
             Entrar
@@ -101,7 +101,7 @@ export function AuthForm({ onDone, secondaryAction }: AuthFormProps) {
         </div>
       )}
 
-      <label className="block mb-4">
+      <label className="block mb-3">
         <span className="pixel-label" style={{ color: "var(--color-muted)" }}>E-mail</span>
         <input
           type="email"
@@ -111,7 +111,7 @@ export function AuthForm({ onDone, secondaryAction }: AuthFormProps) {
           placeholder="voce@empresa.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="field mt-2"
+          className="field mt-2 field-sm"
         />
       </label>
 
@@ -126,13 +126,13 @@ export function AuthForm({ onDone, secondaryAction }: AuthFormProps) {
             placeholder={mode === "signup" ? `Mínimo de ${PASSWORD_MIN} caracteres` : ""}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="field mt-2"
+            className="field mt-2 field-sm"
           />
         </label>
       )}
 
       {mode === "login" && (
-        <button type="button" className="link-btn" onClick={() => switchMode("forgot")} style={{ alignSelf: "flex-end", marginTop: 10 }}>
+        <button type="button" className="link-btn" onClick={() => switchMode("forgot")} style={{ alignSelf: "flex-end", marginTop: 8 }}>
           Esqueci minha senha
         </button>
       )}
@@ -144,7 +144,7 @@ export function AuthForm({ onDone, secondaryAction }: AuthFormProps) {
         <p role="status" className="anim-rise" style={{ margin: "14px 0 0", fontSize: 13, color: "var(--color-run)", lineHeight: 1.5 }}>{notice}</p>
       )}
 
-      <div className="flex items-center justify-end gap-2" style={{ marginTop: 22 }}>
+      <div className="flex items-center justify-end gap-2" style={{ marginTop: 14 }}>
         {secondaryAction}
         <button type="submit" className="btn-next" disabled={busy} style={{ minWidth: 160, justifyContent: "center" }}>
           {busy ? "Aguarde…" : mode === "login" ? "Entrar →" : mode === "signup" ? "Criar conta →" : "Enviar link"}
