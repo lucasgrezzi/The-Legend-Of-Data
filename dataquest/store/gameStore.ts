@@ -27,6 +27,21 @@ interface GameState {
   buyHint: (missionId: number, cost: number) => boolean;
   revealSolution: (missionId: number) => void;
   setCurrentMission: (missionId: number) => void;
+  /** Substitui todo o progresso (ex.: save baixado da nuvem ao entrar na conta) */
+  loadProgress: (snapshot: ProgressSnapshot) => void;
+  /** Volta ao estado inicial (ao sair da conta — o próximo a usar o navegador começa do zero) */
+  resetProgress: () => void;
+}
+
+/** Campos persistidos do progresso — o mesmo formato vai para o localStorage e para a nuvem */
+export type ProgressSnapshot = typeof initialState;
+
+/** Versão do formato persistido — também gravada junto do save na nuvem */
+export const PROGRESS_VERSION = 1;
+
+export function progressSnapshot(state: GameState): ProgressSnapshot {
+  const { profile, totalXP, coins, completedMissionIds, unlockedMissionIds, xpByMission, attempts, currentMissionId, level, levelLabel } = state;
+  return { profile, totalXP, coins, completedMissionIds, unlockedMissionIds, xpByMission, attempts, currentMissionId, level, levelLabel };
 }
 
 const NO_ATTEMPTS: MissionAttempts = { fails: 0, hintsBought: 0, solutionRevealed: false };
@@ -98,10 +113,14 @@ export const useGameStore = create<GameState>()(
 
       setCurrentMission: (missionId) =>
         set({ currentMissionId: missionId }),
+
+      loadProgress: (snapshot) => set({ ...initialState, ...snapshot }),
+
+      resetProgress: () => set(initialState),
     }),
     {
       name: "dataquest-progress",
-      version: 1,
+      version: PROGRESS_VERSION,
       // v0 → v1: moedas creditadas pelas missões já concluídas; grimoireOpened → solutionRevealed
       migrate: (persisted, version) => {
         const s = persisted as Record<string, unknown>;
@@ -115,6 +134,7 @@ export const useGameStore = create<GameState>()(
         }
         return s as unknown as GameState;
       },
+      partialize: progressSnapshot,
     }
   )
 );

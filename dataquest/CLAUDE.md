@@ -4,13 +4,13 @@
 > "A Guilda dos Arquivistas" continua existindo só **dentro da história** (lore), não como nome do produto — jogadores não entendiam.
 
 Plataforma educacional gamificada estilo RPG 8/16-bits para ensinar **Python, SQL, Pandas e Data Visualization**.
-Inspirada no Codédex. Roda 100% no navegador — sem backend.
+Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) guarda contas, save na nuvem e ranking.
 
 ---
 
 ## 📍 Onde paramos (retomar aqui)
 
-> Última sessão: **2026-09-22** (com Claude Code). Leia esta seção primeiro ao retomar.
+> Última sessão: **2026-09-24** (com Claude Code). Leia esta seção primeiro ao retomar.
 
 ### ⚠ Estado do repositório
 - **Sessões 1–3 commitadas e enviadas** ao GitHub (`master`, commit `10363cd`) em 2026-09-22.
@@ -87,6 +87,26 @@ direcionamento, dicas bloqueadas pagas com moedas ganhas a cada fase, dificuldad
 - Testado no navegador: as 8 soluções (M1,5,6,2,7,8,3,4) passam na sequência; compra de dica desconta
   moedas e bloqueia a próxima sem saldo; 3 erros → revelar → +10 XP em vez de +20; migração credita 35 moedas.
 
+### Sessão 5 — Contas (Supabase), save na nuvem e ranking (2026-09-24)
+Site publicado na **Vercel** (Root Directory `dataquest`, deploy automático a cada push no `master`).
+- **Login opcional com e-mail e senha** (escolha do usuário). Sem conta, joga como antes (só localStorage).
+- `lib/supabase.ts`: cliente criado só se `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+  (ou `..._ANON_KEY`) existirem; sem elas, botões de conta/ranking **somem** e o build funciona igual.
+- `supabase/schema.sql`: tabela `saves` (1 linha por conta, RLS: só o dono lê/grava; `state` jsonb = snapshot
+  do gameStore) + função `get_leaderboard(lim)` (security definer, expõe só nome/raça/XP/missões/`is_me`).
+- `components/account/CloudSync.tsx` (montado no `layout.tsx`): ao entrar, **fica o save com mais XP**
+  (nuvem × navegador); depois, cada mudança do store sobe com debounce de 800 ms. **Ao sair, o progresso local
+  é zerado** (`resetProgress`) para o próximo usuário do navegador.
+- Store: `loadProgress`, `resetProgress`, `progressSnapshot()` (também usado como `partialize`), `PROGRESS_VERSION`.
+  Save na nuvem com versão diferente é ignorado — ao subir a versão do store, tratar a migração ali também.
+- UI: `AccountButton` (☁️ Entrar / "Salvo na nuvem" + Sair) e link 🏆 Ranking no topo do mapa; "Já tem conta?"
+  na criação de personagem; `/ranking` (`Leaderboard`); `/conta/nova-senha` (link do "Esqueci minha senha").
+- **Configuração no Supabase** (feita pelo usuário): rodar `schema.sql`; Auth → URL Configuration: Site URL =
+  domínio da Vercel e Redirect URLs `https://<dominio>/**` e `http://localhost:3000/**`; variáveis na Vercel
+  e em `dataquest/.env.local` (ignorado pelo git).
+- Limitações conhecidas: o XP é calculado no navegador — alguém técnico poderia gravar XP falso via API
+  (limite no banco: 0–5000). O SMTP padrão do Supabase envia poucos e-mails por hora (confirmação/senha).
+
 ### Decisões tomadas (podem ser revistas)
 - Só `Enviar Resposta` errado conta como erro (`Executar` não conta).
 - Dicas custam moedas e podem ser compradas a qualquer momento; a **solução** exige 3 erros e custa metade
@@ -127,7 +147,8 @@ direcionamento, dicas bloqueadas pagas com moedas ganhas a cada fase, dificuldad
 | Framework | Next.js 16 (App Router, Turbopack) |
 | UI | React 19 + Tailwind CSS v4 (NES.css **removido** — seu reset sem layer sobrescrevia `flex`/`gap` do Tailwind) |
 | Fontes | Press Start 2P (pixel labels/botões) + JetBrains Mono (corpo/títulos bold) via `next/font/google` |
-| Estado | Zustand 5 com `persist` → `localStorage` |
+| Estado | Zustand 5 com `persist` → `localStorage` (+ nuvem via Supabase quando logado) |
+| Contas | Supabase Auth (e-mail/senha) + Postgres (`saves`, `get_leaderboard`) — opcional |
 | Editor | @uiw/react-codemirror + @codemirror/lang-python + lang-sql |
 | Python | Pyodide 0.27.5 via Web Worker (`/public/pyodide-worker.js`) |
 | SQL | @duckdb/duckdb-wasm (lazy init) |

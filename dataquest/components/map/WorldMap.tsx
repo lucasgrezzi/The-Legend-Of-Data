@@ -13,6 +13,9 @@ import Sprite from "@/components/ui/Sprite";
 import WorldBackground from "@/components/ui/WorldBackground";
 import CharacterCreation from "@/components/player/CharacterCreation";
 import PlayerChip from "@/components/player/PlayerChip";
+import AccountButton from "@/components/account/AccountButton";
+import { supabase } from "@/lib/supabase";
+import { useAccountStore } from "@/store/accountStore";
 import MissionPin, { type PinState } from "./MissionPin";
 
 // ── Geometria do mapa (px verticais, % horizontais) ──
@@ -49,6 +52,7 @@ export default function WorldMap() {
   const hydrated = useHydrated();
   const { profile, setProfile, completedMissionIds, totalXP, coins, xpByMission } = useGameStore();
   const [editing, setEditing] = useState(false);
+  const loggedIn = useAccountStore((s) => s.email !== null);
 
   if (!hydrated) {
     return <div className="min-h-screen" style={{ background: "var(--color-bg)" }} />;
@@ -59,6 +63,13 @@ export default function WorldMap() {
     return (
       <>
         <WorldBackground />
+        {/* Quem já tem conta pode entrar e recuperar o progresso em vez de criar um personagem novo */}
+        {!editing && supabase && !loggedIn && (
+          <div className="panel fixed flex items-center gap-3" style={{ top: 16, right: 24, zIndex: 20, padding: "6px 6px 6px 14px", borderRadius: 12 }}>
+            <span style={{ fontSize: 13, color: "var(--color-muted)" }}>Já tem conta?</span>
+            <AccountButton />
+          </div>
+        )}
         <CharacterCreation
           initial={editing ? profile : null}
           onConfirm={(p) => { setProfile(p); setEditing(false); }}
@@ -92,7 +103,15 @@ export default function WorldMap() {
           </span>
           <p style={{ margin: 0, fontSize: 12, color: "var(--color-muted)" }}>Aprenda Python, SQL e análise de dados jogando um RPG</p>
         </div>
-        <PlayerChip profile={profile} totalXP={totalXP} coins={coins} onClick={() => setEditing(true)} />
+        <div className="flex items-center gap-3">
+          {supabase && (
+            <Link href="/ranking" className="icon-btn" title="Ranking dos jogadores">
+              <span style={{ fontSize: 15 }}>🏆</span> Ranking
+            </Link>
+          )}
+          <AccountButton />
+          <PlayerChip profile={profile} totalXP={totalXP} coins={coins} onClick={() => setEditing(true)} />
+        </div>
       </header>
 
       <main className="flex-1 px-4 pt-8 pb-16">
