@@ -15,7 +15,11 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 ### ⚠ Estado do repositório
 - **Sessões 1–3 commitadas e enviadas** ao GitHub (`master`, commit `10363cd`) em 2026-09-22.
 - **Sessão 4 commitada e enviada** ao GitHub (`master`) em 2026-09-22 — ver `git log`.
+- **Sessão 5 commitada e enviada** em 2026-09-24 (commits `7766fdd` → `f483f80`). Tudo em produção.
   Clone local em `C:\Users\Lucas\Documents\The-Legend-Of-Data`.
+- 🌐 **Produção:** https://the-legend-of-data.vercel.app (Vercel, Root Directory `dataquest`, deploy automático
+  a cada push no `master`). O usuário pede para **commitar e dar push** ao terminar cada mudança — é assim que o
+  site atualiza.
 - ✅ **Licenças resolvidas:** a imagem Freepik com marca d'água foi **removida**. O fundo agora é
   `public/assets/bg/mapa-mundo.png`, gerado por nós com tiles CC0 (ver Sessão 3). Tudo pode ser commitado.
 - Hoje são **9 missões** (7 de Python, 1 SQL, 1 Pandas) — ver "As 9 Missões". Os `expectedOutput` das
@@ -87,44 +91,74 @@ direcionamento, dicas bloqueadas pagas com moedas ganhas a cada fase, dificuldad
 - Testado no navegador: as 8 soluções (M1,5,6,2,7,8,3,4) passam na sequência; compra de dica desconta
   moedas e bloqueia a próxima sem saldo; 3 erros → revelar → +10 XP em vez de +20; migração credita 35 moedas.
 
-### Sessão 5 — Contas (Supabase), save na nuvem e ranking (2026-09-24)
-Site publicado na **Vercel** (Root Directory `dataquest`, deploy automático a cada push no `master`).
-- **Login com e-mail e senha** (escolha do usuário). Sem Supabase configurado, joga como antes (só localStorage).
-- `lib/supabase.ts`: cliente criado só se `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-  (ou `..._ANON_KEY`) existirem; sem elas, botões de conta/ranking **somem** e o build funciona igual.
-- `supabase/schema.sql`: tabela `saves` (1 linha por conta, RLS: só o dono lê/grava; `state` jsonb = snapshot
-  do gameStore) + função `get_leaderboard(lim)` (security definer, expõe só nome/raça/XP/missões/`is_me`).
-- `components/account/CloudSync.tsx` (montado no `layout.tsx`): ao entrar, **fica o save com mais XP**
-  (nuvem × navegador); depois, cada mudança do store sobe com debounce de 800 ms. **Ao sair, o progresso local
-  é zerado** (`resetProgress`) para o próximo usuário do navegador.
-- Store: `loadProgress`, `resetProgress`, `progressSnapshot()` (também usado como `partialize`), `PROGRESS_VERSION`.
-  Save na nuvem com versão diferente é ignorado — ao subir a versão do store, tratar a migração ali também.
-- UI: `AccountButton` (☁️ Entrar / "Salvo na nuvem" + Sair) e link 🏆 Ranking no topo do mapa; "Já tem conta?"
-  na criação de personagem; `/ranking` (`Leaderboard`); `/conta/nova-senha` (link do "Esqueci minha senha").
-- **Depois (pedido do usuário): login ANTES do personagem para quem é novo.** `/map` sem profile →
-  `LoginScreen` (abas Entrar/Criar conta, esqueci a senha) → `CharacterCreation` → mapa. Quem já tem
-  personagem local sem conta continua jogando (pode entrar pelo ☁️). Enquanto o save da nuvem carrega, mostra
-  "Carregando seu progresso…"; se falhar, tela de erro (nunca sobrescreve a nuvem sem ter lido — `syncedId`).
-  Moldura comum `components/ui/GateShell.tsx` (logo com brilho, indicador Conta → Personagem → Jornada,
-  entrada em cascata `.anim-rise` + `delay(ms)`); `AuthForm` é o mesmo na tela e na janela do mapa.
-  Confirmação de e-mail DESLIGADA no Supabase (decisão do usuário: cadastrou, já joga).
-- **Login OBRIGATÓRIO para todos** (pedido seguinte do usuário): `hooks/useGate.ts` decide a etapa
-  (`loading` → `login` → `cloud-error` → `character` → `play`) e é usado no mapa e na missão. Mesmo quem tem
-  personagem local sem conta cai no login (ao entrar, fica o save com mais XP). Dentro do jogo não há "Entrar"
-  na barra. `AuthDialog` agora abre via portal (`document.body`): o `backdrop-filter` da top bar prendia o
-  `position: fixed` e cortava a janela. Telas de entrada compactas: cabem em 1366×768 sem rolar (logo +
-  etapas num painel só; lema da raça virou `title` da carta).
-- **Configuração no Supabase** (feita pelo usuário): rodar `schema.sql`; Auth → URL Configuration: Site URL =
-  domínio da Vercel e Redirect URLs `https://<dominio>/**` e `http://localhost:3000/**`; variáveis na Vercel
-  e em `dataquest/.env.local` (ignorado pelo git).
-- Limitações conhecidas: o XP é calculado no navegador — alguém técnico poderia gravar XP falso via API
-  (limite no banco: 0–5000). O SMTP padrão do Supabase envia poucos e-mails por hora (confirmação/senha).
+### Sessão 5 — Publicação, contas (Supabase), ranking, login obrigatório e cursor (2026-09-24)
+Pedidos do usuário, na ordem: publicar para colaboradores → login + banco para ranking → tela de login antes do
+personagem, alinhada e animada → login obrigatório para todos, telas menores, sem "Entrar" dentro do jogo →
+cursor de RPG (manopla dourada).
 
-- **Cursor de RPG:** manopla toda dourada em pixel art (arte própria — o usuário mostrou uma referência estilo LoL:
-  dedo para cima, punho redondo, polegar na frente, pulseira com rebites) gerada por `scripts/gerar_cursor.py` →
-  `public/assets/cursors/luva.png` e `luva-hover.png` (com faísca), 32×32, hotspot (9,1) = `HOTSPOT` do script.
-  CSS: `--cursor-default` no `html`, `--cursor-hover` em botões/links/abas (use `var(--cursor-hover)` em vez de
-  `pointer`); campos de texto e o CodeMirror mantêm `cursor: text`.
+**Publicação (Vercel)**
+- Projeto importado do GitHub com Root Directory `dataquest`. Variáveis em Settings → Environment Variables:
+  `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (mudou variável → **Redeploy**).
+- Localmente as mesmas variáveis ficam em `dataquest/.env.local` (ignorado pelo git; já criado).
+- GitHub Pages **não serve**: não permite os headers COOP/COEP de que Pyodide/DuckDB precisam.
+
+**Supabase** (projeto `ooidqzdrngzvdvzwzznl`, criado pelo usuário)
+- `supabase/schema.sql` (já executado no SQL Editor): tabela `saves` — 1 linha por conta (`user_id`, `name`,
+  `race`, `total_xp` 0–5000, `missions_done`, `state` jsonb = `{ version, state }` do gameStore, `updated_at`).
+  RLS: cada pessoa só lê/cria/atualiza a própria linha; `anon` não lê nada. Função `get_leaderboard(lim)`
+  (security definer) expõe só nome, raça, XP, missões e `is_me` — nunca e-mail nem o save.
+- Auth: **e-mail + senha**, **confirmação de e-mail DESLIGADA** (decisão do usuário: cadastrou, já joga).
+  URL Configuration: Site URL = domínio da Vercel; Redirect URLs com `https://<dominio>/**` e
+  `http://localhost:3000/**` (necessário para o link de "Esqueci minha senha").
+- O usuário já tinha uma tabela própria (`id`, `created_at`, `nome_jogador`, `email`) — **não foi usada nem
+  alterada**; o nome dela não foi informado. A chave publishable não cria tabelas: DDL é pelo SQL Editor.
+
+**Fluxo de entrada** (`hooks/useGate.ts`, usado no mapa e na missão)
+- Etapas: `loading` → `login` → `cloud-error` → `character` → `play`. Com Supabase configurado, **todo mundo
+  passa pelo login antes de jogar** — inclusive quem já tinha personagem só no navegador. `/mission/N` sem
+  login volta para `/map` (tela de login). Sem Supabase, o jogo funciona como antes (só localStorage).
+- `LoginScreen` (abas Entrar / Criar conta com indicador deslizante, "Esqueci minha senha") →
+  `CharacterCreation` (com indicador de etapas) → mapa. `/conta/nova-senha` recebe o link de redefinição.
+- Moldura comum `components/ui/GateShell.tsx`: logo com brilho + etapas Conta → Personagem → Jornada num painel
+  só; entrada em cascata `.anim-rise` + `delay(ms)`; `.anim-bob` nas raças do login. As telas cabem em
+  **1366×768 sem rolar** (lema da raça virou `title` da carta).
+
+**Save na nuvem** (`components/account/CloudSync.tsx`, montado no `layout.tsx`)
+- Ao entrar: lê o save da nuvem e **fica o que tiver mais XP** (nuvem × navegador) — ninguém perde progresso.
+- Só depois de ler com sucesso (`syncedId`) cada mudança do store sobe (debounce 800 ms) — nunca sobrescreve a
+  nuvem sem ter lido antes. Se a leitura falhar, tela "Tentar de novo".
+- Ao sair (`SIGNED_OUT`): `resetProgress()` zera o navegador para o próximo usuário.
+- Store: `loadProgress`, `resetProgress`, `progressSnapshot()` (também é o `partialize`), `PROGRESS_VERSION`.
+  Save da nuvem com versão diferente é ignorado — **ao subir a versão do store, migrar ali também**.
+- Estado da conta em `store/accountStore.ts` (`ready`, `email`, `sync`: idle/loading/saving/saved/error).
+
+**UI de conta e ranking**
+- Topo do mapa: 🏆 Ranking + `AccountButton` (☁️ "Salvo na nuvem" → menu com e-mail e "Sair da conta").
+  Dentro do jogo **não aparece "Entrar"** (a pessoa já está logada).
+- `AuthDialog` (janela, só usada no `/ranking` para quem não entrou) abre via **portal** em `document.body`:
+  o `backdrop-filter` da top bar prendia o `position: fixed` e cortava a janela ao meio.
+- `/ranking` (`Leaderboard`): medalhas 🥇🥈🥉, raça, nível, XP, missões; destaca "(você)".
+
+**Cursor de RPG**
+- Manopla toda dourada em pixel art, **arte própria** (o usuário mostrou uma referência estilo League of Legends:
+  dedo para cima, punho redondo, polegar na frente, pulseira com rebites — não copiar arte da Riot).
+- `scripts/gerar_cursor.py` → `public/assets/cursors/luva.png` e `luva-hover.png` (mais brilhante + faísca),
+  32×32, ponto de clique (9,1) = `HOTSPOT` do script (se mudar, atualizar o CSS).
+- CSS: `--cursor-default` no `html`; `--cursor-hover` em botões/links/abas — **use `var(--cursor-hover)` em vez
+  de `pointer`**; campos de texto e CodeMirror mantêm `cursor: text`.
+
+**Testado** (script CDP em Node, contas `dataquest.teste.*@example.com` — o usuário deve apagá-las em
+Authentication → Users): 12 testes de API (RLS, XP absurdo recusado, ranking sem dados sensíveis, senha errada);
+na interface: pessoa nova (login → personagem → mapa → "Salvo na nuvem" → ranking), conta existente em
+navegador limpo (progresso volta), convidado antigo cai no login, sair zera o navegador, telas em 1366×768,
+cursor aplicado em produção.
+
+**Limitações conhecidas**
+- O XP é calculado no navegador: alguém técnico poderia gravar XP falso via API (banco limita 0–5000).
+- Com a confirmação desligada, qualquer um com o link cria conta (inclusive com e-mail que não é seu).
+- O SMTP padrão do Supabase envia poucos e-mails por hora ("Esqueci minha senha").
+- Dev server ligado por muitas horas pode quebrar `/mission/[id]` com "Jest worker … exceeding retry limit":
+  parar, apagar `.next` e rodar `npm run dev` de novo.
 
 ### Decisões tomadas (podem ser revistas)
 - Só `Enviar Resposta` errado conta como erro (`Executar` não conta).
@@ -133,7 +167,10 @@ Site publicado na **Vercel** (Root Directory `dataquest`, deploy automático a c
 - Preço das dicas: `hintCost(i) = 5 * (i + 1)` em `lib/xp.ts`. Metade do XP arredonda para baixo (25 → 12).
 - Moedas só na 1ª conclusão; revelar a solução não reduz as moedas da missão.
 - Grimório e solução ficam livres depois que a missão é concluída (revisão).
-- Não há reset de progresso na UI; para testar, apagar `localStorage["dataquest-progress"]` no DevTools.
+- Não há reset de progresso na UI; para testar, apagar `localStorage["dataquest-progress"]` no DevTools
+  (logado, o save da nuvem volta ao recarregar — use uma aba anônima ou saia da conta).
+- Login obrigatório (e-mail + senha, sem confirmação); ao entrar, vale o save com mais XP; ao sair, zera o navegador.
+- Ranking ordena por XP, depois missões concluídas, depois quem chegou primeiro.
 - Recompensas: ver tabela "As 9 Missões". Total de moedas possível hoje: 155.
 
 ### Próximos passos sugeridos
@@ -144,9 +181,15 @@ Site publicado na **Vercel** (Root Directory `dataquest`, deploy automático a c
 3. Loja: talvez outras coisas compráveis com moedas (cosméticos da raça, títulos).
 4. Talvez: dar efeito real às raças (hoje só visuais) — ex.: desconto em dicas de uma trilha.
 5. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px).
+6. Contas: validar XP no servidor (ex.: função no banco que recalcula a partir das missões) se o ranking virar
+   competição; tela de perfil; talvez ranking por guilda/raça.
+7. Limpeza: apagar as contas de teste `dataquest.teste.*@example.com` no Supabase (tarefa do usuário).
 
 ### Como testar rapidamente
-- `npm run dev -- -p 3123` → http://localhost:3123 (sem progresso salvo abre a criação de personagem).
+- `npm run dev` → http://localhost:3000 (com `.env.local`, abre a tela de login). Produção:
+  https://the-legend-of-data.vercel.app — status do deploy aparece no commit do GitHub (API `commits/<sha>/statuses`).
+- Contas de teste: criar com e-mail `dataquest.teste.<algo>@example.com` (a confirmação está desligada, então
+  nenhum e-mail é enviado). Não use e-mails inexistentes se a confirmação for religada.
 - Estados de teste: criar temporariamente `public/__seed.html` que grava um JSON em
   `localStorage["dataquest-progress"]` (formato `{ state: {...}, version: 1 }`; use `version: 0` para testar a
   migração) e redireciona — **apagar depois**.
@@ -198,12 +241,21 @@ dataquest/
 │   ├── player/
 │   │   ├── CharacterCreation.tsx # Criação/edição de personagem (nome + raça) — aparece no 1º acesso ao /map
 │   │   └── PlayerChip.tsx       # Avatar + nome + nível/XP nas top bars (substitui o antigo "Reiniciar")
-│   ├── map/page.tsx             # Tela do Mapa do Mundo
-│   └── mission/[id]/page.tsx   # Tela de Missão (await params)
+│   ├── map/page.tsx             # Tela do Mapa do Mundo (login → personagem → mapa)
+│   ├── mission/[id]/page.tsx   # Tela de Missão (await params)
+│   ├── ranking/page.tsx         # Ranking (Leaderboard)
+│   └── conta/nova-senha/page.tsx # Destino do link "Esqueci minha senha"
 ├── components/
 │   ├── player/
 │   │   ├── CharacterCreation.tsx # Criação/edição de personagem (nome + raça) — aparece no 1º acesso ao /map
 │   │   └── PlayerChip.tsx       # Avatar + nome + nível/XP nas top bars (substitui o antigo "Reiniciar")
+│   ├── account/
+│   │   ├── LoginScreen.tsx      # Tela de login do 1º acesso (etapa 1)
+│   │   ├── AuthDialog.tsx       # AuthForm (Entrar/Criar conta/Esqueci) + janela usada no /ranking
+│   │   ├── AccountButton.tsx    # ☁️ status do save + menu Sair (topo do mapa/ranking)
+│   │   ├── CloudSync.tsx        # Sessão + sincronização do save com o Supabase (no layout)
+│   │   ├── Leaderboard.tsx      # Página de ranking
+│   │   └── NewPasswordForm.tsx  # Criar nova senha
 │   ├── map/
 │   │   ├── WorldMap.tsx         # Painel do jogador + trilha em zigue-zague (SVG) com banners de região
 │   │   └── MissionPin.tsx       # Nó circular + rótulo — locked/available/completed
@@ -223,6 +275,7 @@ dataquest/
 │       ├── TypewriterText.tsx   # Efeito typewriter: digita char a char com pausa em pontuação
 │       ├── Sprite.tsx           # <img> pixelated para sprites 32×32 (usar 32/64/96 px)
 │       ├── WorldBackground.tsx  # Fundo do mapa pixel art + véu escuro (mapa e criação de personagem)
+│       ├── GateShell.tsx        # Moldura das telas de entrada (logo + etapas + animação) + delay(ms)
 │       ├── RichText.tsx         # Renderiza theory/instructions (código, passos, parágrafos)
 │       ├── XPBar.tsx            # Barra de nível (animável a partir de fromXP)
 │       └── MissionResultDialog.tsx # Modal sucesso (contador XP, level up) / erro (feedback)
@@ -232,27 +285,34 @@ dataquest/
 │   ├── tracks.ts                # TRACKS (nome, cor, rgb, ícone) + TRACK_ORDER — fonte única
 │   ├── xp.ts                    # computeLevel(), levelProgress(), isMissionUnlocked(), missingRequirements()
 │   ├── validation.ts            # validateOutput() — exact/table/chart/contains/narrative
+│   ├── supabase.ts              # Cliente Supabase (null sem as variáveis de ambiente)
 │   └── engines/
 │       ├── pyodide-engine.ts    # Singleton Worker: initPyodideWorker(), runPython(), subscribePyodideStatus()
 │       └── duckdb-engine.ts     # Singleton DuckDB: runQuery()
 ├── hooks/
 │   ├── usePyodide.ts            # Hook React para Pyodide (subscriber pattern)
 │   ├── useDuckDB.ts             # Hook React para DuckDB (lazy init)
-│   └── useHydrated.ts           # true após mount — evita mismatch com progresso do localStorage
+│   ├── useHydrated.ts           # true após mount — evita mismatch com progresso do localStorage
+│   └── useGate.ts               # Etapa de entrada: loading / login / cloud-error / character / play
 ├── store/
-│   └── gameStore.ts             # Zustand: totalXP, completedMissionIds, unlockedMissionIds
+│   ├── gameStore.ts             # Zustand: progresso (persist) + loadProgress/resetProgress/progressSnapshot
+│   └── accountStore.ts          # Conta Supabase: ready, email, sync (não persistido)
 ├── data/
 │   ├── missions/
 │   │   ├── mission-0.ts … mission-8.ts   # ordem de jogo definida em lib/missions.ts
 │   └── csv/vendas.csv
 ├── scripts/
-│   └── gerar_fundo_mapa.py      # Gera public/assets/bg/mapa-mundo.png com tiles CC0 Kenney Tiny Town
+│   ├── gerar_fundo_mapa.py      # Gera public/assets/bg/mapa-mundo.png com tiles CC0 Kenney Tiny Town
+│   └── gerar_cursor.py          # Gera public/assets/cursors/luva*.png (manopla dourada, arte própria)
+├── supabase/
+│   └── schema.sql               # Tabela saves + RLS + get_leaderboard (rodar no SQL Editor)
 ├── types/index.ts               # Mission, RunResult, ValidationResult, EngineStatus…
 └── public/
     ├── pyodide-worker.js        # Web Worker Pyodide (deve ficar em /public/)
     └── assets/
         ├── CREDITS.md           # Origem e licença de cada asset
         ├── bg/mapa-mundo.png    # Fundo do mapa (CC0 — gerado por scripts/gerar_fundo_mapa.py)
+        ├── cursors/             # luva.png / luva-hover.png (cursor, gerado por scripts/gerar_cursor.py)
         └── sprites/             # Sprites 32×32 CC0 (Dungeon Crawl Stone Soup): raca-*, trilha-*, missao-*, grimorio
 ```
 
@@ -304,14 +364,15 @@ O **Grimório** é, na lore, um livro vivo e ganancioso que vende dicas por ouro
 4. Botão `Próximo →` (dourado) — desbloqueia apenas após Submit correto
 5. Missão 0 (narrative) — auto-valida no mount, sem necessidade de código
 
-**Persistência:** `localStorage["dataquest-progress"]` via Zustand persist
+**Persistência:** `localStorage["dataquest-progress"]` via Zustand persist + tabela `saves` no Supabase (conta logada)
 
 **Desbloqueio e nível são derivados, não lidos do store:** use `isMissionUnlocked(m, completedMissionIds, totalXP)`
 e `computeLevel(totalXP)`. Os campos `unlockedMissionIds`/`level` persistidos podem ficar desatualizados
 (ex.: missões novas adicionadas depois). Abrir `/mission/N` bloqueada mostra a tela "Missão Bloqueada" com os requisitos.
 
-**Personagem:** `profile: { name, race }` no store. Sem profile, `/map` mostra `CharacterCreation`
-e `/mission/*` redireciona para `/map`. Não há botão de reiniciar para o jogador.
+**Personagem:** `profile: { name, race }` no store. `/map` segue `useGate()`: sem login → `LoginScreen`;
+logado sem profile → `CharacterCreation`; `/mission/*` fora da etapa `play` redireciona para `/map`.
+Não há botão de reiniciar para o jogador.
 
 **Abas da missão:** `Lore` (história, typewriter) · `Estudo` (= `mission.theory`, livre) ·
 `Grimório` (dicas + solução) · `Dados` (se houver `dataFile`).
@@ -324,7 +385,7 @@ com `solutionRevealed`, a vitória rende `solutionXP(reward)` = metade do XP. Tu
 XP efetivo por missão fica em `xpByMission` (o mapa mostra `+10/20 XP` quando foi pela metade).
 O store é persistido com `version: 1` — mudou o formato? incremente a versão e escreva o `migrate`.
 
-**Hidratação:** telas que dependem do progresso (`WorldMap`, `MissionScreen`) só renderizam após `useHydrated()`.
+**Hidratação:** telas que dependem do progresso (`WorldMap`, `MissionScreen`) só renderizam com `useGate() === "play"` (que já espera `useHydrated()` e a sessão/save da nuvem).
 
 ---
 
@@ -457,6 +518,10 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 - [x] Fundo do mapa próprio e CC0 (substituiu a imagem Freepik com marca d'água)
 - [x] Animação de XP ao completar missão (counter animado + level up)
 - [ ] Tela de perfil / histórico de missões concluídas
+- [x] Contas (e-mail/senha), save na nuvem e ranking (Supabase)
+- [x] Login antes do personagem, telas de entrada animadas e compactas
+- [x] Cursor de RPG (manopla dourada)
+- [ ] Validação de XP no servidor (anti-trapaça do ranking)
 - [x] Hints/dicas desbloqueáveis por missão (Grimório: dicas por moedas; solução após 3 erros, −50% XP)
 - [x] Timer de execução visível no terminal
 - [ ] Suporte a múltiplos datasets por missão
@@ -471,8 +536,12 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 ## Comandos Úteis
 
 ```bash
-# Desenvolvimento
+# Desenvolvimento (precisa de .env.local com as variáveis do Supabase para login/ranking)
 npm run dev          # inicia em http://localhost:3000
+
+# Assets gerados
+python scripts/gerar_cursor.py      # cursor (manopla)
+python scripts/gerar_fundo_mapa.py  # fundo do mapa
 
 # Verificação
 npx tsc --noEmit     # check TypeScript sem compilar
