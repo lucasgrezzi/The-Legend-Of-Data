@@ -53,7 +53,7 @@ export default function PlayerChip({ profile, totalXP, coins, onClick }: PlayerC
   };
 
   return onClick ? (
-    <button type="button" onClick={onClick} title="Editar personagem" className="player-chip" style={{ ...style, cursor: "pointer" }}>
+    <button type="button" onClick={onClick} title="Editar personagem" className="player-chip" style={{ ...style, cursor: "var(--cursor-hover)" }}>
       {content}
     </button>
   ) : (

@@ -23,3 +23,6 @@ Licença CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/). Atribuiç
 Gerado por `scripts/gerar_fundo_mapa.py` a partir dos tiles Kenney **Tiny Town**
 (https://kenney.nl/assets/tiny-town, CC0 1.0). Para gerar de novo: baixar o zip, extrair e rodar o script
 na pasta extraída (usa `Tilemap/tilemap_packed.png`). Mudar `random.seed(...)` gera outra vila.
+
+## Cursor (`cursors/luva.png`, `cursors/luva-hover.png`)
+- Manopla dourada em pixel art **criada para o DataQuest** por `scripts/gerar_cursor.py` (formas geométricas, sem assets de terceiros). Livre para uso no projeto.

@@ -46,7 +46,7 @@ export default function MissionPin({ mission, state, x, y, isNext, lockReasons, 
         left: `${x}%`,
         top: y,
         borderColor: state === "completed" ? track.color : undefined,
-        cursor: locked ? "not-allowed" : "pointer",
+        cursor: locked ? "not-allowed" : "var(--cursor-hover)",
       }}
       title={locked ? `Bloqueada — ${lockReasons.join("; ")}` : mission.missionTitle}
     >

@@ -29,6 +29,16 @@
 
 html, body { height: 100%; }
 
+/* ── Cursor: manopla dourada (scripts/gerar_cursor.py) — ponta do dedo em (2, 2) ── */
+:root {
+  --cursor-default: url("/assets/cursors/luva.png") 2 2, auto;
+  --cursor-hover: url("/assets/cursors/luva-hover.png") 2 2, pointer;
+}
+html { cursor: var(--cursor-default); }
+a, button, summary, select, label:has(> input[type="checkbox"]), [role="button"], [role="tab"] { cursor: var(--cursor-hover); }
+input, textarea, [contenteditable="true"], .cm-content, .cm-line { cursor: text; }
+button:disabled { cursor: not-allowed; }
+
 body {
   font-family: var(--font-body);
   background-color: var(--color-bg);
@@ -170,7 +180,7 @@ body {
   font-family: var(--font-pixel);
   font-size: 10px;
   letter-spacing: 1px;
-  cursor: pointer;
+  cursor: var(--cursor-hover);
   transition: color 0.15s, border-color 0.15s, background 0.15s;
   border-radius: 8px 8px 0 0;
 }
@@ -272,7 +282,7 @@ body {
   letter-spacing: 1px;
   line-height: 1;
   border-radius: var(--radius-sm);
-  cursor: pointer;
+  cursor: var(--cursor-hover);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -347,7 +357,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  cursor: pointer;
+  cursor: var(--cursor-hover);
   font-family: var(--font-body);
   font-size: 13px;
   transition: color 0.15s, background 0.15s, transform 0.1s;
@@ -470,7 +480,7 @@ body {
 /* Abas Entrar / Criar conta com indicador deslizante */
 .auth-tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; border-radius: 12px; background: var(--color-bg); border: 1px solid var(--color-border); }
 .auth-tab {
-  position: relative; z-index: 1; padding: 8px 0; border: none; background: none; cursor: pointer;
+  position: relative; z-index: 1; padding: 8px 0; border: none; background: none; cursor: var(--cursor-hover);
   font-family: var(--font-body); font-size: 14px; font-weight: 800; color: var(--color-muted); transition: color 0.2s;
 }
 .auth-tab[aria-selected="true"] { color: #1a1405; }
@@ -531,7 +541,7 @@ body {
   border-radius: 14px;
   color: inherit;
   font-family: var(--font-body);
-  cursor: pointer;
+  cursor: var(--cursor-hover);
   transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, background 0.15s;
 }
 .race-card:hover { transform: translateY(-3px); border-color: #3a4358; }
@@ -570,6 +580,6 @@ body {
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-color: rgba(255,255,255,0.3);
-  cursor: pointer;
+  cursor: var(--cursor-hover);
 }
 .link-btn:hover { color: var(--color-accent); text-decoration-color: currentColor; }
