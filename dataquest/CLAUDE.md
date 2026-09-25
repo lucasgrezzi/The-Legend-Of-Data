@@ -120,8 +120,9 @@ Site publicado na **Vercel** (Root Directory `dataquest`, deploy automático a c
 - Limitações conhecidas: o XP é calculado no navegador — alguém técnico poderia gravar XP falso via API
   (limite no banco: 0–5000). O SMTP padrão do Supabase envia poucos e-mails por hora (confirmação/senha).
 
-- **Cursor de RPG:** manopla dourada em pixel art (arte própria — inspirada no estilo LoL, sem copiar) gerada por
-  `scripts/gerar_cursor.py` → `public/assets/cursors/luva.png` e `luva-hover.png` (com faísca), 32×32, hotspot (2,2).
+- **Cursor de RPG:** manopla toda dourada em pixel art (arte própria — o usuário mostrou uma referência estilo LoL:
+  dedo para cima, punho redondo, polegar na frente, pulseira com rebites) gerada por `scripts/gerar_cursor.py` →
+  `public/assets/cursors/luva.png` e `luva-hover.png` (com faísca), 32×32, hotspot (9,1) = `HOTSPOT` do script.
   CSS: `--cursor-default` no `html`, `--cursor-hover` em botões/links/abas (use `var(--cursor-hover)` em vez de
   `pointer`); campos de texto e o CodeMirror mantêm `cursor: text`.
 

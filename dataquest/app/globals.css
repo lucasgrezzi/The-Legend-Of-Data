@@ -29,10 +29,10 @@
 
 html, body { height: 100%; }
 
-/* ── Cursor: manopla dourada (scripts/gerar_cursor.py) — ponta do dedo em (2, 2) ── */
+/* ── Cursor: manopla dourada (scripts/gerar_cursor.py) — ponta do dedo em (9, 1) ── */
 :root {
-  --cursor-default: url("/assets/cursors/luva.png") 2 2, auto;
-  --cursor-hover: url("/assets/cursors/luva-hover.png") 2 2, pointer;
+  --cursor-default: url("/assets/cursors/luva.png") 9 1, auto;
+  --cursor-hover: url("/assets/cursors/luva-hover.png") 9 1, pointer;
 }
 html { cursor: var(--cursor-default); }
 a, button, summary, select, label:has(> input[type="checkbox"]), [role="button"], [role="tab"] { cursor: var(--cursor-hover); }
