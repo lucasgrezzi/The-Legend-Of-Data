@@ -10,7 +10,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 
 ## 📍 Onde paramos (retomar aqui)
 
-> Última sessão: **2026-09-24** (com Claude Code). Leia esta seção primeiro ao retomar.
+> Última sessão: **2026-09-27** (com Claude Code). Leia esta seção primeiro ao retomar.
 
 ### ⚠ Estado do repositório
 - **Sessões 1–3 commitadas e enviadas** ao GitHub (`master`, commit `10363cd`) em 2026-09-22.
@@ -22,7 +22,8 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
   site atualiza.
 - ✅ **Licenças resolvidas:** a imagem Freepik com marca d'água foi **removida**. O fundo agora é
   `public/assets/bg/mapa-mundo.png`, gerado por nós com tiles CC0 (ver Sessão 3). Tudo pode ser commitado.
-- Hoje são **9 missões** (7 de Python, 1 SQL, 1 Pandas) — ver "As 9 Missões". Os `expectedOutput` das
+- **Sessão 6 commitada e enviada** em 2026-09-27 (trilha SQL completa).
+- Hoje são **13 missões** (7 de Python, 5 de SQL, 1 Pandas) — ver "As 13 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
 ### Sessão 1 — Redesign da interface
@@ -160,6 +161,32 @@ cursor aplicado em produção.
 - Dev server ligado por muitas horas pode quebrar `/mission/[id]` com "Jest worker … exceeding retry limit":
   parar, apagar `.next` e rodar `npm run dev` de novo.
 
+### Sessão 6 — Trilha SQL completa: "As Catacumbas de Dados" (2026-09-27)
+Pedido do usuário: priorizar conteúdo (SQL) pensando na experiência do jogador; a **loja vem depois** (próximo foco).
+- **+4 missões SQL** no padrão da Sessão 4 (Estudo com exemplo de outro contexto — tabelas `monstros`/`magos` —,
+  QUEST enxuta, 2 dicas, solução, `requiredCode`), entre a M3 e a Forja:
+  - `mission-9` **O Salão dos Ossos** (2/5) — `WHERE` com `AND`/`OR`/`IN` e parênteses. O Guardião dos Ossos
+    (esqueleto) só deixa levar armas/amuletos das salas Norte/Leste, sem maldição.
+  - `mission-10` **O Inventário do Guardião** (3/5) — `COUNT`/`SUM`/`AVG`/`MAX` + `AS`, uma linha.
+  - `mission-11` **As Criptas por Tipo** (4/5) — `GROUP BY` + `HAVING` + `ORDER BY`.
+  - `mission-12` **O Rei Esquecido** (chefe, 5/5) — `JOIN` `expedicoes` × `herois` + `GROUP BY`. Lyra (sem
+    expedições) é a armadilha: com `LEFT JOIN` saem 5 linhas e reprova.
+  - A Forja (M4) agora exige a M12 e a narrativa começa "Atrás do trono do Rei Esquecido…".
+- **Dados próprios** em `data/catacumbas.ts` (`RELIQUIAS`, `HEROIS`, `EXPEDICOES`, helper `csvTable`). Mudou um
+  valor? recalcule os `expectedOutput` das missões 9–12.
+- **Várias tabelas por missão SQL:** `DataFilePreview.table` (nome da view; padrão `vendas`) +
+  `Mission.extraDataFiles`; `missionDataFiles(m)` em `lib/missions.ts`; `runQuery(sql, tables[])` cria uma view
+  por tabela. A aba Dados mostra todas ("tabela herois", "tabela expedicoes").
+- **`requiredCode.flags`** (ex.: `"i"`) — SQL não diferencia maiúsculas.
+- Validação de tabela: quando a 1ª linha não bate, a mensagem agora diz "valores calculados não batem" (1 linha) ou
+  "confira o filtro e a ordem" (várias) — antes dizia sempre "fora de ordem".
+- **Testado:** 12 casos no DuckDB-Wasm (Node, com a `validateOutput` real) — soluções e variações corretas passam;
+  sem parênteses, filtro por id, sem `WHERE` na M10, `WHERE` indevido na M11 e `LEFT JOIN` na M12 reprovam.
+  No navegador (build sem Supabase via `.env.production.local` temporário, já apagado): as 4 soluções enviadas pela
+  tela passam, XP +125 e moedas +95 creditados, aba Dados com as 2 tabelas.
+- ⚠ **Observação:** o nível máximo (Mestre dos Dados) é 200 XP e o jogo já soma 335 XP — quem termina o Python
+  já está quase no teto. Vale criar mais níveis (ver próximos passos).
+
 ### Decisões tomadas (podem ser revistas)
 - Só `Enviar Resposta` errado conta como erro (`Executar` não conta).
 - Dicas custam moedas e podem ser compradas a qualquer momento; a **solução** exige 3 erros e custa metade
@@ -171,19 +198,20 @@ cursor aplicado em produção.
   (logado, o save da nuvem volta ao recarregar — use uma aba anônima ou saia da conta).
 - Login obrigatório (e-mail + senha, sem confirmação); ao entrar, vale o save com mais XP; ao sair, zera o navegador.
 - Ranking ordena por XP, depois missões concluídas, depois quem chegou primeiro.
-- Recompensas: ver tabela "As 9 Missões". Total de moedas possível hoje: 155.
+- Recompensas: ver tabela "As 13 Missões". Total de moedas possível hoje: 250.
 
 ### Próximos passos sugeridos
-1. Python extra (opcional): `while` e dicionários (fichas de personagem) — encaixar antes do chefe M8
-   ou como "missões bônus" depois dele.
-2. Aplicar o mesmo padrão (Estudo + QUEST enxuta + dicas + dificuldade crescente) às próximas missões de
-   **SQL** (GROUP BY, JOIN), **Pandas** (groupby, merge) e ao módulo **Data Viz** (validação `"chart"`).
-3. Loja: talvez outras coisas compráveis com moedas (cosméticos da raça, títulos).
-4. Talvez: dar efeito real às raças (hoje só visuais) — ex.: desconto em dicas de uma trilha.
-5. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px).
-6. Contas: validar XP no servidor (ex.: função no banco que recalcula a partir das missões) se o ranking virar
+1. **Loja do Mercador (próximo foco, combinado com o usuário):** cosméticos/títulos compráveis com moedas —
+   títulos aparecendo no ranking, molduras/cores do personagem, talvez pet no mapa. Nada que ajude a resolver
+   (não competir com as dicas). Economia hoje: 250 moedas possíveis; dicas custam 5 e 10.
+2. **Mais níveis:** hoje o teto é 200 XP (Mestre dos Dados) e o jogo soma 335 XP.
+3. Aplicar o mesmo padrão a **Pandas** (groupby, merge) e ao módulo **Data Viz** (validação `"chart"`).
+4. Python extra (opcional): `while` e dicionários (fichas de personagem) como missões bônus.
+5. Talvez: dar efeito real às raças (hoje só visuais) — ex.: desconto em dicas de uma trilha.
+6. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px).
+7. Contas: validar XP no servidor (ex.: função no banco que recalcula a partir das missões) se o ranking virar
    competição; tela de perfil; talvez ranking por guilda/raça.
-7. Limpeza: apagar as contas de teste `dataquest.teste.*@example.com` no Supabase (tarefa do usuário).
+8. Limpeza: apagar as contas de teste `dataquest.teste.*@example.com` no Supabase (tarefa do usuário).
 
 ### Como testar rapidamente
 - `npm run dev` → http://localhost:3000 (com `.env.local`, abre a tela de login). Produção:
@@ -299,7 +327,8 @@ dataquest/
 │   └── accountStore.ts          # Conta Supabase: ready, email, sync (não persistido)
 ├── data/
 │   ├── missions/
-│   │   ├── mission-0.ts … mission-8.ts   # ordem de jogo definida em lib/missions.ts
+│   │   ├── mission-0.ts … mission-12.ts  # ordem de jogo definida em lib/missions.ts
+│   ├── catacumbas.ts            # Tabelas SQL das missões 9–12 (reliquias, herois, expedicoes)
 │   └── csv/vendas.csv
 ├── scripts/
 │   ├── gerar_fundo_mapa.py      # Gera public/assets/bg/mapa-mundo.png com tiles CC0 Kenney Tiny Town
@@ -318,7 +347,7 @@ dataquest/
 
 ---
 
-## As 9 Missões (na ordem de jogo)
+## As 13 Missões (na ordem de jogo)
 
 Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Escudo 150, Pocao 80, Manto 200, Anel 180)
 
@@ -332,7 +361,14 @@ Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Esc
 | 6     | 7  | python | A Mochila do Arquivista  | Listas: append, len e for         | 4/5    | +25 | +20    | 2           | `mochila.append(`, `for … in mochila`, `len(mochila)` |
 | 7     | 8  | python | O Selo das Catacumbas    | Funções: def e return (chefe)     | 5/5    | +35 | +25    | 7           | `def classificar(x):`, `return`, `for … in runas`, chamada `classificar(…)` |
 | 8     | 3  | sql    | A Primeira Escavação     | SQL: SELECT, WHERE e ORDER BY     | 1/5    | +25 | +20    | 8           | — (tabela: colunas, nº de linhas e **1ª linha**) |
-| 9     | 4  | pandas | A Forja Desperta         | Pandas: ler CSV e filtrar linhas  | 2/5    | +30 | +25    | 3           | `read_csv(`, filtro `["valor"] >`, `len(` |
+| 9     | 9  | sql    | O Salão dos Ossos        | SQL: WHERE com AND, OR e IN       | 2/5    | +25 | +20    | 3           | colunas `tipo`, `sala`, `amaldicoada` |
+| 10    | 10 | sql    | O Inventário do Guardião | SQL: COUNT, SUM, AVG, MAX e AS    | 3/5    | +30 | +20    | 9           | `COUNT(`, `SUM(`, `AVG(`, `MAX(` |
+| 11    | 11 | sql    | As Criptas por Tipo      | SQL: GROUP BY e HAVING            | 4/5    | +30 | +25    | 10          | `GROUP BY`, `HAVING` |
+| 12    | 12 | sql    | O Rei Esquecido          | SQL: JOIN entre tabelas (chefe)   | 5/5    | +40 | +30    | 11          | `JOIN`, `ON … heroi_id`, `GROUP BY` |
+| 13    | 4  | pandas | A Forja Desperta         | Pandas: ler CSV e filtrar linhas  | 2/5    | +30 | +25    | 12          | `read_csv(`, filtro `["valor"] >`, `len(` |
+
+Tabelas SQL das missões 9–12 em `data/catacumbas.ts`: `reliquias` (12 linhas: id, nome, tipo, sala, valor,
+amaldicoada 'sim'/'nao'), `herois` (5) e `expedicoes` (9: id, heroi_id, destino, ouro).
 
 Cada missão tem 2 dicas (`hints`) e uma `solution`. A missão 0 não tem Grimório.
 
@@ -344,11 +380,17 @@ Cada missão tem 2 dicas (`hints`) e uma `solution`. A missão 0 não tem Grimó
 - M7: `"tocha\ncorda\npocao\nmapa antigo\nItens: 4"`
 - M8: `"Runa 3: fraca\nRuna 8: média\nRuna 12: forte"`
 - M3: tabela `["produto","valor"]` com 3 linhas, 1ª = `Espada de Dados, 300` (valor > 150, ORDER BY valor DESC)
+- M9: tabela `["nome","valor"]`, 3 linhas, 1ª = `Lança do Vigia, 170`
+- M10: tabela `["total","soma","media","maior"]`, 1 linha = `8, 1030, 128.75, 260` (só não amaldiçoadas)
+- M11: tabela `["tipo","quantidade","total"]`, 3 linhas, 1ª = `arma, 4, 570` (HAVING SUM(valor) > 300)
+- M12: tabela `["nome","viagens","ouro_total"]`, 4 linhas, 1ª = `Brenna, 3, 350`
 - M4: `"3"` (len do DataFrame filtrado)
 
 **Arco da história (Python):** Prólogo na Guilda (bolsa de ouro) → Cap. I o Grimório pede que você se apresente →
 Cap. II Mercado da Vila → Cap. III Guardião do Portão → Cap. IV Corredor das Tochas → Cap. V Salão das Relíquias
-(mochila) → Cap. VI Selo das Catacumbas (chefe) → **SQL:** "Com o Selo rompido…" desce às Catacumbas → **Pandas:** a Forja.
+(mochila) → Cap. VI Selo das Catacumbas (chefe) → **SQL:** "Com o Selo rompido…" desce às Catacumbas (Cap. I Primeira Escavação → II Salão dos Ossos, onde o
+Guardião dos Ossos cataloga as relíquias → III Inventário do Guardião → IV Criptas por Tipo → V O Rei Esquecido,
+o primeiro Arquivista-Rei, com o Livro das Expedições) → **Pandas:** "Atrás do trono do Rei Esquecido…" a Forja.
 O **Grimório** é, na lore, um livro vivo e ganancioso que vende dicas por ouro.
 
 ---
@@ -401,7 +443,7 @@ O store é persistido com `version: 1` — mudou o formato? incremente a versão
 
 ### DuckDB-Wasm (SQL)
 - Init **lazy** — só carrega quando missão SQL é aberta (economiza 6MB no load inicial)
-- CSV registrado como view `vendas` via `registerFileText()` + `read_csv_auto()`
+- Cada CSV da missão (`missionDataFiles`) vira uma view com o nome de `table` (padrão `vendas`) via `registerFileText()` + `read_csv_auto()`
 - Resultado: ArrowTable → `TableData { headers, rows }`
 
 ---
@@ -480,7 +522,7 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 
 ## Como Adicionar uma Nova Missão
 
-1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 9) — nunca reaproveitar/renumerar ids
+1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 13) — nunca reaproveitar/renumerar ids
    (são a chave do progresso salvo). Preencher `concept` com linguagem direta (o que a pessoa aprende).
    Campos de conteúdo (padrão da Sessão 4):
    - `narrative` — continua a história da missão anterior (ver "Arco da história")
@@ -510,7 +552,8 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 - [ ] Módulo Data Viz: matplotlib, seaborn — validação por `"chart"`
 - [x] Missões Python de variáveis/contas e if/elif/else (ids 5 e 6)
 - [ ] Mais missões Python: listas, while, funções, dicionários (próximo foco)
-- [ ] Missões SQL avançadas: JOIN, GROUP BY, subconsultas
+- [x] Missões SQL: AND/OR/IN, agregações, GROUP BY/HAVING, JOIN (ids 9–12)
+- [ ] SQL extra: subconsultas, LEFT JOIN, CASE WHEN
 - [ ] Missões Pandas: merge, groupby, pivot_table
 
 ### Funcionalidades
@@ -524,7 +567,7 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 - [ ] Validação de XP no servidor (anti-trapaça do ranking)
 - [x] Hints/dicas desbloqueáveis por missão (Grimório: dicas por moedas; solução após 3 erros, −50% XP)
 - [x] Timer de execução visível no terminal
-- [ ] Suporte a múltiplos datasets por missão
+- [x] Múltiplas tabelas por missão SQL (`extraDataFiles` + `table`)
 
 ### Técnico
 - [ ] Pré-carregar Pyodide no `layout.tsx` (reduz espera na primeira missão Python)

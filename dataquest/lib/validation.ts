@@ -55,7 +55,11 @@ function validateTable(
     if (!same) {
       return {
         passed: false,
-        feedback: `As linhas certas vieram, mas fora de ordem.
+        feedback: `${
+          expected.rowCount > 1
+            ? "O número de linhas está certo, mas a primeira não é a esperada (confira o filtro e a ordem)."
+            : "Os valores calculados não batem (confira o filtro e as funções)."
+        }
 Primeira linha esperada: ${expected.firstRow.join(", ")}
 Obtida: ${got.join(", ")}`,
         xpEarned: 0,
@@ -88,7 +92,7 @@ function validateChart(
 function missingCode(code: string, mission: Mission): string | null {
   // ignora comentários para o aluno não "passar" só escrevendo o padrão num comentário
   const clean = code.split("\n").map((l) => l.replace(/#.*$|--.*$/, "")).join("\n");
-  const miss = mission.requiredCode?.find((r) => !new RegExp(r.pattern).test(clean));
+  const miss = mission.requiredCode?.find((r) => !new RegExp(r.pattern, r.flags).test(clean));
   return miss ? miss.hint : null;
 }
 

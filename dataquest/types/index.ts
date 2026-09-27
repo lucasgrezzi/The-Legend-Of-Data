@@ -7,6 +7,8 @@ export interface DataFilePreview {
   headers: string[];
   rows: string[][];
   rawCsv: string;
+  /** SQL: nome da tabela (view) criada a partir deste CSV. Padrão: `vendas` */
+  table?: string;
 }
 
 export interface UnlockCondition {
@@ -39,6 +41,8 @@ export interface Mission {
   validationType: ValidationMode;
   xpReward: number;
   dataFile?: DataFilePreview;
+  /** SQL: tabelas extras além de `dataFile` (ex.: para JOIN). Aparecem também na aba Dados. */
+  extraDataFiles?: DataFilePreview[];
   unlockCondition?: UnlockCondition;
   /** Trechos obrigatórios no código (regex) — impede "resolver" só com print da resposta */
   requiredCode?: RequiredCode[];
@@ -47,6 +51,8 @@ export interface Mission {
 export interface RequiredCode {
   /** Regex (string) testada contra o código do aluno */
   pattern: string;
+  /** Flags da regex (ex.: "i" para SQL, que não diferencia maiúsculas) */
+  flags?: string;
   /** Dica mostrada se o padrão não aparecer */
   hint: string;
 }

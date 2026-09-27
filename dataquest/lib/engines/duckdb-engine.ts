@@ -30,17 +30,23 @@ async function getDB() {
   return initPromise;
 }
 
-export async function runQuery(sql: string, csvData?: string): Promise<RunResult> {
+export interface SqlTable {
+  /** Nome da tabela (view) usada nas consultas */
+  name: string;
+  csv: string;
+}
+
+export async function runQuery(sql: string, tables: SqlTable[] = []): Promise<RunResult> {
   const start = Date.now();
   try {
     const db = await getDB();
     const conn = await db.connect();
 
     try {
-      if (csvData) {
-        await db.registerFileText("mission.csv", csvData);
+      for (const t of tables) {
+        await db.registerFileText(`${t.name}.csv`, t.csv);
         await conn.query(
-          `CREATE OR REPLACE VIEW vendas AS SELECT * FROM read_csv_auto('mission.csv')`
+          `CREATE OR REPLACE VIEW ${t.name} AS SELECT * FROM read_csv_auto('${t.name}.csv')`
         );
       }
 

@@ -10,7 +10,9 @@ export default function DataFilePreviewComponent({ dataFile }: DataFilePreviewPr
   return (
     <div>
       <div className="flex items-center justify-between mb-3" style={{ fontSize: 13 }}>
-        <span style={{ color: "var(--color-pandas)", fontWeight: 700 }}>📂 {dataFile.filename}</span>
+        <span style={{ color: "var(--color-pandas)", fontWeight: 700 }}>
+          📂 {dataFile.table ? <>tabela <code>{dataFile.table}</code></> : dataFile.filename}
+        </span>
         <span style={{ color: "var(--color-muted)" }}>
           {dataFile.rows.length} linhas · {dataFile.headers.length} colunas
         </span>

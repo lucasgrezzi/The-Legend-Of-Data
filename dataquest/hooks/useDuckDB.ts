@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import type { EngineStatus, RunResult } from "@/types";
-import { runQuery } from "@/lib/engines/duckdb-engine";
+import { runQuery, type SqlTable } from "@/lib/engines/duckdb-engine";
 
 export function useDuckDB() {
   const [status, setStatus] = useState<EngineStatus>("idle");
 
-  async function runSQL(sql: string, csvData?: string): Promise<RunResult> {
+  async function runSQL(sql: string, tables: SqlTable[] = []): Promise<RunResult> {
     setStatus("running");
     try {
-      const result = await runQuery(sql, csvData);
+      const result = await runQuery(sql, tables);
       setStatus("ready");
       return result;
     } catch (err: unknown) {

@@ -1,4 +1,4 @@
-import type { Mission } from "@/types";
+import type { DataFilePreview, Mission } from "@/types";
 import mission0 from "@/data/missions/mission-0";
 import mission1 from "@/data/missions/mission-1";
 import mission2 from "@/data/missions/mission-2";
@@ -8,6 +8,10 @@ import mission5 from "@/data/missions/mission-5";
 import mission6 from "@/data/missions/mission-6";
 import mission7 from "@/data/missions/mission-7";
 import mission8 from "@/data/missions/mission-8";
+import mission9 from "@/data/missions/mission-9";
+import mission10 from "@/data/missions/mission-10";
+import mission11 from "@/data/missions/mission-11";
+import mission12 from "@/data/missions/mission-12";
 
 /**
  * Ordem de jogo. O `id` é estável (é a chave do progresso salvo) e NÃO define a ordem:
@@ -21,9 +25,18 @@ export const MISSIONS: Mission[] = [
   mission2, // Python — for + range
   mission7, // Python — listas
   mission8, // Python — funções (chefe)
-  mission3, // SQL
+  mission3,  // SQL — SELECT, WHERE, ORDER BY
+  mission9,  // SQL — AND / OR / IN
+  mission10, // SQL — agregações
+  mission11, // SQL — GROUP BY + HAVING
+  mission12, // SQL — JOIN (chefe)
   mission4, // Pandas
 ];
+
+/** Todos os arquivos de dados da missão (principal + extras), na ordem da aba Dados */
+export function missionDataFiles(m: Mission): DataFilePreview[] {
+  return [...(m.dataFile ? [m.dataFile] : []), ...(m.extraDataFiles ?? [])];
+}
 
 export function getMission(id: number): Mission | undefined {
   return MISSIONS.find((m) => m.id === id);

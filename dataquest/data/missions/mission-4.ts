@@ -14,7 +14,7 @@ const mission4: Mission = {
   chapterTitle: "A Forja de Dados — Capítulo I",
   missionTitle: "A Forja Desperta",
   concept: "Pandas: ler CSV e filtrar linhas",
-  narrative: `A Forja dos Arquivistas é onde os fragmentos de dados brutos — as relíquias imperfeitas — são transformados. Com as ferramentas certas, um Arquivista pode filtrar, reorganizar e purificar qualquer conjunto de dados.`,
+  narrative: `Atrás do trono do Rei Esquecido, um corredor quente sobe até a superfície. No fim dele, o brilho das brasas: a Forja dos Arquivistas, onde os fragmentos de dados brutos — as relíquias imperfeitas — são transformados. Com as ferramentas certas, um Arquivista pode filtrar, reorganizar e purificar qualquer conjunto de dados.`,
   theory: `Pandas é a biblioteca de Python para trabalhar com tabelas, chamadas DataFrames.
 
   import pandas as pd
@@ -71,7 +71,7 @@ print(len(filtrado))`,
     ],
     rawCsv: VENDAS_CSV,
   },
-  unlockCondition: { requiredMissionIds: [3] },
+  unlockCondition: { requiredMissionIds: [12] },
 };
 
 export default mission4;

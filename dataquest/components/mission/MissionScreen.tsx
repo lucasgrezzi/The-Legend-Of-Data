@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Mission, RunResult } from "@/types";
 import { validateOutput } from "@/lib/validation";
-import { MISSIONS, getNeighbors } from "@/lib/missions";
+import { MISSIONS, getNeighbors, missionDataFiles } from "@/lib/missions";
 import { TRACKS } from "@/lib/tracks";
 import { isMissionUnlocked, missingRequirements, solutionXP } from "@/lib/xp";
 import { getAttempts, useGameStore } from "@/store/gameStore";
@@ -92,7 +92,10 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
   const handleRun = useCallback(
     (code: string): Promise<RunResult> =>
       mission.editorLanguage === "sql"
-        ? runSQL(code, mission.dataFile?.rawCsv)
+        ? runSQL(
+            code,
+            missionDataFiles(mission).map((f) => ({ name: f.table ?? "vendas", csv: f.rawCsv }))
+          )
         : runCode(code, mission.dataFile?.rawCsv),
     [mission, runCode, runSQL]
   );

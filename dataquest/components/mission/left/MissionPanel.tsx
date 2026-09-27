@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { Mission } from "@/types";
 import { TRACKS } from "@/lib/tracks";
+import { missionDataFiles } from "@/lib/missions";
 import DataFilePreviewComponent from "./DataFilePreview";
 import Link from "next/link";
 import TypewriterText from "@/components/ui/TypewriterText";
@@ -230,8 +231,10 @@ export default function MissionPanel({
               </div>
             )}
             {mission.dataFile && (
-              <div hidden={tab !== "dados"}>
-                <DataFilePreviewComponent dataFile={mission.dataFile} />
+              <div hidden={tab !== "dados"} className="flex flex-col gap-6">
+                {missionDataFiles(mission).map((f) => (
+                  <DataFilePreviewComponent key={f.filename} dataFile={f} />
+                ))}
               </div>
             )}
           </div>
