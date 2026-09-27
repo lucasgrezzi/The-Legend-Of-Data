@@ -22,7 +22,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
   site atualiza.
 - ✅ **Licenças resolvidas:** a imagem Freepik com marca d'água foi **removida**. O fundo agora é
   `public/assets/bg/mapa-mundo.png`, gerado por nós com tiles CC0 (ver Sessão 3). Tudo pode ser commitado.
-- **Sessões 6 e 7 commitadas e enviadas** em 2026-09-27 (trilha SQL completa; 10 níveis + neblina no mapa).
+- **Sessões 6, 7 e 8 commitadas e enviadas** em 2026-09-27 (trilha SQL; 10 níveis + neblina; perfil só leitura).
 - Hoje são **13 missões** (7 de Python, 5 de SQL, 1 Pandas) — ver "As 13 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
@@ -203,6 +203,20 @@ está mais abaixo na página.
   não chega nas missões), jogador que avançou (recua da M10 para a M11, rola a página, grava a âncora), tudo concluído
   (só a trilha Data Viz "Em breve" encoberta); chip mostra "Nv 5 Explorador de Criptas" sem quebrar.
 
+### Sessão 8 — Personagem fixo e ficha do perfil (2026-09-27)
+Pedido do usuário: depois de criado, o personagem **não pode mais ser alterado**; clicar no perfil deve só mostrar a
+ficha (boneco grande, nome, XP, moedas…). E o botão "☁️ Salvo na nuvem" não precisa ficar exposto.
+- `PlayerChip` (mapa e missão) abre `components/player/ProfileDialog.tsx` (portal, Esc fecha): retrato 96 px com
+  `anim-bob`, nome, raça · guilda, lema, `XPBar`, XP/moedas/missões, progresso por trilha e — logado — e-mail, status da
+  nuvem (vermelho só se der erro) e **Sair da conta**. Cabe em 1366×768 (`maxHeight` + rolagem de segurança).
+- Edição removida: `CharacterCreation` não tem mais `initial`/`onCancel` ("Editar personagem"/"Cancelar"); o texto avisa
+  "não dá para mudar depois". `setProfile` no store só grava se ainda não houver personagem (o `resetProgress` ao sair
+  limpa, então a próxima conta cria o seu normalmente).
+- `AccountButton` saiu do topo do mapa; no ranking usa `guestOnly` (só "Entrar" para visitantes). Continua como `corner`
+  nas telas de entrada (criação de personagem / erro da nuvem) para dar como sair da conta ali.
+- Limitação: o `name`/`race` do save na nuvem ainda pode ser mudado por alguém técnico via API (RLS permite atualizar a
+  própria linha) — como o XP; só importa se o ranking virar competição.
+
 ### Decisões tomadas (podem ser revistas)
 - Só `Enviar Resposta` errado conta como erro (`Executar` não conta).
 - Dicas custam moedas e podem ser compradas a qualquer momento; a **solução** exige 3 erros e custa metade
@@ -291,7 +305,8 @@ dataquest/
 ├── components/
 │   ├── player/
 │   │   ├── CharacterCreation.tsx # Criação/edição de personagem (nome + raça) — aparece no 1º acesso ao /map
-│   │   └── PlayerChip.tsx       # Avatar + nome + nível/XP nas top bars (substitui o antigo "Reiniciar")
+│   │   ├── PlayerChip.tsx       # Avatar + nome + nível/XP nas top bars — clique abre a ficha
+│   │   └── ProfileDialog.tsx    # Ficha do personagem (só leitura) + conta (e-mail, nuvem, Sair)
 │   ├── account/
 │   │   ├── LoginScreen.tsx      # Tela de login do 1º acesso (etapa 1)
 │   │   ├── AuthDialog.tsx       # AuthForm (Entrar/Criar conta/Esqueci) + janela usada no /ranking
@@ -432,7 +447,7 @@ Mestre dos Dados (660). Calibrados pela jornada: fim do Python ≈ 155 XP (Nv 4)
 e `computeLevel(totalXP)`. Os campos `unlockedMissionIds`/`level` persistidos podem ficar desatualizados
 (ex.: missões novas adicionadas depois). Abrir `/mission/N` bloqueada mostra a tela "Missão Bloqueada" com os requisitos.
 
-**Personagem:** `profile: { name, race }` no store. `/map` segue `useGate()`: sem login → `LoginScreen`;
+**Personagem:** `profile: { name, race }` no store — definido **uma única vez** (sem edição; o chip abre a ficha). `/map` segue `useGate()`: sem login → `LoginScreen`;
 logado sem profile → `CharacterCreation`; `/mission/*` fora da etapa `play` redireciona para `/map`.
 Não há botão de reiniciar para o jogador.
 

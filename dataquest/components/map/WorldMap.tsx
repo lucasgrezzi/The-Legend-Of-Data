@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import type { Mission, Track } from "@/types";
 import { useGameStore } from "@/store/gameStore";
@@ -76,7 +76,6 @@ const CONTENT_W = 680;
 export default function WorldMap() {
   const gate = useGate();
   const { profile, setProfile, completedMissionIds, totalXP, coins, xpByMission } = useGameStore();
-  const [editing, setEditing] = useState(false);
   const loggedIn = useAccountStore((s) => s.email !== null);
 
   const stateOf = (m: Mission): PinState =>
@@ -87,7 +86,7 @@ export default function WorldMap() {
 
   // Neblina recua (com animação) quando o jogador avançou desde a última visita ao mapa
   const fogAnchor = nextMission ? String(nextMission.id) : FOG_END;
-  const fog = useFogReveal(fogAnchor, fogOrder, gate === "play" && !!profile && !editing);
+  const fog = useFogReveal(fogAnchor, fogOrder, gate === "play" && !!profile);
   const mapRef = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!fog.revealing || !mapRef.current) return;
@@ -113,14 +112,13 @@ export default function WorldMap() {
       </GateShell>
     );
   }
-  if (gate === "character" || !profile || editing) {
+  // Personagem é criado uma única vez — depois o chip do jogador só abre a ficha (ProfileDialog)
+  if (gate === "character" || !profile) {
     return (
       <CharacterCreation
-        initial={editing ? profile : null}
-        onConfirm={(p) => { setProfile(p); setEditing(false); }}
-        onCancel={editing ? () => setEditing(false) : undefined}
-        showSteps={!editing && loggedIn}
-        corner={!editing && loggedIn ? <AccountButton /> : undefined}
+        onConfirm={setProfile}
+        showSteps={loggedIn}
+        corner={loggedIn ? <AccountButton /> : undefined}
       />
     );
   }
@@ -150,8 +148,7 @@ export default function WorldMap() {
               <span style={{ fontSize: 15 }}>🏆</span> Ranking
             </Link>
           )}
-          <AccountButton />
-          <PlayerChip profile={profile} totalXP={totalXP} coins={coins} onClick={() => setEditing(true)} />
+          <PlayerChip profile={profile} totalXP={totalXP} coins={coins} />
         </div>
       </header>
 

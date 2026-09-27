@@ -7,10 +7,7 @@ import Sprite from "@/components/ui/Sprite";
 import GateShell, { delay } from "@/components/ui/GateShell";
 
 interface CharacterCreationProps {
-  initial?: PlayerProfile | null;
   onConfirm: (profile: PlayerProfile) => void;
-  /** Presente quando é edição de um personagem existente */
-  onCancel?: () => void;
   /** Mostra o indicador "Conta → Personagem → Jornada" (primeiro acesso com conta) */
   showSteps?: boolean;
   /** Canto superior direito (ex.: conta conectada) */
@@ -19,9 +16,10 @@ interface CharacterCreationProps {
 
 const NAME_MAX = 20;
 
-export default function CharacterCreation({ initial, onConfirm, onCancel, showSteps, corner }: CharacterCreationProps) {
-  const [name, setName] = useState(initial?.name ?? "");
-  const [race, setRace] = useState<Race | null>(initial?.race ?? null);
+/** Criação do personagem — acontece uma única vez; nome e raça não podem ser alterados depois. */
+export default function CharacterCreation({ onConfirm, showSteps, corner }: CharacterCreationProps) {
+  const [name, setName] = useState("");
+  const [race, setRace] = useState<Race | null>(null);
 
   const trimmed = name.trim();
   const ready = trimmed.length >= 2 && race !== null;
@@ -38,10 +36,10 @@ export default function CharacterCreation({ initial, onConfirm, onCancel, showSt
 
         <div className="text-center mb-3">
           <h2 style={{ fontSize: 21, fontWeight: 800, margin: "0 0 2px", color: "var(--color-accent)", textShadow: "0 0 30px rgba(240,192,64,0.35)" }}>
-            {initial ? "Editar personagem" : "Crie seu personagem"}
+            Crie seu personagem
           </h2>
           <p style={{ margin: 0, color: "var(--color-muted)", fontSize: 13 }}>
-            Escolha seu nome e sua raça — cada raça faz parte de uma guilda.
+            Escolha seu nome e sua raça — cada raça faz parte de uma guilda. Escolha com calma: não dá para mudar depois.
           </p>
         </div>
 
@@ -103,9 +101,8 @@ export default function CharacterCreation({ initial, onConfirm, onCancel, showSt
             )}
           </p>
           <div className="flex gap-2">
-            {onCancel && <button type="button" className="btn-nav" onClick={onCancel}>Cancelar</button>}
             <button type="submit" className="btn-next" disabled={!ready}>
-              {initial ? "Salvar" : "Entrar na Guilda →"}
+              Entrar na Guilda →
             </button>
           </div>
         </div>

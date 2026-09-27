@@ -68,7 +68,8 @@ export const useGameStore = create<GameState>()(
     (set, get) => ({
       ...initialState,
 
-      setProfile: (profile) => set({ profile }),
+      // O personagem é definido uma única vez (na criação) — depois não pode ser alterado
+      setProfile: (profile) => { if (!get().profile) set({ profile }); },
 
       completeMission: (missionId, xpEarned, coinsEarned) =>
         set((state) => {

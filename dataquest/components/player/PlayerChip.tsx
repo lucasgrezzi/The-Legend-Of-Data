@@ -1,19 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import type { PlayerProfile } from "@/types";
 import { RACES } from "@/lib/races";
 import { computeLevel } from "@/lib/xp";
 import Sprite from "@/components/ui/Sprite";
+import ProfileDialog from "./ProfileDialog";
 
 interface PlayerChipProps {
   profile: PlayerProfile;
   totalXP: number;
   coins: number;
-  onClick?: () => void;
 }
 
-/** Avatar + nome + nível/XP — usado nas top bars */
-export default function PlayerChip({ profile, totalXP, coins, onClick }: PlayerChipProps) {
+/** Avatar + nome + nível/XP — usado nas top bars. Clicar abre a ficha do personagem (só visualização). */
+export default function PlayerChip({ profile, totalXP, coins }: PlayerChipProps) {
+  const [open, setOpen] = useState(false);
   const race = RACES[profile.race];
   const { level, label } = computeLevel(totalXP);
 
@@ -52,11 +54,12 @@ export default function PlayerChip({ profile, totalXP, coins, onClick }: PlayerC
     border: "1px solid var(--color-border)",
   };
 
-  return onClick ? (
-    <button type="button" onClick={onClick} title="Editar personagem" className="player-chip" style={{ ...style, cursor: "var(--cursor-hover)" }}>
-      {content}
-    </button>
-  ) : (
-    <div style={style}>{content}</div>
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} title="Ver meu perfil" className="player-chip" style={{ ...style, cursor: "var(--cursor-hover)" }}>
+        {content}
+      </button>
+      {open && <ProfileDialog onClose={() => setOpen(false)} />}
+    </>
   );
 }

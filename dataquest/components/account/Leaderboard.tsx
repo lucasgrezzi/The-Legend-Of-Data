@@ -48,7 +48,7 @@ export default function Leaderboard() {
         style={{ background: "rgba(22,27,39,0.94)", borderBottom: "1px solid var(--color-border)", height: 68, backdropFilter: "blur(6px)" }}
       >
         <Link href="/map" className="btn-nav">← Mapa</Link>
-        <AccountButton />
+        <AccountButton guestOnly />
       </header>
 
       <main className="flex-1 px-4 pt-8 pb-16">

@@ -14,8 +14,11 @@ const SYNC_LABEL: Record<SyncStatus, { text: string; color: string }> = {
   error:   { text: "Erro ao salvar",  color: "var(--color-error)" },
 };
 
-/** Entrar / estado da conta nas top bars. Some quando o Supabase não está configurado. */
-export default function AccountButton() {
+/**
+ * Entrar / estado da conta. Some quando o Supabase não está configurado.
+ * `guestOnly`: só aparece para quem NÃO entrou (ex.: ranking) — logado, a conta fica na ficha do perfil.
+ */
+export default function AccountButton({ guestOnly = false }: { guestOnly?: boolean }) {
   const { ready, email, sync } = useAccountStore();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -39,6 +42,7 @@ export default function AccountButton() {
     );
   }
 
+  if (guestOnly) return null;
   const status = SYNC_LABEL[sync];
   return (
     <div className="relative">
