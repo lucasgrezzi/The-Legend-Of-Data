@@ -437,6 +437,71 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 
+/* ── Neblina das terras inexploradas (MapFog) ──
+   Cobre tudo abaixo da próxima missão: largura total da tela, bloqueia cliques, recua com transição de `top`. */
+.map-fog {
+  position: absolute;
+  left: 50%;
+  width: 100vw;
+  bottom: -64px;
+  transform: translateX(-50%);
+  z-index: 8;
+  overflow: hidden;
+  transition: top 1.9s cubic-bezier(.35,.75,.25,1);
+}
+.map-fog-veil, .map-fog-mist {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,0.9) 36px, #000 64px);
+  mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,0.9) 36px, #000 64px);
+}
+.map-fog-veil {
+  background: linear-gradient(to bottom, rgba(24,29,41,0.9), rgba(20,24,35,0.97) 150px);
+  backdrop-filter: blur(12px) grayscale(0.6);
+  -webkit-backdrop-filter: blur(12px) grayscale(0.6);
+}
+.map-fog-mist {
+  background:
+    radial-gradient(ellipse 38% 90px at 20% 120px, rgba(190,200,222,0.16), transparent 70%),
+    radial-gradient(ellipse 30% 70px at 75% 220px, rgba(190,200,222,0.13), transparent 70%),
+    radial-gradient(ellipse 45% 110px at 50% 360px, rgba(190,200,222,0.10), transparent 70%);
+  background-size: 100% 420px;
+  animation: fog-drift 38s ease-in-out infinite alternate;
+}
+.map-fog-mist.is-slow { animation-duration: 60s; animation-direction: alternate-reverse; opacity: 0.8; }
+.map-fog-cloud {
+  position: absolute;
+  image-rendering: pixelated;
+  opacity: 0.92;
+  filter: drop-shadow(0 8px 14px rgba(0,0,0,0.35));
+  animation: cloud-drift 24s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.map-fog-cloud.is-deep { opacity: 0.5; filter: none; }
+.map-fog.is-revealing .map-fog-cloud:not(.is-deep) { animation: cloud-part 2.2s ease-out; }
+.map-fog-card {
+  position: absolute;
+  top: 190px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(440px, calc(100vw - 32px));
+  padding: 18px 22px;
+  text-align: center;
+  z-index: 1;
+}
+@keyframes fog-drift {
+  from { background-position: -60px 0; }
+  to   { background-position: 60px 0; }
+}
+@keyframes cloud-drift {
+  from { transform: translateX(-28px); }
+  to   { transform: translateX(28px); }
+}
+@keyframes cloud-part {
+  0%   { transform: translateY(-40px) scale(1.05); opacity: 0.2; }
+  100% { transform: translateX(0) scale(1); opacity: 0.92; }
+}
+
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar       { width: 8px; height: 8px; }

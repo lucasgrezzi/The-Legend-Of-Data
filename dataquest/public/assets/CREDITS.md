@@ -26,3 +26,6 @@ na pasta extraída (usa `Tilemap/tilemap_packed.png`). Mudar `random.seed(...)` 
 
 ## Cursor (`cursors/luva.png`, `cursors/luva-hover.png`)
 - Manopla dourada em pixel art **criada para o DataQuest** por `scripts/gerar_cursor.py` (formas geométricas, sem assets de terceiros). Livre para uso no projeto.
+
+## Neblina (`fog/nuvem-1.png` … `nuvem-3.png`)
+- Nuvens em pixel art **criadas para o DataQuest** por `scripts/gerar_nuvens.py` (círculos, sem assets de terceiros). Livre para uso no projeto.

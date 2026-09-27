@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Mission, Track } from "@/types";
 import { useGameStore } from "@/store/gameStore";
@@ -19,6 +19,7 @@ import AccountButton from "@/components/account/AccountButton";
 import { supabase } from "@/lib/supabase";
 import { useAccountStore } from "@/store/accountStore";
 import MissionPin, { type PinState } from "./MissionPin";
+import MapFog, { useFogReveal } from "./MapFog";
 
 // ── Geometria do mapa (px verticais, % horizontais) ──
 const VIEW_W = 100;
@@ -48,6 +49,17 @@ function layout(): { items: Item[]; height: number } {
 }
 
 const { items: ITEMS, height: MAP_H } = layout();
+const NODES = ITEMS.filter((i): i is Extract<Item, { kind: "node" }> => i.kind === "node");
+
+// ── Neblina: âncora = id da próxima missão (tudo abaixo dela fica encoberto) ou FOG_END se tudo foi concluído ──
+const FOG_END = "fim";
+const fogOrder = (a: string) => (a === FOG_END ? NODES.length : NODES.findIndex((n) => String(n.mission.id) === a));
+function fogTop(a: string): number {
+  const last = NODES[NODES.length - 1];
+  if (a === FOG_END) return last ? last.y + NODE_H / 2 + 4 : 0;
+  const node = NODES[fogOrder(a)];
+  return node ? node.y + 46 : 0;
+}
 
 function GateLoading({ text }: { text: string }) {
   return (
@@ -66,6 +78,23 @@ export default function WorldMap() {
   const { profile, setProfile, completedMissionIds, totalXP, coins, xpByMission } = useGameStore();
   const [editing, setEditing] = useState(false);
   const loggedIn = useAccountStore((s) => s.email !== null);
+
+  const stateOf = (m: Mission): PinState =>
+    completedMissionIds.includes(m.id) ? "completed"
+    : isMissionUnlocked(m, completedMissionIds, totalXP) ? "available"
+    : "locked";
+  const nextMission = MISSIONS.find((m) => stateOf(m) === "available");
+
+  // Neblina recua (com animação) quando o jogador avançou desde a última visita ao mapa
+  const fogAnchor = nextMission ? String(nextMission.id) : FOG_END;
+  const fog = useFogReveal(fogAnchor, fogOrder, gate === "play" && !!profile && !editing);
+  const mapRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!fog.revealing || !mapRef.current) return;
+    // acompanha a neblina recuando: centraliza a próxima missão na tela
+    const y = mapRef.current.getBoundingClientRect().top + window.scrollY + fogTop(fogAnchor) - window.innerHeight * 0.5;
+    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+  }, [fog.revealing, fogAnchor]);
 
   // ── Entrada: conta (sempre primeiro, se o Supabase estiver configurado) → personagem → mapa ──
   if (gate === "loading") {
@@ -96,14 +125,9 @@ export default function WorldMap() {
     );
   }
 
-  const stateOf = (m: Mission): PinState =>
-    completedMissionIds.includes(m.id) ? "completed"
-    : isMissionUnlocked(m, completedMissionIds, totalXP) ? "available"
-    : "locked";
-
-  const nextMission = MISSIONS.find((m) => stateOf(m) === "available");
   const completedCount = completedMissionIds.filter((id) => MISSIONS.some((m) => m.id === id)).length;
-  const nodes = ITEMS.filter((i): i is Extract<Item, { kind: "node" }> => i.kind === "node");
+  const nodes = NODES;
+  const shownFogTop = fogTop(fog.shown);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -131,7 +155,7 @@ export default function WorldMap() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 pt-8 pb-16">
+      <main className="flex-1 px-4 pt-8 pb-16" style={{ overflowX: "clip" }}>
         <div className="mx-auto flex flex-col gap-8" style={{ maxWidth: CONTENT_W }}>
 
           {/* ── Painel do jogador ── */}
@@ -163,7 +187,18 @@ export default function WorldMap() {
           </section>
 
           {/* ── Mapa: trilha contínua passando por todas as regiões ── */}
-          <section className="relative anim-rise" style={{ height: MAP_H, ...delay(150) }}>
+          <section ref={mapRef} className="relative anim-rise" style={{ height: MAP_H, ...delay(150) }}>
+            {shownFogTop < MAP_H - 40 && (
+              <MapFog
+                top={shownFogTop}
+                mapHeight={MAP_H}
+                revealing={fog.revealing}
+                title="Terras inexploradas"
+                text={nextMission
+                  ? <>Uma neblina densa cobre o caminho adiante. Conclua <b style={{ color: "var(--color-text)" }}>{nextMission.missionTitle}</b> para desbravar o que vem depois.</>
+                  : "Estas terras ainda não foram mapeadas. Novas missões chegam em breve!"}
+              />
+            )}
             <svg
               className="absolute inset-0"
               width="100%"

@@ -22,7 +22,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
   site atualiza.
 - ✅ **Licenças resolvidas:** a imagem Freepik com marca d'água foi **removida**. O fundo agora é
   `public/assets/bg/mapa-mundo.png`, gerado por nós com tiles CC0 (ver Sessão 3). Tudo pode ser commitado.
-- **Sessão 6 commitada e enviada** em 2026-09-27 (trilha SQL completa).
+- **Sessões 6 e 7 commitadas e enviadas** em 2026-09-27 (trilha SQL completa; 10 níveis + neblina no mapa).
 - Hoje são **13 missões** (7 de Python, 5 de SQL, 1 Pandas) — ver "As 13 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
@@ -187,6 +187,22 @@ Pedido do usuário: priorizar conteúdo (SQL) pensando na experiência do jogado
 - ⚠ **Observação:** o nível máximo (Mestre dos Dados) é 200 XP e o jogo já soma 335 XP — quem termina o Python
   já está quase no teto. Vale criar mais níveis (ver próximos passos).
 
+### Sessão 7 — 10 níveis e neblina nas terras inexploradas (2026-09-27)
+Pedido do usuário: resolver o teto de nível e "não dar para ver os próximos níveis" — uma névoa/nuvens tampando o que
+está mais abaixo na página.
+- **Níveis:** 5 → 10 (ver "Sistema de Gamificação"). Quem estava em "Mestre dos Dados" com 200–329 XP passou a
+  Explorador de Criptas/Arquivista — os nomes são derivados do XP, nada a migrar no store nem no banco.
+- **Neblina no mapa** (`components/map/MapFog.tsx` + CSS `.map-fog*` em `globals.css`): véu escuro quase opaco
+  (borda com máscara de 64 px), duas camadas de névoa que derivam, nuvens em pixel art na borda (derivando) e mais
+  fracas no fundo, cartão "Terras inexploradas". Largura total da tela (`100vw`; o `main` tem `overflow-x: clip`).
+  `backdrop-filter: blur` é bônus — no Chrome headless não aplicou, por isso a opacidade sozinha já esconde o texto.
+- **Recuo animado:** `useFogReveal(anchor, order, enabled)` usa `useLayoutEffect` (volta para a âncora antiga antes da
+  1ª pintura, sem piscar) e só roda com o gate em `play` (senão gravaria a âncora do estado inicial).
+- **Nuvens:** `scripts/gerar_nuvens.py` → `public/assets/fog/nuvem-1..3.png` (arte própria; ver CREDITS.md).
+- Testado (build sem Supabase + CDP, 1366×768): jogador novo (neblina logo após o Prólogo; clique na área encoberta
+  não chega nas missões), jogador que avançou (recua da M10 para a M11, rola a página, grava a âncora), tudo concluído
+  (só a trilha Data Viz "Em breve" encoberta); chip mostra "Nv 5 Explorador de Criptas" sem quebrar.
+
 ### Decisões tomadas (podem ser revistas)
 - Só `Enviar Resposta` errado conta como erro (`Executar` não conta).
 - Dicas custam moedas e podem ser compradas a qualquer momento; a **solução** exige 3 erros e custa metade
@@ -204,14 +220,13 @@ Pedido do usuário: priorizar conteúdo (SQL) pensando na experiência do jogado
 1. **Loja do Mercador (próximo foco, combinado com o usuário):** cosméticos/títulos compráveis com moedas —
    títulos aparecendo no ranking, molduras/cores do personagem, talvez pet no mapa. Nada que ajude a resolver
    (não competir com as dicas). Economia hoje: 250 moedas possíveis; dicas custam 5 e 10.
-2. **Mais níveis:** hoje o teto é 200 XP (Mestre dos Dados) e o jogo soma 335 XP.
-3. Aplicar o mesmo padrão a **Pandas** (groupby, merge) e ao módulo **Data Viz** (validação `"chart"`).
-4. Python extra (opcional): `while` e dicionários (fichas de personagem) como missões bônus.
-5. Talvez: dar efeito real às raças (hoje só visuais) — ex.: desconto em dicas de uma trilha.
-6. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px).
-7. Contas: validar XP no servidor (ex.: função no banco que recalcula a partir das missões) se o ranking virar
+2. Aplicar o mesmo padrão a **Pandas** (groupby, merge) e ao módulo **Data Viz** (validação `"chart"`).
+3. Python extra (opcional): `while` e dicionários (fichas de personagem) como missões bônus.
+4. Talvez: dar efeito real às raças (hoje só visuais) — ex.: desconto em dicas de uma trilha.
+5. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px).
+6. Contas: validar XP no servidor (ex.: função no banco que recalcula a partir das missões) se o ranking virar
    competição; tela de perfil; talvez ranking por guilda/raça.
-8. Limpeza: apagar as contas de teste `dataquest.teste.*@example.com` no Supabase (tarefa do usuário).
+7. Limpeza: apagar as contas de teste `dataquest.teste.*@example.com` no Supabase (tarefa do usuário).
 
 ### Como testar rapidamente
 - `npm run dev` → http://localhost:3000 (com `.env.local`, abre a tela de login). Produção:
@@ -286,7 +301,8 @@ dataquest/
 │   │   └── NewPasswordForm.tsx  # Criar nova senha
 │   ├── map/
 │   │   ├── WorldMap.tsx         # Painel do jogador + trilha em zigue-zague (SVG) com banners de região
-│   │   └── MissionPin.tsx       # Nó circular + rótulo — locked/available/completed
+│   │   ├── MissionPin.tsx       # Nó circular + rótulo — locked/available/completed
+│   │   └── MapFog.tsx           # Neblina sobre as terras inexploradas + useFogReveal (recuo animado)
 │   ├── mission/
 │   │   ├── MissionScreen.tsx    # Guard de bloqueio + top bar + 55/45 colunas + dialog de resultado
 │   │   ├── left/
@@ -332,7 +348,8 @@ dataquest/
 │   └── csv/vendas.csv
 ├── scripts/
 │   ├── gerar_fundo_mapa.py      # Gera public/assets/bg/mapa-mundo.png com tiles CC0 Kenney Tiny Town
-│   └── gerar_cursor.py          # Gera public/assets/cursors/luva*.png (manopla dourada, arte própria)
+│   ├── gerar_cursor.py          # Gera public/assets/cursors/luva*.png (manopla dourada, arte própria)
+│   └── gerar_nuvens.py          # Gera public/assets/fog/nuvem-*.png (nuvens da neblina, arte própria)
 ├── supabase/
 │   └── schema.sql               # Tabela saves + RLS + get_leaderboard (rodar no SQL Editor)
 ├── types/index.ts               # Mission, RunResult, ValidationResult, EngineStatus…
@@ -397,7 +414,10 @@ O **Grimório** é, na lore, um livro vivo e ganancioso que vende dicas por ouro
 
 ## Sistema de Gamificação
 
-**Níveis:** Aprendiz (0 XP) → Escriba (50) → Cronista (100) → Arquivista (150) → Mestre dos Dados (200+)
+**Níveis (10, `LEVEL_THRESHOLDS` em `lib/xp.ts`):** Aprendiz (0) → Escriba (40) → Copista (90) → Cronista (150) →
+Explorador de Criptas (200) → Arquivista (260) → Guardião do Saber (330) → Mestre da Forja (420) → Sábio dos Dados (530) →
+Mestre dos Dados (660). Calibrados pela jornada: fim do Python ≈ 155 XP (Nv 4), fim do SQL ≈ 305 (Nv 6), Forja 335 (Nv 7);
+8–10 esperam o conteúdo futuro — **ao adicionar missões, revisar a tabela**.
 
 **Fluxo por missão:**
 1. Aluno digita código no editor
@@ -504,6 +524,10 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 - Layout calculado em `layout()`: banner de região (132px) + nós (140px), x em zigue-zague `[50, 74, 50, 26]%`
 - SVG com `preserveAspectRatio="none"` + `vectorEffect="non-scaling-stroke"` liga os nós; dourado sólido = alcançado, tracejado = bloqueado
 - Banner de região bloqueada mostra `Requer: …` via `missingRequirements()`; trilha sem missões mostra "Em breve"
+- **Neblina** (`MapFog`, z-index 8): cobre tudo abaixo da próxima missão (ou só as trilhas "Em breve" se tudo foi
+  concluído), bloqueia cliques e mostra "Terras inexploradas" + o que concluir. Âncora = id da próxima missão
+  (`fogTop` em `WorldMap`). `localStorage["dataquest-fog-seen"]` guarda a última âncora vista: se o jogador avançou,
+  a neblina começa na antiga e recua (transição de `top` 1,9 s + rolagem até a próxima missão).
 - Nó: bloqueado `missao-bloqueada`, disponível = sprite da trilha (borda dourada pulsando), concluído `missao-concluida`; tag `▼ PRÓXIMA`
 
 ### Layout da tela de missão

@@ -9,12 +9,22 @@ export const solutionXP = (reward: number) => Math.floor(reward / 2);
 /** Preço (em moedas) da dica de índice i — cada dica custa mais que a anterior */
 export const hintCost = (i: number) => 5 * (i + 1);
 
+/**
+ * Níveis calibrados pela jornada (XP acumulado na ordem de jogo):
+ * fim do Python ≈ 155 XP → Nv 4 · fim do SQL ≈ 305 → Nv 6 · Forja (M4) ≈ 335 → Nv 7.
+ * Os níveis 8–10 ficam para o conteúdo futuro (Pandas, Data Viz). Ao somar XP novo, revisar esta tabela.
+ */
 export const LEVEL_THRESHOLDS = [
   { minXP: 0,   label: "Aprendiz" },
-  { minXP: 50,  label: "Escriba" },
-  { minXP: 100, label: "Cronista" },
-  { minXP: 150, label: "Arquivista" },
-  { minXP: 200, label: "Mestre dos Dados" },
+  { minXP: 40,  label: "Escriba" },
+  { minXP: 90,  label: "Copista" },
+  { minXP: 150, label: "Cronista" },
+  { minXP: 200, label: "Explorador de Criptas" },
+  { minXP: 260, label: "Arquivista" },
+  { minXP: 330, label: "Guardião do Saber" },
+  { minXP: 420, label: "Mestre da Forja" },
+  { minXP: 530, label: "Sábio dos Dados" },
+  { minXP: 660, label: "Mestre dos Dados" },
 ];
 
 export function computeLevel(totalXP: number): { level: number; label: string } {
