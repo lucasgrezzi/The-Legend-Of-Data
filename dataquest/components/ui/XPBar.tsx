@@ -8,9 +8,11 @@ interface XPBarProps {
   /** Se definido, a barra anima a partir deste XP */
   fromXP?: number;
   compact?: boolean;
+  /** Barra em pixel art (cantos retos, marcas a cada 10%) — usada no mapa */
+  pixel?: boolean;
 }
 
-export default function XPBar({ totalXP, fromXP, compact = false }: XPBarProps) {
+export default function XPBar({ totalXP, fromXP, compact = false, pixel = false }: XPBarProps) {
   const target = levelProgress(totalXP);
   const [pct, setPct] = useState(fromXP !== undefined ? levelProgress(fromXP).pct : target.pct);
 
@@ -36,25 +38,31 @@ export default function XPBar({ totalXP, fromXP, compact = false }: XPBarProps) 
             : `${totalXP} XP · nível máximo`}
         </span>
       </div>
-      <div
-        style={{
-          height: compact ? 8 : 10,
-          background: "var(--color-border)",
-          borderRadius: 20,
-          overflow: "hidden",
-        }}
-      >
+      {pixel ? (
+        <div className="xp-pixel">
+          <div style={{ width: `${pct}%` }} />
+        </div>
+      ) : (
         <div
           style={{
-            height: "100%",
-            width: `${pct}%`,
-            background: "linear-gradient(90deg, #d4a010, #f0c040, #ffe08a)",
+            height: compact ? 8 : 10,
+            background: "var(--color-border)",
             borderRadius: 20,
-            boxShadow: "0 0 10px rgba(240,192,64,0.5)",
-            transition: "width 0.9s cubic-bezier(.2,.8,.2,1)",
+            overflow: "hidden",
           }}
-        />
-      </div>
+        >
+          <div
+            style={{
+              height: "100%",
+              width: `${pct}%`,
+              background: "linear-gradient(90deg, #d4a010, #f0c040, #ffe08a)",
+              borderRadius: 20,
+              boxShadow: "0 0 10px rgba(240,192,64,0.5)",
+              transition: "width 0.9s cubic-bezier(.2,.8,.2,1)",
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

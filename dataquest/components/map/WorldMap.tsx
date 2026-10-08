@@ -7,6 +7,7 @@ import { useGameStore } from "@/store/gameStore";
 import { useGate } from "@/hooks/useGate";
 import { MISSIONS } from "@/lib/missions";
 import { TRACKS, TRACK_ORDER } from "@/lib/tracks";
+import { RACES } from "@/lib/races";
 import { isMissionUnlocked, missingRequirements } from "@/lib/xp";
 import XPBar from "@/components/ui/XPBar";
 import Sprite from "@/components/ui/Sprite";
@@ -133,14 +134,12 @@ export default function WorldMap() {
 
       {/* ── Top bar ── */}
       <header
-        className="flex items-center justify-between gap-4 px-6 shrink-0 sticky top-0 z-20"
-        style={{ background: "rgba(22,27,39,0.94)", borderBottom: "1px solid var(--color-border)", height: 68, backdropFilter: "blur(6px)" }}
+        className="wood-bar flex items-center justify-between gap-4 px-6 shrink-0 sticky top-0 z-20"
+        style={{ height: 68 }}
       >
         <div>
-          <span style={{ fontSize: 22, fontWeight: 800, color: "var(--color-accent)", letterSpacing: "-0.5px", textShadow: "0 0 30px rgba(240,192,64,0.35)" }}>
-            DataQuest
-          </span>
-          <p style={{ margin: 0, fontSize: 12, color: "var(--color-muted)" }}>Aprenda Python, SQL e análise de dados jogando um RPG</p>
+          <p className="gate-logo">DataQuest</p>
+          <p style={{ margin: 0, fontSize: 12, color: "#b8a88c" }}>Aprenda Python, SQL e análise de dados jogando um RPG</p>
         </div>
         <div className="flex items-center gap-3">
           {supabase && (
@@ -156,23 +155,23 @@ export default function WorldMap() {
         <div className="mx-auto flex flex-col gap-8" style={{ maxWidth: CONTENT_W }}>
 
           {/* ── Painel do jogador ── */}
-          <section className="panel anim-rise flex flex-col gap-5" style={{ padding: "22px 24px" }}>
+          <section className="rpg-frame anim-rise flex flex-col gap-5" style={{ padding: "22px 26px" }}>
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div>
-                <p className="pixel-chapter" style={{ margin: 0 }}>SUA JORNADA</p>
+                <p className="pixel-label" style={{ margin: 0, color: "var(--color-accent)" }}>📜 SUA JORNADA</p>
                 <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--color-muted)" }}>
                   <b style={{ color: "var(--color-text)" }}>{completedCount}</b> de {MISSIONS.length} missões concluídas
                 </p>
               </div>
               {nextMission ? (
-                <Link href={`/mission/${nextMission.id}`} className="btn-next">
+                <Link href={`/mission/${nextMission.id}`} className="btn-next btn-pixel">
                   ▶ {completedCount === 0 ? "Começar" : "Continuar"}
                 </Link>
               ) : (
                 <span className="pixel-label" style={{ color: "var(--color-run)" }}>✓ Tudo concluído!</span>
               )}
             </div>
-            <XPBar totalXP={totalXP} />
+            <XPBar totalXP={totalXP} pixel />
             {nextMission && (
               <p className="flex items-center gap-2" style={{ margin: 0, fontSize: 13, color: "var(--color-muted)" }}>
                 Próxima:
@@ -209,14 +208,18 @@ export default function WorldMap() {
                 const a = nodes[i];
                 const midY = (a.y + b.y) / 2;
                 const reached = stateOf(b.mission) !== "locked";
+                const d = `M ${a.x} ${a.y} C ${a.x} ${midY}, ${b.x} ${midY}, ${b.x} ${b.y}`;
                 return (
                   <g key={b.mission.id}>
                     {/* contorno escuro para a trilha ler bem sobre o fundo */}
-                    <path d={`M ${a.x} ${a.y} C ${a.x} ${midY}, ${b.x} ${midY}, ${b.x} ${b.y}`} fill="none"
-                      stroke="rgba(0,0,0,0.55)" strokeWidth={10} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-                    <path d={`M ${a.x} ${a.y} C ${a.x} ${midY}, ${b.x} ${midY}, ${b.x} ${b.y}`} fill="none"
-                      stroke={reached ? "#f0c040" : "#6b7385"} strokeWidth={5}
-                      strokeDasharray={reached ? undefined : "1 11"} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                    {/* estrada de terra: contorno escuro → chão batido → pegadas douradas (ou pedras soltas, se bloqueada) */}
+                    <path d={d} fill="none" stroke="rgba(8,10,14,0.7)" strokeWidth={reached ? 16 : 12}
+                      strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                    <path d={d} fill="none" stroke={reached ? "#9c7a45" : "#3a4050"} strokeWidth={reached ? 11 : 7}
+                      strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                    <path d={d} fill="none" stroke={reached ? "#ffe08a" : "#6b7385"} strokeWidth={reached ? 3 : 3}
+                      strokeDasharray={reached ? "4 10" : "1 12"} strokeLinecap={reached ? "butt" : "round"} vectorEffect="non-scaling-stroke"
+                      style={reached ? { filter: "drop-shadow(0 0 3px rgba(240,192,64,0.8))" } : undefined} />
                   </g>
                 );
               })}
@@ -234,6 +237,7 @@ export default function WorldMap() {
                     y={item.y}
                     isNext={item.mission.id === nextMission?.id}
                     xpEarned={xpByMission[item.mission.id]}
+                    heroSprite={RACES[profile.race].sprite}
                     lockReasons={state === "locked" ? missingRequirements(item.mission, completedMissionIds, totalXP, MISSIONS) : []}
                   />
                 );
@@ -248,37 +252,28 @@ export default function WorldMap() {
               return (
                 <div
                   key={`r${item.track}`}
-                  className="panel absolute left-0 right-0 flex items-center gap-4"
+                  className={`rpg-frame region-banner${open ? "" : " is-locked"} absolute flex items-center gap-4`}
                   style={{
                     top: item.y,
+                    left: 34,
+                    right: 34,
                     height: REGION_H - 24,
                     zIndex: 3,
-                    padding: "0 20px 0 12px",
-                    borderRadius: 16,
-                    borderColor: open ? `rgba(${info.rgb},0.5)` : undefined,
-                    background: open
-                      ? `linear-gradient(90deg, rgba(${info.rgb},0.16), rgba(${info.rgb},0.03) 60%), rgba(22,27,39,0.96)`
-                      : undefined,
-                  }}
+                    padding: "0 22px 0 14px",
+                    ...(open ? { "--tint": info.rgb } : {}),
+                  } as React.CSSProperties}
                 >
-                  <div
-                    className="flex items-center justify-center shrink-0"
-                    style={{
-                      width: 68, height: 68, borderRadius: 12,
-                      background: "var(--color-bg)",
-                      border: `1px solid ${open ? `rgba(${info.rgb},0.45)` : "var(--color-border)"}`,
-                      filter: open ? undefined : "grayscale(1)",
-                      opacity: open ? 1 : 0.55,
-                    }}
-                  >
+                  <span className="banner-tail is-left" aria-hidden />
+                  <span className="banner-tail is-right" aria-hidden />
+                  <div className="banner-medal">
                     <Sprite src={info.sprite} size={64} alt={info.name} />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="pixel-label" style={{ margin: 0, color: open ? info.color : "var(--color-muted)" }}>
+                    <p className="pixel-label" style={{ margin: 0, color: open ? info.color : "var(--color-muted)", textShadow: "2px 2px 0 #0b0d13" }}>
                       {info.name.toUpperCase()}
                     </p>
-                    <p style={{ margin: "2px 0 0", fontSize: 16, fontWeight: 800, color: open ? "var(--color-text)" : "var(--color-muted)" }}>
+                    <p style={{ margin: "4px 0 0", fontSize: 17, fontWeight: 800, color: open ? "var(--color-text)" : "var(--color-muted)", textShadow: "0 2px 0 #0b0d13" }}>
                       {info.subtitle}
                     </p>
                     {!open && (
@@ -289,12 +284,12 @@ export default function WorldMap() {
                   </div>
 
                   {missions.length > 0 && (
-                    <div className="text-right shrink-0" style={{ width: 84 }}>
-                      <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: open ? info.color : "var(--color-muted)" }}>
+                    <div className="text-right shrink-0" style={{ width: 88 }}>
+                      <p className="pixel-label" style={{ margin: 0, color: open ? info.color : "var(--color-muted)", textShadow: "2px 2px 0 #0b0d13" }}>
                         {done}/{missions.length}
                       </p>
-                      <div style={{ height: 6, background: "var(--color-border)", borderRadius: 10, marginTop: 6, overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${(done / missions.length) * 100}%`, background: info.color, borderRadius: 10, transition: "width 0.5s" }} />
+                      <div className="banner-progress" style={{ marginTop: 8 }}>
+                        <div style={{ width: `${(done / missions.length) * 100}%`, background: open ? info.color : "#4a5163" }} />
                       </div>
                     </div>
                   )}

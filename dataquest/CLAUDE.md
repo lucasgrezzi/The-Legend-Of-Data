@@ -10,7 +10,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 
 ## 📍 Onde paramos (retomar aqui)
 
-> Última sessão: **2026-09-27** (com Claude Code). Leia esta seção primeiro ao retomar.
+> Última sessão: **2026-10-08** (com Claude Code). Leia esta seção primeiro ao retomar.
 
 ### ⚠ Estado do repositório
 - **Sessões 1–3 commitadas e enviadas** ao GitHub (`master`, commit `10363cd`) em 2026-09-22.
@@ -23,6 +23,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - ✅ **Licenças resolvidas:** a imagem Freepik com marca d'água foi **removida**. O fundo agora é
   `public/assets/bg/mapa-mundo.png`, gerado por nós com tiles CC0 (ver Sessão 3). Tudo pode ser commitado.
 - **Sessões 6, 7 e 8 commitadas e enviadas** em 2026-09-27 (trilha SQL; 10 níveis + neblina; perfil só leitura).
+- **Sessão 9 commitada e enviada** em 2026-10-08 (mapa com visual RPG imersivo).
 - Hoje são **13 missões** (7 de Python, 5 de SQL, 1 Pandas) — ver "As 13 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
@@ -229,6 +230,22 @@ ficha (boneco grande, nome, XP, moedas…). E o botão "☁️ Salvo na nuvem" n
 - Login obrigatório (e-mail + senha, sem confirmação); ao entrar, vale o save com mais XP; ao sair, zera o navegador.
 - Ranking ordena por XP, depois missões concluídas, depois quem chegou primeiro.
 - Recompensas: ver tabela "As 13 Missões". Total de moedas possível hoje: 250.
+
+### Sessão 9 — Mapa com visual RPG imersivo (2026-10-08)
+Pedido do usuário: "design melhor e mais bonito" → escolheu **RPG mais imersivo**, prioridade **só o mapa**.
+- **Molduras pixel art** (`.rpg-frame`): contorno escuro + filete dourado + rebites (SVG em `--rivet`) nos cantos.
+  Usada no painel "Sua Jornada", nos estandartes e no cartão da neblina.
+- **Estandartes de região** (`.region-banner`): tecido tingido com `--tint` = `rgb` da trilha, medalhão redondo
+  com o sprite e caudas de fita (`.banner-tail`) nas laterais; bloqueado vira cinza.
+- **Nós** = medalhões com aro duplo (`--ring`), sombra no chão e selo verde ✓ quando concluídos; a próxima missão brilha.
+- **Rótulos em pergaminho** (`.map-label.is-completed/.is-available`); bloqueados continuam escuros. Texto sobre
+  pergaminho usa `track.ink` (novo campo em `lib/tracks.ts`) e `var(--ink)`.
+- **Estrada de terra** no SVG: contorno → chão batido → pegadas douradas tracejadas (bloqueada = pedras cinza).
+- **Herói no mapa:** sprite da raça (`.map-hero`) parado ao lado da próxima missão, do lado oposto ao rótulo.
+- **Barra de madeira** no topo (`.wood-bar`, logo com brilho `.gate-logo`), chip do jogador em placa dourada.
+- `XPBar pixel` (barra reta com marcas a cada 10%), botão `.btn-pixel` (bisel 3D) no "Continuar".
+- **Vaga-lumes** (`.firefly`, posições fixas) e vinheta no `WorldBackground` (também aparece na criação de personagem).
+- Tela de missão, login e ranking **não mudaram** — próximos candidatos para o mesmo estilo.
 
 ### Próximos passos sugeridos
 1. **Loja do Mercador (próximo foco, combinado com o usuário):** cosméticos/títulos compráveis com moedas —
@@ -536,6 +553,7 @@ Sempre usar o padrão: emoji grande (20px) + pixel label + linha separadora colo
 Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo sólido 94–96%). Nunca texto solto sobre a imagem.
 
 ### Mapa (WorldMap + MissionPin)
+- Estilo RPG da Sessão 9: `.rpg-frame`, `.region-banner`, `.map-label` pergaminho, `.map-hero`, `.wood-bar` (ver lá)
 - Layout calculado em `layout()`: banner de região (132px) + nós (140px), x em zigue-zague `[50, 74, 50, 26]%`
 - SVG com `preserveAspectRatio="none"` + `vectorEffect="non-scaling-stroke"` liga os nós; dourado sólido = alcançado, tracejado = bloqueado
 - Banner de região bloqueada mostra `Requer: …` via `missingRequirements()`; trilha sem missões mostra "Em breve"

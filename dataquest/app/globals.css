@@ -648,3 +648,287 @@ body {
   cursor: var(--cursor-hover);
 }
 .link-btn:hover { color: var(--color-accent); text-decoration-color: currentColor; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   RPG imersivo (mapa): molduras pixel art, estandartes, pergaminhos, vaga-lumes
+   ══════════════════════════════════════════════════════════════════════ */
+:root {
+  --frame-dark: #0b0d13;
+  --frame-gold: #b48a32;
+  --frame-gold-lo: #5e4718;
+  --parchment: #ead7a8;
+  --parchment-lo: #d6bd84;
+  --ink: #2e2010;
+  --ink-soft: #6b5434;
+  /* Rebite dourado em pixel art — simétrico, serve nos quatro cantos */
+  --rivet: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' shape-rendering='crispEdges'%3E%3Cpath d='M4 0h4v2h2v2h2v4h-2v2H8v2H4v-2H2V8H0V4h2V2h2z' fill='%230b0d13'/%3E%3Cpath d='M4 2h4v2h2v4H8v2H4V8H2V4h2z' fill='%23b48a32'/%3E%3Cpath d='M4 2h4v2H6v2H4v2H2V4h2z' fill='%23ffe08a'/%3E%3C/svg%3E");
+}
+
+/* Moldura: contorno escuro + filete dourado com sombra + rebites nos cantos */
+.rpg-frame {
+  position: relative;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(240,192,64,0.06), transparent 60%),
+    linear-gradient(180deg, #1c2131 0%, #141824 100%);
+  border: none;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 2px var(--frame-dark),
+    0 0 0 4px var(--frame-gold),
+    0 0 0 5px var(--frame-gold-lo),
+    0 0 0 7px var(--frame-dark),
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 0 0 1px rgba(240,192,64,0.10),
+    0 20px 44px rgba(0,0,0,0.6);
+}
+.rpg-frame::before {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  pointer-events: none;
+  background:
+    var(--rivet) top left / 12px 12px no-repeat,
+    var(--rivet) top right / 12px 12px no-repeat,
+    var(--rivet) bottom left / 12px 12px no-repeat,
+    var(--rivet) bottom right / 12px 12px no-repeat;
+  image-rendering: pixelated;
+  z-index: 1;
+}
+
+/* Botão com bisel de pixel art (alto-relevo) */
+.btn-pixel {
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.45),
+    inset 0 -4px 0 rgba(0,0,0,0.25),
+    0 0 0 2px var(--frame-dark),
+    0 5px 0 var(--frame-dark),
+    0 8px 18px rgba(240,192,64,0.25);
+  padding: 13px 22px 15px;
+}
+.btn-pixel:hover:not(:disabled) {
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,0.55),
+    inset 0 -4px 0 rgba(0,0,0,0.25),
+    0 0 0 2px var(--frame-dark),
+    0 6px 0 var(--frame-dark),
+    0 10px 24px rgba(240,192,64,0.4);
+}
+.btn-pixel:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -2px 0 rgba(0,0,0,0.25), 0 0 0 2px var(--frame-dark), 0 1px 0 var(--frame-dark);
+}
+
+/* Barra de topo de madeira escura com filete dourado */
+.wood-bar {
+  background:
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, #2a1f17 0%, #1d1611 100%);
+  border-bottom: 3px solid var(--frame-gold);
+  box-shadow: 0 2px 0 var(--frame-dark), 0 8px 24px rgba(0,0,0,0.5);
+}
+.wood-bar .gate-logo { font-size: 22px; }
+
+/* Barra de XP pixel art: cantos retos, fundo afundado e marcas a cada 10% */
+.xp-pixel {
+  height: 14px;
+  padding: 2px;
+  background: var(--frame-dark);
+  box-shadow: 0 0 0 2px var(--frame-gold-lo), inset 0 2px 0 rgba(0,0,0,0.6);
+  position: relative;
+}
+.xp-pixel > div {
+  height: 100%;
+  background: linear-gradient(180deg, #ffe08a 0 30%, #f0c040 30% 70%, #c38f12 70%);
+  box-shadow: 0 0 10px rgba(240,192,64,0.45);
+  transition: width 0.9s cubic-bezier(.2,.8,.2,1);
+}
+.xp-pixel::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), rgba(11,13,19,0.55) calc(10% - 2px) 10%);
+  pointer-events: none;
+}
+
+/* ── Estandarte de região: corpo emoldurado + caudas de tecido nas laterais ── */
+.region-banner {
+  --tint: 120,130,150;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, rgba(var(--tint),0.30) 0%, rgba(var(--tint),0.10) 100%),
+    #151a26;
+}
+.region-banner.is-locked { --tint: 70,76,92; }
+.banner-tail {
+  position: absolute;
+  top: 16px;
+  bottom: -14px;
+  width: 28px;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(var(--tint),1), rgba(var(--tint),0.7));
+  filter: brightness(0.5);
+}
+.banner-tail.is-left  { left: -34px;  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 42% 50%); }
+.banner-tail.is-right { right: -34px; clip-path: polygon(0 0, 100% 0, 58% 50%, 100% 100%, 0 100%); }
+.banner-medal {
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 35%, rgba(var(--tint),0.35), #0e1119 72%);
+  box-shadow: 0 0 0 2px var(--frame-dark), 0 0 0 5px var(--frame-gold), 0 0 0 7px var(--frame-dark), 0 6px 14px rgba(0,0,0,0.6);
+}
+.region-banner.is-locked .banner-medal { box-shadow: 0 0 0 2px var(--frame-dark), 0 0 0 5px #4a5163, 0 0 0 7px var(--frame-dark); }
+.region-banner.is-locked .banner-medal img { filter: grayscale(1) brightness(0.7); }
+.banner-progress {
+  height: 10px;
+  padding: 2px;
+  background: var(--frame-dark);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+}
+.banner-progress > div { height: 100%; transition: width 0.5s; box-shadow: inset 0 2px 0 rgba(255,255,255,0.35); }
+
+/* ── Nós do mapa: medalhão com aro duplo e sombra no chão ── */
+.map-node {
+  border: none;
+  background: radial-gradient(circle at 50% 35%, #2f3850, #121620 72%);
+  box-shadow:
+    0 0 0 3px var(--frame-dark),
+    0 0 0 7px var(--ring, #3e475c),
+    0 0 0 9px var(--frame-dark),
+    inset 0 3px 0 rgba(255,255,255,0.08),
+    inset 0 -6px 12px rgba(0,0,0,0.5);
+}
+.map-node::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -26px;
+  width: 92px;
+  height: 18px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.6), transparent 70%);
+  z-index: -1;
+}
+.map-node.is-completed { --ring: var(--frame-gold); }
+.map-node.is-available {
+  --ring: var(--color-accent);
+  background: radial-gradient(circle at 50% 35%, #4a3c1a, #17140c 72%);
+  animation: node-glow 1.8s ease-in-out infinite;
+}
+.map-node.is-locked { --ring: #353b4b; background: radial-gradient(circle at 50% 35%, #232836, #0f1219 72%); }
+.node-check {
+  position: absolute;
+  right: -8px;
+  bottom: -6px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--frame-dark);
+  background: var(--color-run);
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--frame-dark), inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -3px 0 rgba(0,0,0,0.25);
+}
+@keyframes node-glow {
+  0%, 100% { box-shadow: 0 0 0 3px var(--frame-dark), 0 0 0 7px var(--ring), 0 0 0 9px var(--frame-dark), 0 0 18px 6px rgba(240,192,64,0.35), inset 0 -6px 12px rgba(0,0,0,0.5); }
+  50%      { box-shadow: 0 0 0 3px var(--frame-dark), 0 0 0 7px var(--ring), 0 0 0 9px var(--frame-dark), 0 0 34px 14px rgba(240,192,64,0.55), inset 0 -6px 12px rgba(0,0,0,0.5); }
+}
+
+/* ── Rótulos em pergaminho (fundo sólido: texto nunca direto sobre o mapa) ── */
+.map-label {
+  max-width: 236px;
+  padding: 10px 14px 11px;
+  border: none;
+  border-radius: 3px;
+  color: var(--ink);
+  background:
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(120,84,36,0.28) 100%),
+    linear-gradient(180deg, var(--parchment) 0%, var(--parchment-lo) 100%);
+  box-shadow:
+    0 0 0 2px #6b4f26,
+    0 0 0 4px var(--frame-dark),
+    inset 0 2px 0 rgba(255,255,255,0.4),
+    0 10px 20px rgba(0,0,0,0.5);
+}
+.map-label.is-locked {
+  color: #9aa3b5;
+  background: linear-gradient(180deg, #1d2230, #161a25);
+  box-shadow: 0 0 0 2px #353b4b, 0 0 0 4px var(--frame-dark), 0 10px 20px rgba(0,0,0,0.5);
+}
+.map-label.is-available {
+  box-shadow: 0 0 0 2px var(--frame-gold), 0 0 0 4px var(--frame-dark), 0 0 22px rgba(240,192,64,0.35), inset 0 2px 0 rgba(255,255,255,0.4), 0 10px 20px rgba(0,0,0,0.5);
+}
+.map-label a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.next-flag {
+  border-radius: 3px;
+  padding: 6px 9px 7px;
+  box-shadow: 0 0 0 2px var(--frame-dark), inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -3px 0 rgba(0,0,0,0.2), 0 6px 12px rgba(0,0,0,0.5);
+}
+
+/* Avatar do jogador parado ao lado da próxima missão */
+.map-hero {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 4;
+  pointer-events: none;
+}
+.map-hero img {
+  animation: bob 1.4s steps(2) infinite;
+  filter: drop-shadow(2px 0 0 #0b0d13) drop-shadow(-2px 0 0 #0b0d13) drop-shadow(0 2px 0 #0b0d13) drop-shadow(0 -2px 0 #0b0d13);
+}
+.map-hero::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 44px;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.65), transparent 70%);
+  z-index: -1;
+}
+
+/* ── Vaga-lumes sobre o fundo do mundo ── */
+.firefly {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #ffe9a0;
+  box-shadow: 0 0 6px 2px rgba(255,214,102,0.7);
+  opacity: 0;
+  animation: firefly var(--dur, 12s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes firefly {
+  0%   { opacity: 0; transform: translate(0, 0); }
+  15%  { opacity: 0.9; }
+  50%  { opacity: 0.35; transform: translate(var(--dx, 30px), -60px); }
+  85%  { opacity: 0.9; }
+  100% { opacity: 0; transform: translate(calc(var(--dx, 30px) * -0.5), -120px); }
+}
+
+/* Chip do jogador e botões dentro da barra de madeira: placa escura com filete dourado */
+.wood-bar .player-chip, .wood-bar .icon-btn {
+  background: linear-gradient(180deg, #1a1410, #120e0b) !important;
+  border: none !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 0 2px var(--frame-dark), 0 0 0 3px var(--frame-gold-lo), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.wood-bar .player-chip:hover, .wood-bar .icon-btn:hover {
+  background: linear-gradient(180deg, #2a2018, #1a1410) !important;
+  box-shadow: 0 0 0 2px var(--frame-dark), 0 0 0 3px var(--frame-gold), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.wood-bar .player-chip > span:first-child { border-radius: 3px !important; }
+.map-fog-card.rpg-frame { position: absolute; }

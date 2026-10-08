@@ -101,7 +101,7 @@ export default function MapFog({ top, mapHeight, revealing, title, text }: MapFo
         );
       })}
 
-      <div className="map-fog-card panel">
+      <div className="map-fog-card rpg-frame">
         <img src="/assets/fog/nuvem-3.png" alt="" width={72} style={{ imageRendering: "pixelated", display: "inline-block" }} />
         <p className="pixel-label" style={{ margin: "10px 0 0", color: "var(--color-accent)" }}>
           {revealing ? "A neblina se dissipa..." : title}
