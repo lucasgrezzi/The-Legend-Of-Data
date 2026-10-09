@@ -3,7 +3,7 @@ import type { DataFilePreview } from "@/types";
 // Tabelas da trilha SQL "As Catacumbas de Dados" (missões 9–12).
 // Valores sem vírgula (o parser abaixo é simples). Mudou um valor? Recalcule o expectedOutput das missões.
 
-function csvTable(table: string, rawCsv: string): DataFilePreview {
+export function csvTable(table: string, rawCsv: string): DataFilePreview {
   const [head, ...lines] = rawCsv.trim().split("\n");
   return {
     filename: `${table}.csv`,

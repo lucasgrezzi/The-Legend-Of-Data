@@ -10,7 +10,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 
 ## 📍 Onde paramos (retomar aqui)
 
-> Última sessão: **2026-10-08** (com Claude Code). Leia esta seção primeiro ao retomar.
+> Última sessão: **2026-10-09** (com Claude Code). Leia esta seção primeiro ao retomar.
 
 ### ⚠ Estado do repositório
 - **Sessões 1–3 commitadas e enviadas** ao GitHub (`master`, commit `10363cd`) em 2026-09-22.
@@ -24,7 +24,8 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
   `public/assets/bg/mapa-mundo.png`, gerado por nós com tiles CC0 (ver Sessão 3). Tudo pode ser commitado.
 - **Sessões 6, 7 e 8 commitadas e enviadas** em 2026-09-27 (trilha SQL; 10 níveis + neblina; perfil só leitura).
 - **Sessão 9 commitada e enviada** em 2026-10-08 (mapa com visual RPG imersivo).
-- Hoje são **13 missões** (7 de Python, 5 de SQL, 1 Pandas) — ver "As 13 Missões". Os `expectedOutput` das
+- **Sessão 10 commitada e enviada** em 2026-10-09 (Forja II: groupby).
+- Hoje são **14 missões** (7 de Python, 5 de SQL, 2 Pandas) — ver "As 14 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
 ### Sessão 1 — Redesign da interface
@@ -229,7 +230,7 @@ ficha (boneco grande, nome, XP, moedas…). E o botão "☁️ Salvo na nuvem" n
   (logado, o save da nuvem volta ao recarregar — use uma aba anônima ou saia da conta).
 - Login obrigatório (e-mail + senha, sem confirmação); ao entrar, vale o save com mais XP; ao sair, zera o navegador.
 - Ranking ordena por XP, depois missões concluídas, depois quem chegou primeiro.
-- Recompensas: ver tabela "As 13 Missões". Total de moedas possível hoje: 250.
+- Recompensas: ver tabela "As 14 Missões". Total de moedas possível hoje: 275.
 
 ### Sessão 9 — Mapa com visual RPG imersivo (2026-10-08)
 Pedido do usuário: "design melhor e mais bonito" → escolheu **RPG mais imersivo**, prioridade **só o mapa**.
@@ -247,11 +248,21 @@ Pedido do usuário: "design melhor e mais bonito" → escolheu **RPG mais imersi
 - **Vaga-lumes** (`.firefly`, posições fixas) e vinheta no `WorldBackground` (também aparece na criação de personagem).
 - Tela de missão, login e ranking **não mudaram** — próximos candidatos para o mesmo estilo.
 
+### Sessão 10 — Forja II: "O Fole das Regiões" (2026-10-09)
+Pedido do usuário: criar uma fase nova por dia, seguindo a campanha. Lembrete diário às 19h (Brasília) via rotinas na
+nuvem (claude.ai/code/routines) que só preparam um briefing — a fase é criada junto, nesta máquina.
+- `mission-13` **O Fole das Regiões** (Pandas, 3/5) — filtro + `groupby` + `sum` + `sort_values` + `.items()`.
+  O ferreiro anão só acende o fole sabendo quanto ouro cada região já **pagou** (pendentes não contam).
+- Dados novos em `data/forja.ts` (`ENCOMENDAS`, 12 linhas: id, peca, regiao, ouro, status 'paga'/'pendente');
+  `csvTable` agora é exportado de `data/catacumbas.ts`; `csvFile` remove o `table` para a aba Dados mostrar o arquivo.
+- Testado com pandas 2.3: a solução passa; sem o filtro (Norte 330…), ordem crescente e sem ordenar reprovam.
+  `tsc` e `build` ok. **Não testado no navegador (Pyodide)**.
+
 ### Próximos passos sugeridos
 1. **Loja do Mercador (próximo foco, combinado com o usuário):** cosméticos/títulos compráveis com moedas —
    títulos aparecendo no ranking, molduras/cores do personagem, talvez pet no mapa. Nada que ajude a resolver
-   (não competir com as dicas). Economia hoje: 250 moedas possíveis; dicas custam 5 e 10.
-2. Aplicar o mesmo padrão a **Pandas** (groupby, merge) e ao módulo **Data Viz** (validação `"chart"`).
+   (não competir com as dicas). Economia hoje: 275 moedas possíveis; dicas custam 5 e 10.
+2. Continuar **Pandas** (merge, colunas calculadas, pivot_table — groupby feito na M13) e ao módulo **Data Viz** (validação `"chart"`).
 3. Python extra (opcional): `while` e dicionários (fichas de personagem) como missões bônus.
 4. Talvez: dar efeito real às raças (hoje só visuais) — ex.: desconto em dicas de uma trilha.
 5. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px).
@@ -375,8 +386,9 @@ dataquest/
 │   └── accountStore.ts          # Conta Supabase: ready, email, sync (não persistido)
 ├── data/
 │   ├── missions/
-│   │   ├── mission-0.ts … mission-12.ts  # ordem de jogo definida em lib/missions.ts
-│   ├── catacumbas.ts            # Tabelas SQL das missões 9–12 (reliquias, herois, expedicoes)
+│   │   ├── mission-0.ts … mission-13.ts  # ordem de jogo definida em lib/missions.ts
+│   ├── catacumbas.ts            # Tabelas SQL das missões 9–12 (reliquias, herois, expedicoes) + csvTable
+│   ├── forja.ts                 # CSVs da trilha Pandas (encomendas — missão 13)
 │   └── csv/vendas.csv
 ├── scripts/
 │   ├── gerar_fundo_mapa.py      # Gera public/assets/bg/mapa-mundo.png com tiles CC0 Kenney Tiny Town
@@ -396,7 +408,7 @@ dataquest/
 
 ---
 
-## As 13 Missões (na ordem de jogo)
+## As 14 Missões (na ordem de jogo)
 
 Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Escudo 150, Pocao 80, Manto 200, Anel 180)
 
@@ -415,9 +427,11 @@ Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Esc
 | 11    | 11 | sql    | As Criptas por Tipo      | SQL: GROUP BY e HAVING            | 4/5    | +30 | +25    | 10          | `GROUP BY`, `HAVING` |
 | 12    | 12 | sql    | O Rei Esquecido          | SQL: JOIN entre tabelas (chefe)   | 5/5    | +40 | +30    | 11          | `JOIN`, `ON … heroi_id`, `GROUP BY` |
 | 13    | 4  | pandas | A Forja Desperta         | Pandas: ler CSV e filtrar linhas  | 2/5    | +30 | +25    | 12          | `read_csv(`, filtro `["valor"] >`, `len(` |
+| 14    | 13 | pandas | O Fole das Regiões       | Pandas: groupby, sum e sort_values| 3/5    | +35 | +25    | 4           | `read_csv(`, `["status"]`, `.groupby(`, `.sum(`, `.sort_values(` |
 
 Tabelas SQL das missões 9–12 em `data/catacumbas.ts`: `reliquias` (12 linhas: id, nome, tipo, sala, valor,
 amaldicoada 'sim'/'nao'), `herois` (5) e `expedicoes` (9: id, heroi_id, destino, ouro).
+CSV da missão 13 em `data/forja.ts`: `encomendas` (12 linhas: id, peca, regiao, ouro, status 'paga'/'pendente').
 
 Cada missão tem 2 dicas (`hints`) e uma `solution`. A missão 0 não tem Grimório.
 
@@ -434,12 +448,17 @@ Cada missão tem 2 dicas (`hints`) e uma `solution`. A missão 0 não tem Grimó
 - M11: tabela `["tipo","quantidade","total"]`, 3 linhas, 1ª = `arma, 4, 570` (HAVING SUM(valor) > 300)
 - M12: tabela `["nome","viagens","ouro_total"]`, 4 linhas, 1ª = `Brenna, 3, 350`
 - M4: `"3"` (len do DataFrame filtrado)
+- M13: `"Norte: 270
+Oeste: 220
+Leste: 150
+Sul: 100"` (só `paga`, groupby regiao, sum ouro, desc)
 
 **Arco da história (Python):** Prólogo na Guilda (bolsa de ouro) → Cap. I o Grimório pede que você se apresente →
 Cap. II Mercado da Vila → Cap. III Guardião do Portão → Cap. IV Corredor das Tochas → Cap. V Salão das Relíquias
 (mochila) → Cap. VI Selo das Catacumbas (chefe) → **SQL:** "Com o Selo rompido…" desce às Catacumbas (Cap. I Primeira Escavação → II Salão dos Ossos, onde o
 Guardião dos Ossos cataloga as relíquias → III Inventário do Guardião → IV Criptas por Tipo → V O Rei Esquecido,
-o primeiro Arquivista-Rei, com o Livro das Expedições) → **Pandas:** "Atrás do trono do Rei Esquecido…" a Forja.
+o primeiro Arquivista-Rei, com o Livro das Expedições) → **Pandas:** "Atrás do trono do Rei Esquecido…" a Forja (Cap. I A Forja Desperta → II O Fole das Regiões, o
+ferreiro anão e as encomendas das quatro regiões).
 O **Grimório** é, na lore, um livro vivo e ganancioso que vende dicas por ouro.
 
 ---
@@ -448,7 +467,7 @@ O **Grimório** é, na lore, um livro vivo e ganancioso que vende dicas por ouro
 
 **Níveis (10, `LEVEL_THRESHOLDS` em `lib/xp.ts`):** Aprendiz (0) → Escriba (40) → Copista (90) → Cronista (150) →
 Explorador de Criptas (200) → Arquivista (260) → Guardião do Saber (330) → Mestre da Forja (420) → Sábio dos Dados (530) →
-Mestre dos Dados (660). Calibrados pela jornada: fim do Python ≈ 155 XP (Nv 4), fim do SQL ≈ 305 (Nv 6), Forja 335 (Nv 7);
+Mestre dos Dados (660). Calibrados pela jornada: fim do Python ≈ 155 XP (Nv 4), fim do SQL ≈ 305 (Nv 6), Forja I 335 (Nv 7), Forja II 370;
 8–10 esperam o conteúdo futuro — **ao adicionar missões, revisar a tabela**.
 
 **Fluxo por missão:**
@@ -579,7 +598,7 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 
 ## Como Adicionar uma Nova Missão
 
-1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 13) — nunca reaproveitar/renumerar ids
+1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 14) — nunca reaproveitar/renumerar ids
    (são a chave do progresso salvo). Preencher `concept` com linguagem direta (o que a pessoa aprende).
    Campos de conteúdo (padrão da Sessão 4):
    - `narrative` — continua a história da missão anterior (ver "Arco da história")
@@ -611,7 +630,7 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 - [ ] Mais missões Python: listas, while, funções, dicionários (próximo foco)
 - [x] Missões SQL: AND/OR/IN, agregações, GROUP BY/HAVING, JOIN (ids 9–12)
 - [ ] SQL extra: subconsultas, LEFT JOIN, CASE WHEN
-- [ ] Missões Pandas: merge, groupby, pivot_table
+- [ ] Missões Pandas: merge, pivot_table (groupby feito — id 13)
 
 ### Funcionalidades
 - [x] Imagens RPG para trilhas SQL/Pandas/DataViz (sprites CC0)

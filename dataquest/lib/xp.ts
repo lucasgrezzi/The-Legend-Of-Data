@@ -11,7 +11,7 @@ export const hintCost = (i: number) => 5 * (i + 1);
 
 /**
  * Níveis calibrados pela jornada (XP acumulado na ordem de jogo):
- * fim do Python ≈ 155 XP → Nv 4 · fim do SQL ≈ 305 → Nv 6 · Forja (M4) ≈ 335 → Nv 7.
+ * fim do Python ≈ 155 XP → Nv 4 · fim do SQL ≈ 305 → Nv 6 · Forja I (M4) ≈ 335 → Nv 7 · Forja II (M13) ≈ 370.
  * Os níveis 8–10 ficam para o conteúdo futuro (Pandas, Data Viz). Ao somar XP novo, revisar esta tabela.
  */
 export const LEVEL_THRESHOLDS = [
