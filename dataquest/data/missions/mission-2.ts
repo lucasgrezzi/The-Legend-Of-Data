@@ -8,9 +8,14 @@ const mission2: Mission = {
   chapterTitle: "A Linguagem dos Antigos — Capítulo IV",
   missionTitle: "O Corredor das Tochas",
   concept: "Repetição com for e range()",
-  narrative: `Depois do Portão começa o Corredor das Tochas. Ele é escuro e longo: para atravessá-lo, o Arquivista precisa acender as tochas uma a uma — repetindo o mesmo encantamento várias vezes.
+  narrative: `Depois do portão vem o Corredor das Tochas. Escuro. Comprido. Com um leve cheiro de meia velha.
 
-Programadores não copiam a mesma linha dez vezes: eles usam um loop, que repete um bloco de código automaticamente. No fim do corredor, uma última verificação decide se você é digno de seguir.`,
+Você precisa acender as tochas uma por uma. Hoje são só três... mas corredor de masmorra (masmorra = labirinto subterrâneo cheio de perigo, o lugar favorito de todo RPG) cresce quando ninguém está olhando. Amanhã podem ser trezentas.
+
+Copiar a mesma linha trezentas vezes? Isso é castigo de estagiário amaldiçoado. Programador manda o computador REPETIR.
+
+E no fim do corredor tem um portal que só abre para quem juntou XP suficiente. XP são os pontos de experiência que você ganha vencendo desafios — tipo pontos de fidelidade, só que mais heroicos.`,
+  realWorld: `Um loop (for) repete um bloco de código sozinho. É o que um app faz para mandar a mesma mensagem para mil clientes ou somar todas as compras do mês: escreve a instrução uma vez e manda repetir. range(1, 4) gera os números 1, 2 e 3 — uma volta do loop para cada um.`,
   theory: `Um loop repete um bloco de código. O for percorre uma sequência, e range(início, fim) gera números do início até ANTES do fim:
 
   for n in range(1, 6):

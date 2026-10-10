@@ -209,6 +209,30 @@ export default function MissionPanel({
                 delay={350}
                 style={{ fontSize: 14, color: "var(--color-text)", lineHeight: 1.85 }}
               />
+              {mission.realWorld && (
+                <div
+                  className="anim-rise"
+                  style={{
+                    ["--d" as string]: "600ms",
+                    marginTop: 20,
+                    padding: "14px 16px",
+                    background: "var(--color-panel)",
+                    border: "1px solid var(--color-border)",
+                    borderLeft: `3px solid ${track.color}`,
+                    borderRadius: 6,
+                  }}
+                >
+                  <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
+                    <span style={{ fontSize: 16 }}>🌍</span>
+                    <span style={{ fontFamily: "var(--font-pixel)", fontSize: 9, color: track.color }}>
+                      No mundo real
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 13, lineHeight: 1.7, color: "var(--color-text)", margin: 0 }}>
+                    {mission.realWorld}
+                  </p>
+                </div>
+              )}
             </div>
             {mission.theory && (
               <div hidden={tab !== "estudo"}>

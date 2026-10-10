@@ -9,9 +9,12 @@ const mission8: Mission = {
   chapterTitle: "A Linguagem dos Antigos — Capítulo VI (Chefe)",
   missionTitle: "O Selo das Catacumbas",
   concept: "Funções: def e return",
-  narrative: `No fundo do Salão está a entrada das Catacumbas, lacrada pelo Selo dos Antigos. Nele há runas gravadas, cada uma com uma força — e o Selo só se rompe quando cada runa é classificada em voz alta.
+  narrative: `Chegou a hora do CHEFE. Em jogo, chefe é o desafio final de cada região: maior, mais difícil e geralmente com música dramática. Imagine a música. Pronto, agora sim.
 
-Você poderia escrever a mesma regra várias vezes... mas Arquivistas experientes criam seus próprios feitiços: funções. Uma função é uma receita com nome — escrita uma vez, usada quantas vezes quiser. Este é o último desafio da Linguagem dos Antigos.`,
+Nosso chefe é o Selo das Catacumbas: uma porta de pedra coberta de runas — pedrinhas mágicas, cada uma com uma força. O Selo só abre quando cada runa é classificada em voz alta: fraca, média ou forte.
+
+Você até podia escrever a mesma regra três vezes. Mas aí eu ia sentir vergonha alheia. Crie o seu próprio feitiço — uma função — e use quantas vezes quiser. É tudo o que você aprendeu até aqui, trabalhando junto.`,
+  realWorld: `Uma função é uma receita com nome: você escreve os passos uma vez (def) e usa sempre que precisar, com ingredientes diferentes. O return é o prato pronto que ela devolve. Apps estão cheios delas — calcular_frete(cep), validar_senha(texto)... Ninguém reescreve o cálculo do frete a cada compra.`,
   theory: `def cria uma função (um feitiço seu). Ela recebe valores (parâmetros) e devolve um resultado com return:
 
   def dobro(x):

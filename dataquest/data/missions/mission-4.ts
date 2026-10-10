@@ -14,7 +14,12 @@ const mission4: Mission = {
   chapterTitle: "A Forja de Dados — Capítulo I",
   missionTitle: "A Forja Desperta",
   concept: "Pandas: ler CSV e filtrar linhas",
-  narrative: `Atrás do trono do Rei Esquecido, um corredor quente sobe até a superfície. No fim dele, o brilho das brasas: a Forja dos Arquivistas, onde os fragmentos de dados brutos — as relíquias imperfeitas — são transformados. Com as ferramentas certas, um Arquivista pode filtrar, reorganizar e purificar qualquer conjunto de dados.`,
+  narrative: `Atrás do trono do Rei tem uma passagem secreta (todo trono tem, é regra de castelo). Ela sobe, sobe, esquenta... e termina na Forja dos Arquivistas.
+
+Forja é a oficina do ferreiro, onde metal bruto vira espada. Aqui é igual, só que com dados: entra tabela bagunçada, sai tabela arrumadinha. A ferramenta de trabalho se chama Pandas. E não, não tem nenhum urso aqui. Eu perguntei.
+
+O ferreiro é o Brokk, um anão com uma barba que dá três voltas no pescoço. Ele acabou de receber o registro de vendas e não quer a lista inteira. Quer um número só. Anão é assim, direto ao ponto.`,
+  realWorld: `Pandas é uma biblioteca de Python para trabalhar com tabelas — pense numa planilha que você controla com código. read_csv abre o arquivo e o filtro df[condição] mantém só as linhas que interessam. Analistas usam isso para responder perguntas como "quantos pedidos passaram de R$ 150?" em segundos.`,
   theory: `Pandas é a biblioteca de Python para trabalhar com tabelas, chamadas DataFrames.
 
   import pandas as pd

@@ -10,9 +10,12 @@ const mission13: Mission = {
   chapterTitle: "A Forja de Dados — Capítulo II",
   missionTitle: "O Fole das Regiões",
   concept: "Pandas: groupby, sum e sort_values",
-  narrative: `Com o primeiro fogo aceso, a Forja voltou a receber encomendas das quatro regiões do reino. Mas o grande fole de couro, que sopra as brasas até o calor certo, está murcho e parado.
+  narrative: `Com o fogo aceso, a Forja voltou a receber encomendas das quatro regiões do reino. Mas o fole — aquele saco de couro gigante que sopra ar no fogo, tipo um pulmão de sanfona — está murcho e parado.
 
-O velho ferreiro anão bate o martelo na bigorna: "O fole só respira para quem sabe de onde vem o ouro. Diga quanto cada região já PAGOU, da mais generosa para a mais avarenta. Encomenda pendente não enche fole nenhum."`,
+Brokk bate o martelo na bigorna. BLÉM. "O fole só respira para quem sabe de onde vem o ouro! Quero saber quanto cada região já PAGOU, da mais generosa para a mais pão-dura."
+
+Ele cruza os braços. "E encomenda pendente não conta. Promessa não enche fole nenhum."`,
+  realWorld: `groupby é o GROUP BY do Pandas: separa as linhas em grupos (aqui, por região) e calcula algo para cada um, como a soma. sort_values ordena o resultado. É o relatório de "faturamento por região" que toda empresa pede: primeiro filtra o que foi pago, depois agrupa, soma e ordena.`,
   theory: `Para resumir uma tabela por grupos, o Pandas tem o groupby — a mesma ideia do GROUP BY do SQL:
 
   forca_por_habitat = df.groupby("habitat")["forca"].sum()

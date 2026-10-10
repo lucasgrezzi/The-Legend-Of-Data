@@ -25,6 +25,8 @@ export interface Mission {
   /** O que a missão ensina, em linguagem direta (ex.: "if / elif / else") — aparece no mapa e no cabeçalho */
   concept: string;
   narrative: string;
+  /** Caixa "No mundo real" (aba Lore): traduz a metáfora da fase em programação e no dia a dia */
+  realWorld?: string;
   /** Aba "Estudo" (livre): ensina a sintaxe da fase com um exemplo DIFERENTE da resposta */
   theory: string;
   /** QUEST: direcionamento — o objetivo e a saída esperada, sem entregar o passo a passo */

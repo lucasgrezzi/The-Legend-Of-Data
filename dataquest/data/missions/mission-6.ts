@@ -9,9 +9,14 @@ const mission6: Mission = {
   chapterTitle: "A Linguagem dos Antigos — Capítulo III",
   missionTitle: "O Guardião do Portão",
   concept: "Decisões com if / elif / else",
-  narrative: `Equipado, você chega ao fim da Vila. Ali fica o Portão das Catacumbas, vigiado por um Guardião de pedra. Ele não aceita subornos — só obedece a regras. Quem tem nível alto passa direto. Quem tem nível médio só passa se trouxer a chave. Os demais voltam para treinar.
+  narrative: `No fim da Vila tem um portão e, na frente dele, um Guardião de pedra com cara de quem nunca tirou férias.
 
-Programas também tomam decisões assim: SE uma condição for verdadeira, fazem uma coisa; SENÃO, fazem outra. O Guardião perdeu a memória das próprias leis — ensine-as a ele.`,
+Ele não aceita suborno, não ri de piada (eu tentei, foi constrangedor) e só segue regras. O problema? Esqueceu as próprias regras. Duzentos anos parado na chuva, acontece.
+
+As leis eram assim: nível alto passa direto; nível médio só passa com a chave; o resto volta para casa treinar. "Nível", aliás, é só o quanto o personagem já evoluiu — quanto maior, mais experiente. Nesta cena você está no nível 7. Finge que é verdade.
+
+Escreva as leis de novo para ele. Assim ele decide sozinho, seja quem for que aparecer.`,
+  realWorld: `if / elif / else é como o programa toma decisões: SE isso, faça aquilo; SENÃO SE outra coisa, faça outra; SENÃO, a última opção. Você faz isso todo dia: se está chovendo, leva guarda-chuva; senão, se está frio, leva casaco; senão, vai de camiseta. O caixa eletrônico faz o mesmo antes de liberar um saque.`,
   theory: `if testa uma condição. elif testa outra, caso a primeira seja falsa. else pega todo o resto. A indentação (4 espaços) mostra o que pertence a cada bloco:
 
   vida = 30

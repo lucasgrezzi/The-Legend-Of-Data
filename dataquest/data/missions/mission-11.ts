@@ -10,9 +10,12 @@ const mission11: Mission = {
   chapterTitle: "As Catacumbas de Dados — Capítulo IV",
   missionTitle: "As Criptas por Tipo",
   concept: "SQL: GROUP BY e HAVING",
-  narrative: `A porta de ferro se abre para um corredor com quatro criptas seladas, uma para cada tipo de relíquia: armas, amuletos, pergaminhos e armaduras. Cada selo se desfaz quando alguém diz em voz alta quantas relíquias daquele tipo existem e quanto elas valem juntas.
+  narrative: `A porta de ferro range e abre. Atrás dela: quatro criptas seladas, uma para cada tipo de relíquia — armas, amuletos, pergaminhos e armaduras. Cripta é um quarto-cofre de catacumba, só que com mais teia de aranha.
 
-Mas abrir uma cripta desperta o que dorme lá dentro. O Guardião avisa: "Só vale a pena abrir as criptas cujo tesouro passa de 300 moedas. As outras... deixe dormir."`,
+Cada selo se desfaz quando alguém diz quantas relíquias daquele tipo existem e quanto elas valem juntas. Só que abrir uma cripta acorda o que dorme lá dentro, e ninguém aqui está a fim de acordar nada.
+
+"Só abra as que valem mais de 300 moedas", aconselha o Guardião. "As outras... deixa dormir." Ele boceja. "Eu também queria."`,
+  realWorld: `GROUP BY junta as linhas parecidas e faz a conta para cada grupo: vendas POR loja, alunos POR turma, gastos POR categoria no app do banco. O HAVING filtra os grupos depois de calculados — por exemplo, "só as categorias em que gastei mais de R$ 300".`,
   theory: `GROUP BY junta as linhas que têm o mesmo valor numa coluna e calcula um resumo para cada grupo:
 
   SELECT habitat,

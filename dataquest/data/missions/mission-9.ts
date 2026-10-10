@@ -10,9 +10,14 @@ const mission9: Mission = {
   chapterTitle: "As Catacumbas de Dados — Capítulo II",
   missionTitle: "O Salão dos Ossos",
   concept: "SQL: WHERE com AND, OR e IN",
-  narrative: `Mais fundo nas Catacumbas, o ar esfria e o chão range sob ossos antigos. No centro do salão, um esqueleto de armadura enferrujada ergue a cabeça: é o Guardião dos Ossos, que há séculos cataloga cada relíquia das salas na tabela reliquias.
+  narrative: `Mais fundo, o chão faz crec-crec. São ossos. Muitos. Você decide não perguntar.
 
-"Leve o que precisar, Arquivista", ele diz com a voz rouca, "mas só armas e amuletos, e só das salas Norte e Leste — as outras desabaram. E nada que esteja amaldiçoado. Quem sai daqui com uma maldição nunca mais encontra a saída."`,
+No meio do salão, um esqueleto de armadura levanta a cabeça bem devagar: é o Guardião dos Ossos, bibliotecário das Catacumbas há quinhentos anos. Ele anota cada relíquia na tabela reliquias e tem regras MUITO específicas.
+
+"Pode levar, Arquivista... mas só armas e amuletos. Só das salas Norte e Leste, que as outras desabaram. E nada amaldiçoado." Pausa dramática. "Quem sai com maldição nunca acha a saída."
+
+São três regras ao mesmo tempo. Cuidado com os parênteses — maldição de parêntese é a pior que existe.`,
+  realWorld: `AND, OR e IN combinam várias condições num filtro só. É o que você faz numa loja online: tênis E tamanho 40 E (preto OU branco). Os parênteses dizem o que vai junto — sem eles, o computador pode entender "tênis preto tamanho 40, ou então qualquer coisa branca de qualquer tamanho".`,
   theory: `Uma condição só no WHERE raramente basta. Para combinar várias, use AND e OR:
 
   AND → as duas condições precisam ser verdadeiras

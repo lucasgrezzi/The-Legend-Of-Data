@@ -14,9 +14,12 @@ const mission3: Mission = {
   chapterTitle: "As Catacumbas de Dados — Capítulo I",
   missionTitle: "A Primeira Escavação",
   concept: "SQL: SELECT, WHERE e ORDER BY",
-  narrative: `Com o Selo rompido, uma escadaria em espiral se revela e você desce às Catacumbas. Ali estão guardados os registros de todas as transações do Império, organizados em tabelas — cada tabela é uma sala diferente.
+  narrative: `O Selo explode numa nuvem de poeirinha brilhante (estiloso, eu sei). Atrás dele, uma escada em espiral desce às Catacumbas de Dados.
 
-Para encontrar as relíquias mais valiosas sem revirar sala por sala, o Arquivista precisa dominar a linguagem de consulta das Catacumbas: o SQL.`,
+Aqui embaixo, cada sala guarda uma TABELA: linhas e colunas, igualzinho a uma planilha. São registros de tudo o que o reino já vendeu. Revirar sala por sala? Você sairia daqui aposentado.
+
+Por isso os Arquivistas inventaram o SQL: um jeito de PERGUNTAR para a tabela e receber só o que interessa. Parece mágica, mas é só uma pergunta bem feita. Python fica lá em cima, viu? Aqui embaixo a língua é outra.`,
+  realWorld: `SQL é a língua usada para conversar com bancos de dados — é onde empresas guardam clientes, vendas e pedidos. SELECT escolhe as colunas, WHERE filtra as linhas e ORDER BY ordena. É como filtrar uma planilha, só que escrito, repetível e funcionando com milhões de linhas.`,
   theory: `SQL é a língua das Catacumbas: você pede os dados e o banco responde com uma tabela.
 
 SELECT escolhe as colunas e FROM diz de qual tabela:

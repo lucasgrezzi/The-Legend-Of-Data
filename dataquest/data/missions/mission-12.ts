@@ -10,9 +10,14 @@ const mission12: Mission = {
   chapterTitle: "As Catacumbas de Dados — Capítulo V (Chefe)",
   missionTitle: "O Rei Esquecido",
   concept: "SQL: JOIN entre tabelas",
-  narrative: `No coração das Catacumbas, sobre um trono de pedra, está o Rei Esquecido — o primeiro Arquivista-Rei, que se trancou aqui na Grande Corrupção. Seus olhos acendem quando você se aproxima.
+  narrative: `CHEFE DA REGIÃO. Solta a música dramática de novo. Mais alto.
 
-"Nenhum herói passa pela minha porta sem que eu saiba quem é digno", ele diz, abrindo dois tomos: a lista dos heróis e o Livro das Expedições. "Mas o Livro só guarda números — o herói de cada expedição é apenas um heroi_id. Junte os dois tomos e me diga quem trouxe mais ouro a este reino. Faça isso, e a passagem para a Forja é sua."`,
+No coração das Catacumbas, num trono de pedra, está o Rei Esquecido — o primeiro Arquivista-Rei, que se trancou aqui durante a Grande Bagunça e esqueceu onde deixou a chave. Faz trezentos anos. Ele está levemente mal-humorado.
+
+"Quero saber quem trouxe mais ouro ao meu reino!", troveja, abrindo dois livros: a lista dos heróis e o Livro das Expedições. Só que o Livro não guarda nomes, só um número para cada herói: o heroi_id. Coisa de rei com preguiça de escrever.
+
+Junte os dois livros, some o ouro de cada herói e ele libera a passagem para a Forja. Sem pressão. Só um rei morto-vivo te encarando.`,
+  realWorld: `JOIN junta duas tabelas por uma coluna em comum. Uma loja guarda os clientes numa tabela e os pedidos em outra — e o pedido só tem o id do cliente. Para saber quanto cada cliente gastou, você junta as duas pelo id. É um dos comandos mais usados no SQL do dia a dia.`,
   theory: `Muitas vezes a informação está dividida em duas tabelas. Uma coluna da primeira aponta para o id da segunda — é assim que elas se ligam.
 
   magos:    id, nome

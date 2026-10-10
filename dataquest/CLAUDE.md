@@ -24,7 +24,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
   `public/assets/bg/mapa-mundo.png`, gerado por nós com tiles CC0 (ver Sessão 3). Tudo pode ser commitado.
 - **Sessões 6, 7 e 8 commitadas e enviadas** em 2026-09-27 (trilha SQL; 10 níveis + neblina; perfil só leitura).
 - **Sessão 9 commitada e enviada** em 2026-10-08 (mapa com visual RPG imersivo).
-- **Sessão 10 commitada e enviada** em 2026-10-09 (Forja II: groupby).
+- **Sessão 10 commitada e enviada** em 2026-10-09 (Forja II: groupby; história reescrita em tom meta + "No mundo real").
 - Hoje são **14 missões** (7 de Python, 5 de SQL, 2 Pandas) — ver "As 14 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
@@ -257,6 +257,17 @@ nuvem (claude.ai/code/routines) que só preparam um briefing — a fase é criad
   `csvTable` agora é exportado de `data/catacumbas.ts`; `csvFile` remove o `table` para a aba Dados mostrar o arquivo.
 - Testado com pandas 2.3: a solução passa; sem o filtro (Norte 330…), ordem crescente e sem ordenar reprovam.
   `tsc` e `build` ok. **Não testado no navegador (Pyodide)**.
+- **História reescrita (todas as 14 fases)** para quem nunca jogou RPG nem programou. Decisões do usuário: tom
+  **bem-humorado e meta** (o Grimório é o narrador e fala com o jogador "do outro lado da tela") + caixa
+  **🌍 No mundo real** em cada fase. Só `narrative`/`realWorld` (e o `theory` do Prólogo) mudaram — QUEST,
+  `expectedOutput` e validação ficaram iguais.
+  - Novo campo `Mission.realWorld` (2–3 frases: o que o conceito é + analogia do dia a dia), renderizado no fim da
+    aba Lore (`MissionPanel`), com borda na cor da trilha.
+  - Termos de RPG são explicados na própria fala na 1ª vez (nível na M6, masmorra e XP na M2, chefe na M8, cripta
+    na M11, forja e fole na M4/M13); o Estudo do Prólogo tem um mini glossário (XP, moedas, chefe, raça/guilda).
+  - Elenco: Grimório (narrador), Seu Bartolo (mercador, M5), Guardião de pedra (M6), Guardião dos Ossos (M9–11,
+    esqueleto de óculos), Rei Esquecido (M12), Brokk (ferreiro anão, M4/M13). "Grande Corrupção" → **Grande Bagunça**
+    (alguém derrubou café no Grande Arquivo).
 
 ### Próximos passos sugeridos
 1. **Loja do Mercador (próximo foco, combinado com o usuário):** cosméticos/títulos compráveis com moedas —
@@ -459,7 +470,9 @@ Cap. II Mercado da Vila → Cap. III Guardião do Portão → Cap. IV Corredor d
 Guardião dos Ossos cataloga as relíquias → III Inventário do Guardião → IV Criptas por Tipo → V O Rei Esquecido,
 o primeiro Arquivista-Rei, com o Livro das Expedições) → **Pandas:** "Atrás do trono do Rei Esquecido…" a Forja (Cap. I A Forja Desperta → II O Fole das Regiões, o
 ferreiro anão e as encomendas das quatro regiões).
-O **Grimório** é, na lore, um livro vivo e ganancioso que vende dicas por ouro.
+O **Grimório** é, na lore, um livro vivo e ganancioso que vende dicas por ouro — e o **narrador** da campanha, que
+quebra a quarta parede. Ao escrever fases novas: tom bem-humorado e meta, frases curtas, explicar todo termo de RPG
+na 1ª vez e sempre preencher `realWorld`.
 
 ---
 
@@ -601,7 +614,8 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 14) — nunca reaproveitar/renumerar ids
    (são a chave do progresso salvo). Preencher `concept` com linguagem direta (o que a pessoa aprende).
    Campos de conteúdo (padrão da Sessão 4):
-   - `narrative` — continua a história da missão anterior (ver "Arco da história")
+   - `narrative` — continua a história da missão anterior (ver "Arco da história"; tom meta e bem-humorado)
+   - `realWorld` — caixa "No mundo real": o conceito em linguagem simples + analogia do dia a dia
    - `theory` (aba Estudo) — ensina a SINTAXE com um exemplo de outro contexto; não entrega a resposta
    - `instructions` (QUEST) — objetivo + saída esperada, sem passo a passo; menos guiada quanto mais avançada
    - `hints` — 2 dicas, da mais leve à mais específica · `solution` — código completo que passa na validação

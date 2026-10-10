@@ -7,26 +7,36 @@ const mission0: Mission = {
   chapterTitle: "Prólogo — O Despertar do Arquivista",
   missionTitle: "O Chamado do Arquivo",
   concept: "Como o jogo funciona",
-  narrative: `O ano é 847 da Era dos Dados. As Catacumbas do Grande Arquivo foram seladas há três gerações após a Grande Corrupção — quando os dados foram fragmentados, desordenados e perdidos para sempre.
+  narrative: `Psiu. Ei. Sim, você aí do outro lado da tela.
 
-Você foi escolhido pela Guilda dos Arquivistas para adentrar as ruínas e restaurar o conhecimento perdido. Antes de partir, a Guilda lhe entrega uma pequena bolsa de ouro: use-a com sabedoria.
+Eu sou o Grimório: um livro mágico, falante e, modéstia à parte, genial. Vou narrar a sua aventura. Deixa eu resumir a história, porque ninguém gosta de prólogo comprido:
 
-Sua jornada começa agora.`,
-  theory: `Aqui você aprende programação e análise de dados jogando. A Guilda dos Arquivistas é o grupo de heróis que usa código para organizar os dados do reino — e agora você faz parte dela.
+Era uma vez um reino que anotava tudo no Grande Arquivo — quem comprou o quê, quanto ouro entrou, qual dragão comeu qual vila. Um belo dia, alguém derrubou café em tudo. Chamamos esse dia de Grande Bagunça. Os dados viraram sopa.
+
+A Guilda dos Arquivistas — um clube de heróis que arruma dados usando código — está precisando de gente nova. Adivinha quem acabou de entrar? Pois é. Toma aqui uma bolsinha de ouro. Não gasta tudo em poção.`,
+  realWorld: `Este jogo é um curso de verdade fantasiado de aventura. Cada fase ensina uma ferramenta que analistas de dados usam no trabalho: Python (dar instruções ao computador), SQL (fazer perguntas a tabelas), Pandas (arrumar planilhas com código) e gráficos. Não precisa saber nada de RPG nem de programação — a gente explica tudo pelo caminho.`,
+  theory: `Bem-vindo! Aqui você aprende programação e análise de dados jogando — e não precisa saber nada de nenhum dos dois.
+
+Palavras de jogo que vão aparecer por aí:
+
+• XP (pontos de experiência) — os pontos que você ganha ao vencer uma fase. Juntar XP faz você subir de NÍVEL, como passar de ano na escola.
+• MOEDAS — o dinheiro do jogo. Servem para comprar dicas.
+• CHEFE — a última fase de cada região: mais difícil, junta tudo o que você aprendeu ali.
+• RAÇA e GUILDA — o visual e o time do seu personagem. Não mudam nada nas fases.
 
 Sua jornada passa por quatro regiões:
 
 • PYTHON — A Linguagem dos Antigos: a base de tudo. Variáveis, decisões, repetições e funções.
-• SQL — As Catacumbas de Dados: consultar tabelas gigantes.
+• SQL — As Catacumbas de Dados: fazer perguntas a tabelas gigantes.
 • PANDAS — A Forja de Dados: limpar e transformar dados.
 • DATA VIZ — O Farol da Verdade: gráficos que revelam padrões.
 
 Como jogar:
 
 • QUEST é o seu objetivo. Ela diz O QUE fazer — descobrir COMO é com você.
-• ESTUDO ensina a sintaxe da fase, com exemplos. Leia antes de começar!
-• ▶ Executar testa o código. Enviar Resposta valida e rende XP e moedas.
-• GRIMÓRIO vende dicas em troca de moedas. Depois de 3 respostas erradas ele também revela a solução completa — mas a missão passa a valer só metade do XP.
+• ESTUDO ensina o que você precisa saber para a fase, com exemplos. Leia antes de começar!
+• ▶ Executar testa o código. Enviar Resposta confere e dá XP e moedas.
+• GRIMÓRIO (eu!) vende dicas em troca de moedas. Depois de 3 respostas erradas eu também mostro a solução completa — mas aí a fase vale só metade do XP.
 • Quanto mais você avança, menos a QUEST te guia. É assim que se forma um Arquivista.`,
   instructions: "Leia o chamado e pressione Próximo para começar sua jornada.",
   hints: [],

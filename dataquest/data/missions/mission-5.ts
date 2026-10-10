@@ -9,9 +9,12 @@ const mission5: Mission = {
   chapterTitle: "A Linguagem dos Antigos — Capítulo II",
   missionTitle: "O Mercado da Vila",
   concept: "Variáveis e contas (+ - * /)",
-  narrative: `Antes de descer às Catacumbas, todo Arquivista passa pelo Mercado da Vila para se equipar. O mercador anota tudo num pergaminho encantado: cada item tem um nome e um preço — e, a cada compra, as moedas da bolsa mudam.
+  narrative: `Antes de qualquer aventura, todo herói faz a mesma coisa: vai às compras. É lei. Está na página 1 do Manual do Herói.
 
-Em programação, esse pergaminho é feito de variáveis: nomes que guardam valores, entram em contas e podem ser atualizados a qualquer momento.`,
+O Mercado da Vila é do Seu Bartolo, um mercador que anota tudo num pergaminho e detesta fazer conta de cabeça. "Três poções, quinze moedas cada... dá... hmm... calcula aí pra mim, vai?"
+
+Spoiler: você também não vai fazer de cabeça. Quem faz conta aqui é o Python. Você só precisa pedir direito — e anotar quanto sobrou na bolsa, que o Seu Bartolo não devolve troco errado.`,
+  realWorld: `Variáveis guardam números e entram em contas, como uma calculadora com memória. É exatamente o que o app do banco faz: saldo = saldo - compra. Quando o valor muda, você atualiza a variável, e o resto do programa passa a usar o valor novo.`,
   theory: `Variáveis podem entrar em contas, e o resultado pode ser guardado em outra variável:
 
   forca = 4

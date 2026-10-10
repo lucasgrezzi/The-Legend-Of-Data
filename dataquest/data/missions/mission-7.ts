@@ -9,9 +9,12 @@ const mission7: Mission = {
   chapterTitle: "A Linguagem dos Antigos — Capítulo V",
   missionTitle: "A Mochila do Arquivista",
   concept: "Listas: append, len e for",
-  narrative: `Além do corredor fica o Salão das Relíquias: prateleiras cobertas de poeira, objetos esquecidos desde a Grande Corrupção. Sua mochila já carrega o básico — mas um Arquivista de verdade não confia na memória: ele mantém uma lista.
+  narrative: `Do outro lado do corredor fica o Salão das Relíquias: prateleiras empoeiradas, objetos esquecidos desde a Grande Bagunça e um cheiro forte de "ninguém limpa isso há séculos".
 
-Em Python, uma lista guarda vários valores em ordem dentro de uma única variável. Ela pode crescer, ser percorrida e contada.`,
+Sua mochila já tem tocha, corda e poção. E ali no canto tem um mapa antigo dando sopa. Pega. Mapa nunca é demais.
+
+Conselho de livro velho: herói que confia na memória é herói perdido. Faça uma lista do que carrega. E, cá entre nós, você vai usar listas em praticamente TODO programa que escrever daqui pra frente. Bem-vindo ao clube.`,
+  realWorld: `Uma lista guarda vários valores em ordem dentro de uma única variável. É a sua lista de compras, a playlist do celular, o carrinho de uma loja online: dá para adicionar itens (append), contar quantos tem (len) e passar por cada um (for).`,
   theory: `Uma lista guarda vários valores entre colchetes, separados por vírgula:
 
   feiticos = ["fogo", "gelo"]

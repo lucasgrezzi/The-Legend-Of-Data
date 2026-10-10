@@ -10,9 +10,12 @@ const mission10: Mission = {
   chapterTitle: "As Catacumbas de Dados — Capítulo III",
   missionTitle: "O Inventário do Guardião",
   concept: "SQL: COUNT, SUM, AVG, MAX e AS",
-  narrative: `Com as relíquias escolhidas, você segue para a porta de ferro no fim do salão. O Guardião dos Ossos bate o cajado no chão e ela não se mexe.
+  narrative: `Com as relíquias na mochila, você chega a uma porta de ferro. O Guardião bate o cajado no chão. A porta não se mexe. Ele bate de novo. Nada. Ele finge que era isso mesmo que queria.
 
-"Antes de passar, preciso de um relatório para o meu livro", ele diz. "Não quero a lista inteira — meus olhos já não leem tanto. Quero os números: quantas relíquias podem sair daqui, quanto valem juntas, quanto vale uma em média e quanto vale a mais preciosa."`,
+"Antes de passar, preciso de um relatório para o meu livro", diz, ajeitando os óculos (sim, esqueletos usam óculos). "A lista inteira não, meus olhos já não leem tanto. Quero os números: quantas relíquias podem sair, quanto valem juntas, quanto vale uma em média e quanto vale a mais preciosa."
+
+Traduzindo: ele quer um resumo. Esqueletos adoram resumos. Ocupam menos espaço na caveira.`,
+  realWorld: `COUNT conta, SUM soma, AVG tira a média e MAX acha o maior valor. São as contas do rodapé de uma planilha, só que feitas pelo banco de dados. Todo painel de empresa ("vendas do mês", "ticket médio") começa com elas. O AS só dá um nome legível para a coluna do resultado.`,
   theory: `Às vezes você não quer as linhas, e sim um resumo delas. As funções de agregação transformam muitas linhas em um único valor:
 
   COUNT(*)     → quantas linhas existem

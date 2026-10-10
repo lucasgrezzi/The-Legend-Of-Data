@@ -8,9 +8,14 @@ const mission1: Mission = {
   chapterTitle: "A Linguagem dos Antigos — Capítulo I",
   missionTitle: "O Primeiro Feitiço",
   concept: "print() e variáveis",
-  narrative: `No salão da Guilda, um livro velho se abre sozinho sobre a mesa: é o Grimório, o livro vivo dos Arquivistas. Ele conhece todos os feitiços — mas é ganancioso, e só sussurra dicas em troca de ouro.
+  narrative: `Sou eu de novo, o Grimório, agora aberto em cima da mesa da Guilda. Duas regras antes de começar:
 
-"Todo Arquivista começa se apresentando ao Arquivo", ele resmunga. "Diga quem você é e qual o seu nível. O Arquivo só escuta quem fala a língua dos Antigos: Python."`,
+Regra número um: aqui, "feitiço" é só um nome chique para CÓDIGO. Você escreve, o computador obedece. Sem varinha, sem latim, sem acenar para a tela (eu vi).
+
+Regra número dois: eu sei TODAS as respostas, mas cobro por elas. Sou um livro, preciso pagar o aluguel da estante.
+
+Agora, o Arquivo — aquela estante gigante lá no fundo — quer saber quem você é. Ele é meio surdo e só entende uma língua: Python. Apresente-se.`,
+  realWorld: `Variável é uma caixinha com etiqueta: você guarda um valor (um nome, um número) e depois chama pela etiqueta. É como salvar um contato no celular — você não decora o número, procura por "Mãe". E o print() é o jeito de o programa falar com você: ele mostra na tela o que tem dentro da caixinha.`,
   theory: `print() faz o Arquivo mostrar algo na tela:
 
   print("Olá, reino!")
