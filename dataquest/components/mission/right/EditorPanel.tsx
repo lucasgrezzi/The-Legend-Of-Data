@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import type { Mission, RunResult, EngineStatus } from "@/types";
 import CodeEditor from "./CodeEditor";
 import TerminalOutput from "./TerminalOutput";
 import TablePreview from "./TablePreview";
 import GraphPanel from "./GraphPanel";
+import { explainError, errorContext } from "@/lib/friendlyErrors";
 
 interface EditorPanelProps {
   mission: Mission;
@@ -27,6 +28,8 @@ const LANG_COLOR: Record<string, string> = {
 };
 
 const OUTPUT_DEFAULT = 220;
+/** Altura que cabe a explicação do Grimório inteira */
+const OUTPUT_ERROR = 340;
 const OUTPUT_MIN = 90;
 const EDITOR_MIN = 140;
 
@@ -39,6 +42,8 @@ export default function EditorPanel({
 }: EditorPanelProps) {
   const [code, setCode] = useState(mission.codeTemplate);
   const [result, setResult] = useState<RunResult | null>(null);
+  /** Código que gerou o `result` (o jogador pode editar depois; a linha do erro se refere a este) */
+  const [ranCode, setRanCode] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -54,7 +59,9 @@ export default function EditorPanel({
     if (busy) return;
     setIsRunning(true);
     try {
-      setResult(await onRun(code));
+      const r = await onRun(code);
+      setRanCode(code);
+      setResult(r);
     } finally {
       setIsRunning(false);
     }
@@ -65,6 +72,7 @@ export default function EditorPanel({
     setIsSubmitting(true);
     try {
       const r = await onRun(code);
+      setRanCode(code);
       setResult(r);
       onSubmit(r, code);
     } finally {
@@ -97,6 +105,19 @@ export default function EditorPanel({
   const langColor = LANG_COLOR[mission.editorLanguage] ?? "var(--color-submit)";
 
   const hasError = !!result && !result.success;
+  const friendly = useMemo(
+    () => (result && !result.success && result.stderr ? explainError(result.stderr, errorContext(mission, ranCode)) : null),
+    [result, mission, ranCode]
+  );
+  // objeto novo a cada execução: reaplica o destaque mesmo se a linha for a mesma
+  const errorMark = useMemo(() => (friendly?.line ? { line: friendly.line } : null), [friendly]);
+
+  // Com erro, a saída cresce para mostrar a explicação inteira (sem espremer o editor)
+  useEffect(() => {
+    if (!friendly || !containerRef.current) return;
+    const max = containerRef.current.getBoundingClientRect().height - EDITOR_MIN - 120;
+    setOutputHeight((h) => Math.max(h, Math.min(OUTPUT_ERROR, max)));
+  }, [friendly]);
   const rowCount = result?.tableData?.rows.length;
 
   return (
@@ -142,6 +163,7 @@ export default function EditorPanel({
           onChange={setCode}
           language={mission.editorLanguage}
           onRunShortcut={handleRun}
+          errorMark={errorMark}
         />
       </div>
 
@@ -205,6 +227,8 @@ export default function EditorPanel({
               stdout={result?.stdout ?? ""}
               stderr={result?.stderr ?? ""}
               isRunning={isRunning || isSubmitting}
+              friendly={friendly}
+              language={mission.editorLanguage}
             />
           )}
           {result?.tableData && !isRunning && (

@@ -1,4 +1,5 @@
 import type { Mission, RunResult, ValidationResult, TableData } from "@/types";
+import { explainError, errorContext } from "@/lib/friendlyErrors";
 
 function normalize(s: string): string {
   return s.trim().replace(/\r\n/g, "\n").replace(/\n+$/, "");
@@ -101,7 +102,7 @@ export function validateOutput(
   mission: Mission,
   code = ""
 ): ValidationResult {
-  const base = validateResult(result, mission);
+  const base = validateResult(result, mission, code);
   if (!base.passed) return base;
   const hint = missingCode(code, mission);
   if (hint) {
@@ -118,16 +119,24 @@ Dica: ${hint}`,
 
 function validateResult(
   result: RunResult,
-  mission: Mission
+  mission: Mission,
+  code: string
 ): ValidationResult {
   if (mission.validationType === "narrative") {
     return { passed: true, feedback: "Missão concluída!", xpEarned: mission.xpReward };
   }
 
   if (!result.success) {
+    const err = explainError(result.stderr, errorContext(mission, code));
+    const plain = (t: string) => t.replace(/`/g, "");
     return {
       passed: false,
-      feedback: `Erro de execução:\n${result.stderr}`,
+      feedback: `O feitiço quebrou antes de terminar.
+
+🔮 ${plain(err.title)}${err.line ? ` (linha ${err.line})` : ""}
+${plain(err.explain)}${err.fix ? `\n\nComo consertar: ${plain(err.fix)}` : ""}
+
+A explicação completa e a mensagem original estão no painel Saída.`,
       xpEarned: 0,
     };
   }

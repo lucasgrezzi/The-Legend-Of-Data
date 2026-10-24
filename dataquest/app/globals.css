@@ -228,6 +228,92 @@ body {
 }
 .terminal.has-error { color: var(--color-error); }
 
+/* Erro traduzido pelo Grimório (painel Saída) */
+.grimoire-error {
+  margin: 12px 14px 14px;
+  padding: 12px 14px 10px;
+  background: linear-gradient(180deg, rgba(255,92,92,0.08), rgba(28,35,51,0.9) 60%);
+  border: 1px solid rgba(255,92,92,0.28);
+  border-left: 3px solid var(--color-error);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.35);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text);
+  animation: pop-in 0.25s both;
+}
+.grimoire-error-book {
+  flex-shrink: 0;
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  background: rgba(240,192,64,0.1);
+  border: 1px solid rgba(240,192,64,0.35);
+  border-radius: 50%;
+}
+.grimoire-error-kicker {
+  margin: 2px 0 0;
+  font-family: var(--font-pixel);
+  font-size: 9px;
+  color: var(--color-accent);
+  letter-spacing: 0.5px;
+}
+.grimoire-error-title { margin: 4px 0 0; font-size: 15px; font-weight: 800; }
+.grimoire-error-line {
+  display: flex; align-items: center; gap: 10px;
+  margin: 10px 0 2px;
+  padding: 6px 10px;
+  background: #060a10;
+  border-radius: 6px;
+  overflow-x: auto;
+  white-space: pre;
+}
+.grimoire-error-lineno {
+  flex-shrink: 0;
+  font-size: 11px; font-weight: 700;
+  color: var(--color-error);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.grimoire-error-line code { color: #e6d9a8; }
+.grimoire-error-text { margin: 8px 0 0; }
+.grimoire-error-fix {
+  margin: 8px 0 0;
+  padding: 6px 10px;
+  background: rgba(34,197,94,0.08);
+  border-left: 2px solid var(--color-run);
+  border-radius: 4px;
+}
+.grimoire-error-fix b { color: var(--color-run); }
+.grimoire-error-code {
+  font-family: var(--font-body);
+  font-size: 12px;
+  padding: 1px 5px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: #e6d9a8;
+  white-space: pre-wrap;
+}
+.grimoire-error-raw { margin-top: 10px; font-size: 12px; color: var(--color-muted); }
+.grimoire-error-raw summary { cursor: var(--cursor-hover); user-select: none; }
+.grimoire-error-raw summary:hover { color: var(--color-text); }
+.grimoire-error-raw summary span { opacity: 0.7; }
+.grimoire-error-raw p { margin: 6px 0; font-style: italic; }
+.grimoire-error-raw pre {
+  margin: 0;
+  padding: 8px 10px;
+  background: #060a10;
+  color: var(--color-error);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Linha com erro no editor (some ao editar) */
+.cm-editor .cm-error-line { background: rgba(255,92,92,0.16); box-shadow: inset 3px 0 0 var(--color-error); }
+
 /* Alça para redimensionar editor ↕ terminal */
 .splitter {
   height: 8px;

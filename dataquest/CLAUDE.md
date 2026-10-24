@@ -10,7 +10,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 
 ## 📍 Onde paramos (retomar aqui)
 
-> Última sessão: **2026-10-09** (com Claude Code). Leia esta seção primeiro ao retomar.
+> Última sessão: **2026-10-24** (com Claude Code). Leia esta seção primeiro ao retomar.
 
 ### ⚠ Estado do repositório
 - **Sessões 1–3 commitadas e enviadas** ao GitHub (`master`, commit `10363cd`) em 2026-09-22.
@@ -25,6 +25,8 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessões 6, 7 e 8 commitadas e enviadas** em 2026-09-27 (trilha SQL; 10 níveis + neblina; perfil só leitura).
 - **Sessão 9 commitada e enviada** em 2026-10-08 (mapa com visual RPG imersivo).
 - **Sessão 10 commitada e enviada** em 2026-10-09 (Forja II: groupby; história reescrita em tom meta + "No mundo real").
+- **Sessão 11 commitada e enviada** em 2026-10-24 (o Grimório traduz os erros de Python e SQL).
+- **Sessão 11 commitada e enviada** em 2026-10-24 (o Grimório traduz os erros de Python e SQL).
 - Hoje são **14 missões** (7 de Python, 5 de SQL, 2 Pandas) — ver "As 14 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
@@ -269,8 +271,34 @@ nuvem (claude.ai/code/routines) que só preparam um briefing — a fase é criad
     esqueleto de óculos), Rei Esquecido (M12), Brokk (ferreiro anão, M4/M13). "Grande Corrupção" → **Grande Bagunça**
     (alguém derrubou café no Grande Arquivo).
 
+### Sessão 11 — O Grimório traduz os erros (2026-10-24)
+Pedido do usuário: melhorar a experiência para **quem não sabe programar nem jogar RPG** (e quem já sabe), mantendo as
+missões no padrão atual e o visual cada vez mais RPG. Roteiro combinado (nesta ordem):
+**(1) erros traduzidos ✅ → (2) tela da missão no estilo RPG + tutorial guiado na 1ª fase de código → (3) glossário fixo
+("Bestiário de Palavras") → (4) Loja do Mercador e fases novas.**
+- `lib/friendlyErrors.ts`: `explainError(stderr, errorContext(mission, code))` → `{ kind, title, explain, fix, line,
+  lineText, raw }`. Regras para ~40 erros comuns de Python (aspas, parênteses, `:`, recuo, `=` × `==`, aspas curvas,
+  NameError com "você quis dizer…?", concatenação texto+número, KeyError de coluna do Pandas, import…) e de SQL/DuckDB
+  (tabela/coluna inexistente com sugestão, `"texto"` em vez de `'texto'`, GROUP BY, agregação no WHERE → HAVING, coluna
+  ambígua no JOIN, palavra-chave com letra trocada `FORM`→`FROM`, vírgula antes do FROM…). Trechos entre crases viram código.
+  Sugestões: distância de edição até 2; nomes com < 3 letras não recebem sugestão; a dica `None` do Python é ignorada
+  (`nome` → "Did you mean: 'None'?" só confundia).
+- `GrimoireError.tsx` no painel Saída: título, "Linha N" + texto da linha, explicação, **Como consertar** e, recolhida,
+  a **mensagem original** (para quem já programa — e para aprender a ler). A saída cresce para 340px num erro.
+  A linha com erro fica destacada no editor (`.cm-error-line`, some ao editar). O dialog "Ainda não…" usa o mesmo texto.
+- **Motor Python** (`pyodide-worker.js`): o código do aluno roda **sem embrulho** (`runPythonAsync(code, { globals })`)
+  — os números de linha batem com o editor e textos de três aspas não são mais alterados; **namespace novo a cada
+  execução** (antes, uma variável de uma execução antiga "salvava" a seguinte); o que foi impresso antes do erro também
+  aparece. `plt`/`pd` não vêm mais prontos — as missões já importam.
+- Testado: 38 casos do tradutor em Node (erros reais do CPython e do DuckDB-Wasm); no navegador (build sem Supabase,
+  CDP, 1366×768) 13 cenários — erros de Python, Pandas e SQL com linha e destaque certos, envio errado mostra a
+  tradução no dialog, soluções da M1 e M4 passam pela tela.
+
 ### Próximos passos sugeridos
-1. **Loja do Mercador (próximo foco, combinado com o usuário):** cosméticos/títulos compráveis com moedas —
+0. **Roteiro da Sessão 11:** (2) tela da missão no estilo RPG do mapa (molduras, QUEST em pergaminho, terminal) +
+   tutorial guiado na M1 (o Grimório aponta editor, Executar, Saída, Enviar); (3) glossário fixo do jogador, preenchido
+   conforme avança; depois (4) abaixo.
+1. **Loja do Mercador (combinado com o usuário):** cosméticos/títulos compráveis com moedas —
    títulos aparecendo no ranking, molduras/cores do personagem, talvez pet no mapa. Nada que ajude a resolver
    (não competir com as dicas). Economia hoje: 275 moedas possíveis; dicas custam 5 e 10.
 2. Continuar **Pandas** (merge, colunas calculadas, pivot_table — groupby feito na M13) e ao módulo **Data Viz** (validação `"chart"`).
@@ -366,7 +394,8 @@ dataquest/
 │   │   └── right/
 │   │       ├── EditorPanel.tsx  # Editor (altura total) + Run/Submit + splitter + painel Saída
 │   │       ├── CodeEditor.tsx   # Wrapper CodeMirror (Ctrl/Cmd+Enter executa)
-│   │       ├── TerminalOutput.tsx
+│   │       ├── TerminalOutput.tsx # stdout ou, no erro, o GrimoireError
+│   │       ├── GrimoireError.tsx  # Erro traduzido: título, linha, explicação, como consertar, original
 │   │       ├── TablePreview.tsx # Resultado SQL como tabela HTML
 │   │       └── GraphPanel.tsx   # Gráfico matplotlib base64
 │   └── ui/
@@ -383,6 +412,8 @@ dataquest/
 │   ├── tracks.ts                # TRACKS (nome, cor, rgb, ícone) + TRACK_ORDER — fonte única
 │   ├── xp.ts                    # computeLevel(), levelProgress(), isMissionUnlocked(), missingRequirements()
 │   ├── validation.ts            # validateOutput() — exact/table/chart/contains/narrative
+│   ├── friendlyErrors.ts        # explainError(): traduz erros de Python/SQL para iniciantes (Grimório)
+│   ├── friendlyErrors.ts        # explainError(): traduz erros de Python/SQL para iniciantes (Grimório)
 │   ├── supabase.ts              # Cliente Supabase (null sem as variáveis de ambiente)
 │   └── engines/
 │       ├── pyodide-engine.ts    # Singleton Worker: initPyodideWorker(), runPython(), subscribePyodideStatus()
