@@ -26,7 +26,9 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessão 9 commitada e enviada** em 2026-10-08 (mapa com visual RPG imersivo).
 - **Sessão 10 commitada e enviada** em 2026-10-09 (Forja II: groupby; história reescrita em tom meta + "No mundo real").
 - **Sessão 11 commitada e enviada** em 2026-10-24 (o Grimório traduz os erros de Python e SQL).
+- **Sessão 12 commitada e enviada** em 2026-10-24 (tela da missão no estilo RPG + tutorial guiado).
 - **Sessão 11 commitada e enviada** em 2026-10-24 (o Grimório traduz os erros de Python e SQL).
+- **Sessão 12 commitada e enviada** em 2026-10-24 (tela da missão no estilo RPG + tutorial guiado).
 - Hoje são **14 missões** (7 de Python, 5 de SQL, 2 Pandas) — ver "As 14 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
@@ -294,10 +296,29 @@ missões no padrão atual e o visual cada vez mais RPG. Roteiro combinado (nesta
   CDP, 1366×768) 13 cenários — erros de Python, Pandas e SQL com linha e destaque certos, envio errado mostra a
   tradução no dialog, soluções da M1 e M4 passam pela tela.
 
+### Sessão 12 — Tela da missão no estilo RPG + tutorial guiado (2026-10-24)
+Item (2) do roteiro da Sessão 11. Mesmo vocabulário visual do mapa (Sessão 9); CSS no bloco "RPG imersivo (tela da
+missão)" no fim de `globals.css`.
+- **Topo** `.wood-bar` (logo `.gate-logo`), progresso da trilha em **gemas** (`.quest-gem` + `--gem`), botão **❔ Como
+  jogar** (só em fases com código). **Rodapé** `.wood-bar.is-bottom`. Botões com `.btn-pixel .is-compact` (brilho por
+  `--glow`: verde no Executar, azul no Enviar).
+- **Esquerda** `.mission-stage` (pedra tingida com `--track-rgb`); **QUEST em pergaminho** `.quest-scroll` com bastões de
+  madeira (texto em `track.ink`; RichText aceita `--rt-text`/`--rt-on-accent`); abas num `.mission-book.rpg-frame`
+  (sem `overflow: hidden`, senão corta os rebites).
+- **Direita** `.mission-tome`: barras `.tome-bar` de madeira, arquivo em `.file-tag`, "✍️ Escreva seu código aqui",
+  "🔮 Saída — o que o código mostra". Prólogo: bloco da direita em `.rpg-frame` avisando que o tutorial vem na próxima.
+- **Tutorial** `components/mission/GuidedTour.tsx`: holofote (`.tour-spot`, sombra de 9999px) + balão do Grimório
+  (`.tour-card.rpg-frame`) posicionado abaixo/acima/ao lado do alvo. Alvos = atributos `data-tour` (quest, tab-estudo,
+  tab-dados, editor, run, output, submit, tab-grimorio, player). `missionTourSteps()` pula o que a fase não tem e fala das
+  lacunas `___` se o template tiver. Abre sozinho **só na 1ª fase com código** (`FIRST_CODE_MISSION_ID`), não concluída,
+  uma vez por navegador (`localStorage["dataquest-tour-seen"]`, marcado ao Pular ou concluir). Teclas: → / Enter / ← / Esc.
+- Testado (build sem Supabase + CDP, 1366×768): jogador novo na M1 → tutorial abre, 8 passos com alvo e balão dentro da
+  tela, fecha e grava; reload não reabre; "Como jogar" reabre; M9 não abre sozinho. Os 13 cenários da Sessão 11 passam.
+
 ### Próximos passos sugeridos
-0. **Roteiro da Sessão 11:** (2) tela da missão no estilo RPG do mapa (molduras, QUEST em pergaminho, terminal) +
-   tutorial guiado na M1 (o Grimório aponta editor, Executar, Saída, Enviar); (3) glossário fixo do jogador, preenchido
-   conforme avança; depois (4) abaixo.
+0. **Roteiro da Sessão 11:** ~~(2) tela da missão RPG + tutorial~~ ✅; **(3) glossário fixo do jogador** ("Bestiário de
+   Palavras": termos de RPG e de programação, preenchido conforme avança); depois (4) abaixo. Login e ranking ainda no
+   visual antigo.
 1. **Loja do Mercador (combinado com o usuário):** cosméticos/títulos compráveis com moedas —
    títulos aparecendo no ranking, molduras/cores do personagem, talvez pet no mapa. Nada que ajude a resolver
    (não competir com as dicas). Economia hoje: 275 moedas possíveis; dicas custam 5 e 10.
@@ -387,6 +408,7 @@ dataquest/
 │   │   └── MapFog.tsx           # Neblina sobre as terras inexploradas + useFogReveal (recuo animado)
 │   ├── mission/
 │   │   ├── MissionScreen.tsx    # Guard de bloqueio + top bar + 55/45 colunas + dialog de resultado
+│   │   ├── GuidedTour.tsx       # Tutorial guiado (holofote + balão do Grimório) — data-tour nos alvos
 │   │   ├── left/
 │   │   │   ├── MissionPanel.tsx # QUEST no topo + abas Lore/Estudo/Grimório/Dados + rodapé
 │   │   │   ├── HintShop.tsx     # Grimório: dicas compradas com moedas + solução (3 erros, −50% XP)

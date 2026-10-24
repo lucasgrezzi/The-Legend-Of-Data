@@ -1006,15 +1006,162 @@ body {
 }
 
 /* Chip do jogador e botões dentro da barra de madeira: placa escura com filete dourado */
-.wood-bar .player-chip, .wood-bar .icon-btn {
+.wood-bar .player-chip, .wood-bar .icon-btn, .tome-bar .icon-btn {
   background: linear-gradient(180deg, #1a1410, #120e0b) !important;
   border: none !important;
   border-radius: 4px !important;
   box-shadow: 0 0 0 2px var(--frame-dark), 0 0 0 3px var(--frame-gold-lo), inset 0 1px 0 rgba(255,255,255,0.06);
 }
-.wood-bar .player-chip:hover, .wood-bar .icon-btn:hover {
+.wood-bar .player-chip:hover, .wood-bar .icon-btn:hover, .tome-bar .icon-btn:hover {
   background: linear-gradient(180deg, #2a2018, #1a1410) !important;
   box-shadow: 0 0 0 2px var(--frame-dark), 0 0 0 3px var(--frame-gold), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 .wood-bar .player-chip > span:first-child { border-radius: 3px !important; }
 .map-fog-card.rpg-frame { position: absolute; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   RPG imersivo (tela da missão): pedra, pergaminho da QUEST, tomo do editor
+   ══════════════════════════════════════════════════════════════════════ */
+.btn-pixel { box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -4px 0 rgba(0,0,0,0.25), 0 0 0 2px var(--frame-dark), 0 5px 0 var(--frame-dark), 0 8px 18px var(--glow, rgba(240,192,64,0.25)); }
+.btn-pixel:hover:not(:disabled) { box-shadow: inset 0 2px 0 rgba(255,255,255,0.55), inset 0 -4px 0 rgba(0,0,0,0.25), 0 0 0 2px var(--frame-dark), 0 6px 0 var(--frame-dark), 0 10px 24px var(--glow, rgba(240,192,64,0.4)); }
+.btn-run.btn-pixel    { --glow: rgba(34,197,94,0.35); }
+.btn-submit.btn-pixel { --glow: rgba(74,174,255,0.35); }
+.btn-nav.btn-pixel    { --glow: rgba(0,0,0,0.3); }
+.btn-pixel.is-compact { padding: 10px 16px 12px; }
+
+/* Rodapé de madeira (mesma madeira da barra do topo) */
+.wood-bar.is-bottom {
+  border-bottom: none;
+  border-top: 3px solid var(--frame-gold);
+  box-shadow: 0 -2px 0 var(--frame-dark), 0 -8px 24px rgba(0,0,0,0.4);
+}
+
+/* Progresso da trilha no topo: uma gema por missão */
+.quest-gem {
+  display: block;
+  width: 30px;
+  height: 12px;
+  border-radius: 2px;
+  background: #2a2f3d;
+  box-shadow: 0 0 0 2px var(--frame-dark), inset 0 2px 0 rgba(255,255,255,0.18), inset 0 -3px 0 rgba(0,0,0,0.3);
+}
+.quest-gem.is-done { background: var(--gem); box-shadow: 0 0 0 2px var(--frame-dark), inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -3px 0 rgba(0,0,0,0.25), 0 0 10px var(--gem); }
+.quest-gem.is-current { box-shadow: 0 0 0 2px var(--frame-dark), 0 0 0 4px var(--frame-gold), inset 0 2px 0 rgba(255,255,255,0.3), inset 0 -3px 0 rgba(0,0,0,0.25); }
+.quest-gem.is-locked { opacity: 0.45; }
+
+/* Coluna da esquerda: salão de pedra tingido pela cor da trilha */
+.mission-stage {
+  background:
+    radial-gradient(90% 45% at 30% 0%, rgba(var(--track-rgb), 0.12), transparent 70%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.014) 0 1px, transparent 1px 30px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.010) 0 1px, transparent 1px 60px),
+    var(--color-bg);
+}
+.mission-stage .pixel-chapter { color: #b8a88c; }
+
+/* QUEST em pergaminho com bastões de madeira em cima e embaixo */
+.quest-scroll {
+  --rt-text: var(--ink);
+  --rt-on-accent: var(--parchment);
+  position: relative;
+  margin: 12px 10px 30px;
+  padding: 22px 24px 16px;
+  color: var(--ink);
+  border-radius: 3px;
+  background:
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(120,84,36,0.28) 100%),
+    linear-gradient(180deg, var(--parchment) 0%, var(--parchment-lo) 100%);
+  box-shadow:
+    0 0 0 2px #6b4f26,
+    0 0 0 4px var(--frame-dark),
+    inset 0 2px 0 rgba(255,255,255,0.4),
+    0 14px 28px rgba(0,0,0,0.5);
+}
+.quest-scroll::before, .quest-scroll::after {
+  content: "";
+  position: absolute;
+  left: -14px;
+  right: -14px;
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #a07c44 0%, #6b4c24 55%, #3d2a12 100%);
+  box-shadow: 0 0 0 2px var(--frame-dark), inset 0 2px 0 rgba(255,255,255,0.3), 0 4px 8px rgba(0,0,0,0.45);
+}
+.quest-scroll::before { top: -10px; }
+.quest-scroll::after  { bottom: -10px; }
+.quest-scroll .code-block { background: rgba(46,32,16,0.9); color: #f3e3b5; }
+.quest-scroll .link-btn { color: var(--ink); font-weight: 700; }
+.quest-scroll .link-btn:hover { color: #7a3d0a; }
+.quest-scroll .section-line { opacity: 0.45; }
+.quest-meta {
+  margin: 14px 0 0;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(46,32,16,0.35);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* Livro das abas (Lore / Estudo / Grimório / Dados) */
+.mission-book.rpg-frame { margin: 0 8px 8px; }
+.mission-book .tabs {
+  background:
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.02) 0 2px, transparent 2px 8px),
+    linear-gradient(180deg, #241b14, #1a1410);
+  border-bottom: 2px solid var(--frame-gold-lo);
+  border-radius: 4px 4px 0 0;
+}
+.mission-book .tab[aria-selected="true"] { background: rgba(240,192,64,0.07); }
+
+/* Coluna da direita: o tomo de feitiços */
+.mission-tome {
+  background: var(--color-surface);
+  box-shadow: inset 3px 0 0 var(--frame-gold-lo), inset 5px 0 0 var(--frame-dark);
+}
+.tome-bar {
+  background:
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, #2a1f17 0%, #1d1611 100%);
+  border-bottom: 2px solid var(--frame-gold-lo);
+  padding-left: 5px;
+}
+.tome-bar.is-actions { border-bottom: none; border-top: 2px solid var(--frame-gold-lo); }
+.file-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #1a1410, #120e0b);
+  box-shadow: 0 0 0 2px var(--frame-dark), 0 0 0 3px var(--frame-gold-lo), inset 0 -2px 0 var(--tag-color, var(--frame-gold));
+}
+.mission-tome .output-header {
+  background: linear-gradient(180deg, #1d1611, #15110d);
+  border-bottom: 1px solid var(--frame-gold-lo);
+  color: #b8a88c;
+}
+.mission-tome .splitter { background: #15110d; border-top: 1px solid var(--frame-gold-lo); }
+
+/* ── Tutorial guiado: holofote + balão do Grimório ── */
+.tour-overlay { position: fixed; inset: 0; z-index: 60; }
+.tour-spot {
+  position: fixed;
+  border-radius: 6px;
+  pointer-events: none;
+  box-shadow: 0 0 0 3px var(--color-accent), 0 0 24px 6px rgba(240,192,64,0.45), 0 0 0 9999px rgba(5,7,12,0.72);
+  transition: top 0.35s cubic-bezier(.2,.8,.2,1), left 0.35s cubic-bezier(.2,.8,.2,1), width 0.35s cubic-bezier(.2,.8,.2,1), height 0.35s cubic-bezier(.2,.8,.2,1);
+}
+.tour-card {
+  position: fixed;
+  width: 340px;
+  padding: 16px 18px 14px;
+  z-index: 61;
+  transition: top 0.35s cubic-bezier(.2,.8,.2,1), left 0.35s cubic-bezier(.2,.8,.2,1);
+}
+.tour-card .tour-step { font-family: var(--font-pixel); font-size: 9px; color: var(--color-accent); }
+.tour-card h3 { margin: 4px 0 0; font-size: 16px; font-weight: 800; color: var(--color-text); }
+.tour-card p { margin: 10px 0 0; font-size: 13px; line-height: 1.65; color: var(--color-text); }
+.tour-card p b { color: var(--color-accent); }
+.tour-dots { display: flex; gap: 5px; }
+.tour-dots span { width: 8px; height: 8px; border-radius: 1px; background: #3a3f4d; box-shadow: 0 0 0 1px var(--frame-dark); }
+.tour-dots span.is-on { background: var(--color-accent); }

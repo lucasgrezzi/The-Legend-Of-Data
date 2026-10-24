@@ -77,7 +77,7 @@ export default function RichText({ text, color, numbered = false }: RichTextProp
                   <span
                     style={{
                       background: color,
-                      color: "#000",
+                      color: "var(--rt-on-accent, #000)",
                       borderRadius: "50%",
                       width: 24,
                       height: 24,
@@ -95,13 +95,13 @@ export default function RichText({ text, color, numbered = false }: RichTextProp
                 ) : (
                   <span style={{ color, flexShrink: 0, fontWeight: 800 }}>◆</span>
                 )}
-                <span style={{ color: "var(--color-text)" }}>{b.text}</span>
+                <span style={{ color: "var(--rt-text, var(--color-text))" }}>{b.text}</span>
               </div>
             );
 
           case "p":
             return (
-              <p key={i} style={{ margin: 0, color: "var(--color-text)" }}>
+              <p key={i} style={{ margin: 0, color: "var(--rt-text, var(--color-text))" }}>
                 {b.text}
               </p>
             );

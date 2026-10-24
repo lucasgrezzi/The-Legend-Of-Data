@@ -124,18 +124,13 @@ export default function EditorPanel({
     <div ref={containerRef} className="flex flex-col h-full" style={{ userSelect: dragging ? "none" : undefined }}>
 
       {/* ── Aba do arquivo ── */}
-      <div
-        className="flex items-center justify-between px-4 shrink-0"
-        style={{ background: "var(--color-bg)", borderBottom: "1px solid var(--color-border)", height: 46 }}
-      >
-        <div
-          className="flex items-center gap-2 px-3 h-full"
-          style={{ borderBottom: `2px solid ${langColor}`, fontSize: 13 }}
-        >
+      <div className="tome-bar flex items-center justify-between gap-3 px-4 shrink-0" style={{ height: 50 }}>
+        <span className="file-tag" style={{ ["--tag-color" as string]: langColor }}>
           <span>{LANG_ICON[mission.editorLanguage]}</span>
           <span>{fileName}</span>
-        </div>
-        <span style={{ fontSize: 12, color: "var(--color-muted)" }}>
+        </span>
+        <span className="truncate" style={{ fontSize: 12, color: "#b8a88c" }}>
+          <span style={{ fontSize: 13 }}>✍️</span> Escreva seu código aqui ·{" "}
           <span className="kbd">Ctrl</span> + <span className="kbd">Enter</span> executa
         </span>
       </div>
@@ -157,7 +152,7 @@ export default function EditorPanel({
       )}
 
       {/* ── Editor (ocupa todo o espaço livre) ── */}
-      <div className="flex-1 min-h-0 overflow-hidden">
+      <div className="flex-1 min-h-0 overflow-hidden" data-tour="editor">
         <CodeEditor
           value={code}
           onChange={setCode}
@@ -168,10 +163,7 @@ export default function EditorPanel({
       </div>
 
       {/* ── Ações ── */}
-      <div
-        className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
-        style={{ background: "var(--color-bg)", borderTop: "1px solid var(--color-border)" }}
-      >
+      <div className="tome-bar is-actions flex items-center justify-between gap-3 px-4 py-3 shrink-0">
         <div className="flex items-center gap-2">
           <button className="icon-btn" onClick={handleCopy} title="Copiar código">
             {copied ? "✓ Copiado" : "⎘ Copiar"}
@@ -182,10 +174,10 @@ export default function EditorPanel({
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="btn-run" onClick={handleRun} disabled={busy}>
+          <button className="btn-run btn-pixel is-compact" onClick={handleRun} disabled={busy} data-tour="run">
             {isRunning ? "…" : "▶"} Executar
           </button>
-          <button className="btn-submit" onClick={handleSubmit} disabled={busy || validated}>
+          <button className="btn-submit btn-pixel is-compact" onClick={handleSubmit} disabled={busy || validated} data-tour="submit">
             {validated ? "✓ Concluída" : isSubmitting ? "Verificando…" : "Enviar Resposta"}
           </button>
         </div>
@@ -205,9 +197,12 @@ export default function EditorPanel({
       />
 
       {/* ── Saída ── */}
-      <div className="flex flex-col shrink-0" style={{ height: outputHeight, background: "#060a10" }}>
+      <div className="flex flex-col shrink-0" style={{ height: outputHeight, background: "#060a10" }} data-tour="output">
         <div className="output-header">
-          <span>● Saída</span>
+          <span className="flex items-center gap-2">
+            <span style={{ fontFamily: "var(--font-body)", fontSize: 14 }}>🔮</span> Saída
+            <span style={{ fontFamily: "var(--font-body)", fontSize: 11, letterSpacing: 0, opacity: 0.8 }}>— o que o código mostra</span>
+          </span>
           <span style={{ fontFamily: "var(--font-body)", fontSize: 12, letterSpacing: 0 }}>
             {isRunning || isSubmitting ? (
               <span style={{ color: "var(--color-accent)" }}>executando…</span>

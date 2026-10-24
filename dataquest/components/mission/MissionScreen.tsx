@@ -17,6 +17,10 @@ import MissionResultDialog, { type MissionResult } from "@/components/ui/Mission
 import Link from "next/link";
 import Sprite from "@/components/ui/Sprite";
 import PlayerChip from "@/components/player/PlayerChip";
+import GuidedTour, { missionTourSteps, tourSeen } from "./GuidedTour";
+
+/** O tutorial abre sozinho na primeira fase com código (depois, só pelo botão "Como jogar") */
+const FIRST_CODE_MISSION_ID = MISSIONS.find((m) => m.validationType !== "narrative")?.id;
 
 interface MissionScreenProps {
   mission: Mission;
@@ -68,11 +72,20 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
   const isNarrative = mission.validationType === "narrative";
   const validated = alreadyCompleted || isNarrative;
   const [result, setResult] = useState<MissionResult | null>(null);
+  const [tourOpen, setTourOpen] = useState(false);
 
   // Sem conta ou sem personagem → volta ao mapa (lá ficam o login e a criação de personagem)
   useEffect(() => {
     if (gate !== "loading" && gate !== "play") router.replace("/map");
   }, [gate, router]);
+
+  // Tutorial guiado na primeira fase de código (uma vez por navegador); espera a tela montar
+  useEffect(() => {
+    if (gate !== "play" || !unlocked || isNarrative || alreadyCompleted) return;
+    if (mission.id !== FIRST_CODE_MISSION_ID || tourSeen()) return;
+    const t = setTimeout(() => setTourOpen(true), 700);
+    return () => clearTimeout(t);
+  }, [gate, unlocked, isNarrative, alreadyCompleted, mission.id]);
 
   // Missão narrativa: concluída ao abrir (só depois de ler o progresso salvo)
   useEffect(() => {
@@ -148,54 +161,38 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: "var(--color-bg)" }}>
 
       {/* ── Top bar ── */}
-      <div
-        className="flex items-center justify-between gap-6 px-6 shrink-0"
-        style={{ background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)", height: 64 }}
-      >
+      <div className="wood-bar flex items-center justify-between gap-6 px-6 shrink-0 relative z-10" style={{ height: 66 }}>
         {/* Logo + breadcrumb */}
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href="/map"
-            className="no-underline shrink-0"
+            className="gate-logo no-underline shrink-0"
             title="Voltar ao mapa"
-            style={{
-              fontSize: 19,
-              fontWeight: 800,
-              color: "var(--color-accent)",
-              letterSpacing: "-0.5px",
-              textShadow: "0 0 20px rgba(240,192,64,0.3)",
-            }}
+            style={{ fontSize: 20 }}
           >
             DataQuest
           </Link>
-          <span style={{ color: "var(--color-border)", fontSize: 18 }}>/</span>
+          <span style={{ color: "var(--frame-gold-lo)", fontSize: 18 }}>/</span>
           <Link href="/map" className="flex items-center gap-2 shrink-0" style={{ color: track.color, fontSize: 14, fontWeight: 700 }}>
             <Sprite src={track.sprite} size={32} /> {track.name}
           </Link>
-          <span style={{ color: "var(--color-border)", fontSize: 18 }}>/</span>
-          <span className="truncate" style={{ color: "var(--color-muted)", fontSize: 14 }}>
+          <span style={{ color: "var(--frame-gold-lo)", fontSize: 18 }}>/</span>
+          <span className="truncate" style={{ color: "#b8a88c", fontSize: 14 }}>
             {mission.missionTitle}
           </span>
         </div>
 
         {/* Progresso real da trilha: um segmento por missão */}
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {trackMissions.map((m) => {
               const done = completedMissionIds.includes(m.id);
               const current = m.id === mission.id;
               const canOpen = isMissionUnlocked(m, completedMissionIds, totalXP);
               const seg = (
                 <span
-                  style={{
-                    display: "block",
-                    width: 34,
-                    height: 10,
-                    borderRadius: 6,
-                    background: done ? track.color : "var(--color-border)",
-                    boxShadow: current ? `0 0 0 2px var(--color-surface), 0 0 0 4px ${track.color}` : undefined,
-                    opacity: done || current || canOpen ? 1 : 0.5,
-                  }}
+                  className={`quest-gem${done ? " is-done" : ""}${current ? " is-current" : ""}${!done && !current && !canOpen ? " is-locked" : ""}`}
+                  style={{ ["--gem" as string]: track.color }}
                 />
               );
               return canOpen && !current ? (
@@ -205,14 +202,21 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
               );
             })}
           </div>
-          <span style={{ fontSize: 12, color: "var(--color-muted)", whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 12, color: "#b8a88c", whiteSpace: "nowrap" }}>
             {trackDone}/{trackTotal} concluídas
           </span>
         </div>
 
         {/* Personagem + XP */}
-        <div className="shrink-0">
-          <PlayerChip profile={profile} totalXP={totalXP} coins={coins} />
+        <div className="flex items-center gap-3 shrink-0">
+          {!isNarrative && (
+            <button type="button" className="icon-btn" onClick={() => setTourOpen(true)} title="Ver o tutorial de novo">
+              <span style={{ fontSize: 14 }}>❔</span> Como jogar
+            </button>
+          )}
+          <div data-tour="player">
+            <PlayerChip profile={profile} totalXP={totalXP} coins={coins} />
+          </div>
         </div>
       </div>
 
@@ -220,7 +224,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
       <div className="flex flex-1 overflow-hidden">
 
         {/* Esquerda 55% */}
-        <div className="flex flex-col overflow-hidden" style={{ width: "55%", borderRight: "1px solid var(--color-border)" }}>
+        <div className="flex flex-col overflow-hidden" style={{ width: "55%" }}>
           <MissionPanel
             key={mission.id}
             mission={mission}
@@ -239,16 +243,18 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
         </div>
 
         {/* Direita 45% */}
-        <div className="flex flex-col flex-1 overflow-hidden" style={{ background: "var(--color-surface)" }}>
+        <div className="mission-tome flex flex-col flex-1 overflow-hidden">
           {isNarrative ? (
-            <div className="flex flex-col items-center justify-center h-full gap-6 px-10 text-center">
+            <div className="flex items-center justify-center h-full px-10">
+            <div className="rpg-frame flex flex-col items-center gap-6 px-10 py-9 text-center" style={{ maxWidth: 460 }}>
               <div className="flex gap-3" style={{ animation: "float 3s ease-in-out infinite" }}>
                 {(["python", "sql", "pandas", "dataviz"] as const).map((t) => (
                   <Sprite key={t} src={TRACKS[t].sprite} size={64} alt={TRACKS[t].name} />
                 ))}
               </div>
               <p style={{ fontSize: 15, color: "var(--color-muted)", maxWidth: 360, lineHeight: 1.8, margin: 0 }}>
-                Esta missão é só história — leia o chamado ao lado. A partir da próxima, você escreverá código aqui.
+                Esta missão é só história — leia o chamado ao lado. Na próxima, você escreve seu primeiro código, e eu mostro a tela
+                passo a passo antes. Nada de pânico.
               </p>
               <div className="flex flex-wrap justify-center gap-2">
                 {(["python", "sql", "pandas", "dataviz"] as const).map((t) => (
@@ -258,8 +264,9 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
                 ))}
               </div>
               {nextId !== null && (
-                <Link href={`/mission/${nextId}`} className="btn-next">Começar a jornada →</Link>
+                <Link href={`/mission/${nextId}`} className="btn-next btn-pixel">Começar a jornada →</Link>
               )}
+            </div>
             </div>
           ) : (
             <EditorPanel
@@ -273,6 +280,18 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
           )}
         </div>
       </div>
+
+      {tourOpen && (
+        <GuidedTour
+          steps={missionTourSteps({
+            hasBlanks: mission.codeTemplate.includes("___"),
+            hasGrimoire: mission.hints.length > 0 || !!mission.solution,
+            hasData: !!mission.dataFile,
+            language: mission.editorLanguage,
+          })}
+          onClose={() => setTourOpen(false)}
+        />
+      )}
 
       <MissionResultDialog
         result={result}

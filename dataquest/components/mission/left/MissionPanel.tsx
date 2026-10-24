@@ -79,7 +79,7 @@ export default function MissionPanel({
     <div className="flex flex-col h-full">
 
       {/* ── Conteúdo rolável ── */}
-      <div className="flex-1 overflow-y-auto px-8 pt-7 pb-8">
+      <div className="mission-stage flex-1 overflow-y-auto px-8 pt-7 pb-8" style={{ ["--track-rgb" as string]: track.rgb }}>
 
         {/* Chapter label */}
         <p className="pixel-chapter mb-3">
@@ -141,22 +141,10 @@ export default function MissionPanel({
 
         {/* ── QUEST: o objetivo sempre visível no topo ── */}
         {!isNarrative && (
-          <div
-            className="mb-6"
-            style={{
-              background: `linear-gradient(180deg, rgba(${track.rgb},0.08), rgba(${track.rgb},0.02))`,
-              border: `1px solid rgba(${track.rgb},0.35)`,
-              borderRadius: 14,
-              padding: "18px 22px",
-              boxShadow: `0 0 0 1px rgba(${track.rgb},0.05), 0 8px 24px rgba(0,0,0,0.25)`,
-            }}
-          >
-            <SectionHeader icon="🗡️" label="QUEST" color={track.color} />
-            <RichText text={mission.instructions} color={track.color} numbered />
-            <p
-              className="flex flex-wrap items-center gap-x-4 gap-y-1"
-              style={{ margin: "14px 0 0", paddingTop: 12, borderTop: `1px solid rgba(${track.rgb},0.2)`, fontSize: 12, color: "var(--color-muted)" }}
-            >
+          <div className="quest-scroll" data-tour="quest">
+            <SectionHeader icon="🗡️" label="QUEST" color={track.ink} />
+            <RichText text={mission.instructions} color={track.ink} numbered />
+            <p className="quest-meta flex flex-wrap items-center gap-x-4 gap-y-1">
               {mission.theory && (
                 <button type="button" className="link-btn" onClick={() => openTab("estudo")}>📜 Não conhece a sintaxe? Leia o Estudo</button>
               )}
@@ -165,7 +153,7 @@ export default function MissionPanel({
               )}
               {!validated && fails > 0 && (
                 <span>
-                  Erros: <b style={{ color: "var(--color-error)" }}>{fails}</b>
+                  Erros: <b style={{ color: "#a3201c" }}>{fails}</b>
                   {!solutionRevealed && fails < SOLUTION_UNLOCK_FAILS && ` · solução libera após ${SOLUTION_UNLOCK_FAILS}`}
                 </span>
               )}
@@ -174,23 +162,15 @@ export default function MissionPanel({
         )}
 
         {/* ── Abas: Lore / Estudo / Grimório / Dados ── */}
-        <div
-          ref={tabsRef}
-          style={{
-            scrollMarginTop: 16,
-            background: "var(--color-surface)",
-            border: "1px solid var(--color-border)",
-            borderRadius: 14,
-            overflow: "hidden",
-          }}
-        >
-          <div className="tabs px-3 pt-2" role="tablist" style={{ background: "var(--color-panel)" }}>
+        <div ref={tabsRef} className="mission-book rpg-frame" data-tour="tabs" style={{ scrollMarginTop: 16 }}>
+          <div className="tabs px-3 pt-2" role="tablist">
             {tabs.map((t) => (
               <button
                 key={t.id}
                 role="tab"
                 className="tab"
                 aria-selected={tab === t.id}
+                data-tour={`tab-${t.id}`}
                 onClick={() => setTab(t.id)}
                 style={{ ["--tab-color" as string]: t.id === "lore" ? "var(--color-accent)" : track.color }}
               >
@@ -267,32 +247,32 @@ export default function MissionPanel({
 
       {/* ── Rodapé fixo ── */}
       <div
-        className="shrink-0 flex items-center justify-between px-8 py-4"
-        style={{ background: "var(--color-surface)", borderTop: "1px solid var(--color-border)" }}
+        className="wood-bar is-bottom shrink-0 flex items-center justify-between px-8 py-3"
+        data-tour="next"
       >
-        <span className="pixel-label" style={{ color: "var(--color-muted)" }}>
+        <span className="pixel-label" style={{ color: "#b8a88c" }}>
           Missão {trackIndex + 1} de {trackTotal}
         </span>
 
         <div className="flex gap-2">
           {prevId !== null ? (
-            <Link href={`/mission/${prevId}`} className="btn-nav">← Voltar</Link>
+            <Link href={`/mission/${prevId}`} className="btn-nav btn-pixel is-compact">← Voltar</Link>
           ) : (
-            <Link href="/map" className="btn-nav">⬡ Mapa</Link>
+            <Link href="/map" className="btn-nav btn-pixel is-compact">⬡ Mapa</Link>
           )}
 
           {nextId !== null ? (
             validated ? (
-              <Link href={`/mission/${nextId}`} className="btn-next">Próximo →</Link>
+              <Link href={`/mission/${nextId}`} className="btn-next btn-pixel is-compact">Próximo →</Link>
             ) : (
-              <button className="btn-next" disabled title="Envie uma resposta correta para avançar">
+              <button className="btn-next btn-pixel is-compact" disabled title="Envie uma resposta correta para avançar">
                 <span style={{ fontFamily: "var(--font-body)" }}>🔒</span> Próximo
               </button>
             )
           ) : validated ? (
-            <Link href="/map" className="btn-next"><span style={{ fontFamily: "var(--font-body)" }}>⭐</span> Concluído</Link>
+            <Link href="/map" className="btn-next btn-pixel is-compact"><span style={{ fontFamily: "var(--font-body)" }}>⭐</span> Concluído</Link>
           ) : (
-            <button className="btn-next" disabled><span style={{ fontFamily: "var(--font-body)" }}>🔒</span> Próximo</button>
+            <button className="btn-next btn-pixel is-compact" disabled><span style={{ fontFamily: "var(--font-body)" }}>🔒</span> Próximo</button>
           )}
         </div>
       </div>
