@@ -27,7 +27,6 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessão 10 commitada e enviada** em 2026-10-09 (Forja II: groupby; história reescrita em tom meta + "No mundo real").
 - **Sessão 11 commitada e enviada** em 2026-10-24 (o Grimório traduz os erros de Python e SQL).
 - **Sessão 12 commitada e enviada** em 2026-10-24 (tela da missão no estilo RPG + tutorial guiado).
-- **Sessão 11 commitada e enviada** em 2026-10-24 (o Grimório traduz os erros de Python e SQL).
 - Hoje são **14 missões** (7 de Python, 5 de SQL, 2 Pandas) — ver "As 14 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
