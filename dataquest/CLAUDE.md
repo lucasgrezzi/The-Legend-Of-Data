@@ -455,6 +455,10 @@ alinhamento e animação, Mapa-Múndi com mais cara de game e o fundo sem árvor
 - Testado: batalha na M3 via CDP (run ok 100→78, erro cura até 88, envio errado quebra 1 escudo, envio certo → 0 HP e
   "Missão Concluída!", console sem erros); mapa e chefes em 1366×768; bloqueio de fase no build de produção sem
   Supabase (fase 12 para quem só fez a 1 → "Missão Bloqueada"). O acesso livre a todas as fases é só o Modo Teste.
+- **Mascotes melhores (mesmo dia):** raridade em `ShopItem.rarity` (`RARITY_INFO`: comum, raro, épico, lendário) com
+  pedestal, brilho e pulinho na loja (`.pet-stage`), som + faíscas ao comprar. +4 mascotes CC0 (DCSS), liberados por
+  chefes: Sapo Príncipe (fase 8, 90), Vaga-lume Ancião (14, 110), Grifinho (12, 150), Dragão Dourado (22, 200,
+  lendário). Os 4 antigos ficaram (ids salvos no progresso). Catálogo de mascotes em ordem de preço.
 - ⚠ O dev server do Modo Teste (3001) pode parar de recompilar o `globals.css` (estilos novos não aparecem num
   carregamento novo da página): reiniciar o `npm run teste`.
 

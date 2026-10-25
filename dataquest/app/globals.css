@@ -1808,3 +1808,44 @@ a:hover > .hub-place .hub-medal { transform: scale(1.08) translateY(-2px); }
 @media (max-width: 1100px) {
   .hub-hud { grid-template-columns: 1fr; }
 }
+
+/* ── Mascotes na loja: pedestal, brilho da raridade e respiração ── */
+.pet-stage { position: relative; display: grid; place-items: center; width: 96px; height: 88px; }
+.pet-glow {
+  position: absolute; inset: 4px 8px 14px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(var(--rar), 0.45), transparent);
+  animation: hub-breathe-pet 2.6s ease-in-out infinite;
+}
+.pet-stage.is-comum .pet-glow { opacity: 0.45; }
+.pet-stage.is-lendario .pet-glow { background: radial-gradient(closest-side, rgba(255, 224, 138, 0.75), rgba(var(--rar), 0.2) 60%, transparent); }
+.pet-sprite { position: relative; z-index: 1; margin-bottom: 10px; animation: pet-hop 1.6s steps(2, jump-none) infinite; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.45)); }
+.shop-card:hover .pet-sprite { animation: pet-happy 0.5s ease-in-out infinite; }
+.pet-pedestal {
+  position: absolute; bottom: 6px; left: 50%;
+  width: 64px; height: 14px; transform: translateX(-50%);
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(var(--rar), 0.55), rgba(10, 13, 20, 0.9));
+  box-shadow: 0 0 0 2px rgba(var(--rar), 0.35), 0 6px 12px rgba(0, 0, 0, 0.5);
+}
+.pet-stage.is-lendario::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(2px 2px at 18% 30%, #fff3c4, transparent),
+    radial-gradient(2px 2px at 82% 22%, #fff3c4, transparent),
+    radial-gradient(2px 2px at 72% 70%, #fff3c4, transparent),
+    radial-gradient(2px 2px at 26% 74%, #fff3c4, transparent);
+  animation: blink 1.4s steps(2) infinite;
+}
+@keyframes pet-hop { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes pet-happy { 0%, 100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-8px) rotate(-6deg); } 75% { transform: translateY(-8px) rotate(6deg); } }
+@keyframes hub-breathe-pet { 0%, 100% { transform: scale(0.92); opacity: 0.8; } 50% { transform: scale(1.06); opacity: 1; } }
+.rarity-chip {
+  align-self: flex-start;
+  margin: 6px 4px -2px;
+  padding: 2px 8px;
+  font-size: 10.5px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
+  border-radius: 99px;
+  background: rgba(var(--rar), 0.12);
+  border: 1px solid rgba(var(--rar), 0.4);
+}

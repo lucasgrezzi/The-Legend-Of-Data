@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { useGameStore } from "@/store/gameStore";
 import { useGate } from "@/hooks/useGate";
 import { getMission } from "@/lib/missions";
-import { SHOP_ITEMS, SLOT_INFO, SHOP_UNLOCK_MISSION_ID, equippedLook, type ShopItem, type ShopSlot } from "@/lib/shop";
+import { SHOP_ITEMS, SLOT_INFO, SHOP_UNLOCK_MISSION_ID, equippedLook, type ShopItem, type ShopSlot, RARITY_INFO } from "@/lib/shop";
 import Sprite from "@/components/ui/Sprite";
+import { play } from "@/lib/sfx";
+import { burst, centerOf } from "@/lib/juice";
 import WorldBackground from "@/components/ui/WorldBackground";
 import PlayerChip from "@/components/player/PlayerChip";
 import HeroPortrait from "@/components/player/HeroPortrait";
@@ -26,7 +28,16 @@ const GREETINGS = [
 ];
 
 function Preview({ item }: { item: ShopItem }) {
-  if (item.slot === "mascote") return <Sprite src={item.value} size={64} alt={item.name} />;
+  if (item.slot === "mascote") {
+    const r = RARITY_INFO[item.rarity ?? "comum"];
+    return (
+      <span className={`pet-stage is-${item.rarity ?? "comum"}`} style={{ ["--rar" as string]: r.rgb }}>
+        <span className="pet-glow" aria-hidden />
+        <span className="pet-sprite"><Sprite src={item.value} size={64} alt={item.name} /></span>
+        <span className="pet-pedestal" aria-hidden />
+      </span>
+    );
+  }
   if (item.slot === "moldura") {
     return (
       <span
@@ -62,6 +73,9 @@ export default function MerchantShop() {
 
   const onBuy = (item: ShopItem) => {
     if (buyItem(item.id)) {
+      play("buy");
+      const c = centerOf(document.querySelector(`[data-item="${item.id}"] .shop-preview`));
+      burst(c.x, c.y, { count: item.rarity === "lendario" ? 40 : 22, colors: [RARITY_INFO[item.rarity ?? "comum"].color, "#f5c451", "#ffffff"], spread: 110 });
       setFlash(item.id);
       setTimeout(() => setFlash(null), 1200);
     }
@@ -127,8 +141,13 @@ export default function MerchantShop() {
                       ? getMission(item.requiresMissionId) : undefined;
                     const poor = !owned && coins < item.price;
                     return (
-                      <article key={item.id} className={`shop-card ${isOn ? "is-on" : ""} ${lockedBy ? "is-locked" : ""} ${flash === item.id ? "is-flash" : ""}`}>
+                      <article key={item.id} data-item={item.id} className={`shop-card ${isOn ? "is-on" : ""} ${lockedBy ? "is-locked" : ""} ${flash === item.id ? "is-flash" : ""}`}>
                         <div className="shop-preview"><Preview item={item} /></div>
+                        {item.rarity && (
+                          <span className="rarity-chip" style={{ color: RARITY_INFO[item.rarity].color, ["--rar" as string]: RARITY_INFO[item.rarity].rgb }}>
+                            {RARITY_INFO[item.rarity].label}
+                          </span>
+                        )}
                         <h3>{item.name}</h3>
                         <p>{item.description}</p>
                         <div className="shop-actions">
