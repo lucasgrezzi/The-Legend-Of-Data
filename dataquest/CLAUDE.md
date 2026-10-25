@@ -10,7 +10,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 
 ## 📍 Onde paramos (retomar aqui)
 
-> Última sessão: **2026-10-25** (com Claude Code). Leia esta seção primeiro ao retomar.
+> Última sessão: **2026-10-26** (com Claude Code). Leia esta seção primeiro ao retomar.
 
 ### ⚠ Estado do repositório
 - **Sessões 1–3 commitadas e enviadas** ao GitHub (`master`, commit `10363cd`) em 2026-09-22.
@@ -355,14 +355,13 @@ Pedido do usuário: "pode fazer todas as etapas e a gente verifica tudo depois".
   menos com dicas (> × >=, parênteses com AND/OR, LEFT JOIN). Grimório: `=` dentro de if/elif → "use ==" mesmo quando o
   Python só diz "invalid syntax"; KeyError do Pandas sem o prefixo "Column not found:".
 - **Teste no navegador** (`review.mjs` no scratchpad: jogador novo, 17 fases em ordem, 23 erros típicos de iniciante):
-  as 16 soluções passam e nenhum erro passa por engano. As 3 últimas correções de mensagem foram conferidas só com teste
-  em Node (a 2ª rodada no navegador foi interrompida por falta de memória no PC; em 2026-10-25 ela foi adiada de
-  novo pelo mesmo motivo).
+  as 16 soluções passam e nenhum erro passa por engano.
+- **2ª rodada no navegador (2026-10-26, `scripts/revisar_fases.mjs`):** de novo as 16 soluções passam e os 23 erros são
+  recusados. As 3 últimas correções também foram confirmadas no navegador: `=` no elif vira "use ==", "None" aponta
+  falta de return e a coluna errada do Pandas aparece sem o prefixo.
+  Melhoria possível: na M14, a lista "colunas disponíveis" mostra só as do CSV, sem a coluna `total` que o aluno cria.
 
 ### Próximos passos sugeridos
-0. **Pendente:** depois de `npm install`, repetir a rodada no navegador com `scripts/revisar_fases.mjs` (cerca de 10 min,
-   com uns 2 GB de RAM livres). O passo a passo está em "Como testar rapidamente". O que se espera: as 16 soluções
-   passam e os 23 erros são recusados com a mensagem certa.
 1. **Rodar `supabase/2026-10-titulo-no-ranking.sql`** (tarefa do usuário) para o título aparecer no ranking.
 2. Mais fases: Pandas `merge`/`pivot_table` (o worker só injeta UM CSV — para merge, aceitar vários arquivos em
    `/data/`); Data Viz III (chefe: gráfico a partir de groupby, cores/legenda).
