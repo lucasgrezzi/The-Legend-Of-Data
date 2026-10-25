@@ -22,6 +22,7 @@ import { useAccountStore } from "@/store/accountStore";
 import MissionPin, { type PinState } from "./MissionPin";
 import MapFog, { useFogReveal } from "./MapFog";
 import { BestiaryButton } from "@/components/glossary/Bestiary";
+import { equippedLook, SHOP_UNLOCK_MISSION_ID } from "@/lib/shop";
 
 // ── Geometria do mapa (px verticais, % horizontais) ──
 const VIEW_W = 100;
@@ -77,7 +78,8 @@ const CONTENT_W = 680;
 
 export default function WorldMap() {
   const gate = useGate();
-  const { profile, setProfile, completedMissionIds, totalXP, coins, xpByMission } = useGameStore();
+  const { profile, setProfile, completedMissionIds, totalXP, coins, xpByMission, equipped } = useGameStore();
+  const look = equippedLook(equipped);
   const loggedIn = useAccountStore((s) => s.email !== null);
 
   const stateOf = (m: Mission): PinState =>
@@ -144,6 +146,13 @@ export default function WorldMap() {
         </div>
         <div className="flex items-center gap-3">
           <BestiaryButton />
+          <Link
+            href="/loja"
+            className="icon-btn"
+            title={completedMissionIds.includes(SHOP_UNLOCK_MISSION_ID) ? "Loja do Mercador: títulos, molduras e mascotes" : "Abre depois do Mercado da Vila"}
+          >
+            <span style={{ fontSize: 15 }}>🛒</span> Loja
+          </Link>
           {supabase && (
             <Link href="/ranking" className="icon-btn" title="Ranking dos jogadores">
               <span style={{ fontSize: 15 }}>🏆</span> Ranking
@@ -240,6 +249,7 @@ export default function WorldMap() {
                     isNext={item.mission.id === nextMission?.id}
                     xpEarned={xpByMission[item.mission.id]}
                     heroSprite={RACES[profile.race].sprite}
+                    petSprite={look.pet?.value}
                     lockReasons={state === "locked" ? missingRequirements(item.mission, completedMissionIds, totalXP, MISSIONS) : []}
                   />
                 );

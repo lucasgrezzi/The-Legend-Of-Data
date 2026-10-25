@@ -10,6 +10,9 @@ import { MISSIONS } from "@/lib/missions";
 import { TRACKS, TRACK_ORDER } from "@/lib/tracks";
 import Sprite from "@/components/ui/Sprite";
 import XPBar from "@/components/ui/XPBar";
+import HeroPortrait from "./HeroPortrait";
+import Link from "next/link";
+import { equippedLook } from "@/lib/shop";
 
 /**
  * Ficha do personagem — só visualização. Nome e raça são escolhidos uma única vez, na criação,
@@ -17,7 +20,8 @@ import XPBar from "@/components/ui/XPBar";
  * Abre via portal em document.body: o backdrop-filter das top bars prenderia o position: fixed.
  */
 export default function ProfileDialog({ onClose }: { onClose: () => void }) {
-  const { profile, totalXP, coins, completedMissionIds } = useGameStore();
+  const { profile, totalXP, coins, completedMissionIds, equipped } = useGameStore();
+  const look = equippedLook(equipped);
   const { email, sync } = useAccountStore();
 
   useEffect(() => {
@@ -52,21 +56,13 @@ export default function ProfileDialog({ onClose }: { onClose: () => void }) {
           className="flex items-center gap-5"
           style={{ padding: "20px 24px 16px", background: `radial-gradient(circle at 18% 40%, rgba(${race.rgb},0.22), transparent 65%)` }}
         >
-          <div
-            className="anim-bob flex items-center justify-center shrink-0"
-            style={{
-              width: 116, height: 116, borderRadius: 22,
-              background: "var(--color-bg)", border: `2px solid rgba(${race.rgb},0.6)`,
-              boxShadow: `0 0 0 6px rgba(${race.rgb},0.08), 0 14px 34px rgba(${race.rgb},0.25)`,
-            }}
-          >
-            <Sprite src={race.sprite} size={96} alt={race.name} />
-          </div>
+          <HeroPortrait race={profile.race} box={116} sprite={96} frame={look.frame} pet={look.pet} radius={22} className="anim-bob" />
           <div className="min-w-0">
             <p className="pixel-chapter" style={{ margin: 0 }}>FICHA DO PERSONAGEM</p>
             <h2 id="profile-title" style={{ fontSize: 24, fontWeight: 800, margin: "8px 0 2px", color: "var(--color-text)", wordBreak: "break-word" }}>
               {profile.name}
             </h2>
+            {look.title && <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 800, color: "var(--color-accent)" }}>“{look.title}”</p>}
             <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: race.color }}>{race.name} · {race.guild}</p>
             <p style={{ margin: "4px 0 0", fontSize: 12, fontStyle: "italic", color: "var(--color-muted)" }}>“{race.motto}”</p>
           </div>
@@ -120,7 +116,9 @@ export default function ProfileDialog({ onClose }: { onClose: () => void }) {
         )}
 
         <div className="flex items-center justify-between gap-3" style={{ padding: "12px 24px", borderTop: "1px solid var(--color-border)" }}>
-          <span style={{ fontSize: 11, color: "var(--color-muted)" }}>Nome e raça são escolhidos uma única vez.</span>
+          <span style={{ fontSize: 11, color: "var(--color-muted)" }}>
+            Nome e raça são escolhidos uma única vez. Títulos, molduras e mascotes: <Link href="/loja" onClick={onClose} style={{ color: "var(--color-accent)" }}>Loja do Mercador</Link>.
+          </span>
           <button type="button" className="btn-nav" onClick={onClose} autoFocus>Fechar</button>
         </div>
       </div>

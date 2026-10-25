@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware";
 import type { MissionAttempts, PlayerProfile } from "@/types";
 import { computeLevel, computeUnlockedMissions } from "@/lib/xp";
 import { MISSIONS } from "@/lib/missions";
+import { getItem, type Equipped } from "@/lib/shop";
 
 interface GameState {
   profile: PlayerProfile | null;
@@ -19,6 +20,10 @@ interface GameState {
   currentMissionId: number;
   level: number;
   levelLabel: string;
+  /** Itens da Loja do Mercador já comprados (ids de lib/shop.ts) */
+  ownedItems: string[];
+  /** Item equipado em cada espaço (título, moldura, mascote) */
+  equipped: Equipped;
 
   setProfile: (profile: PlayerProfile) => void;
   completeMission: (missionId: number, xpEarned: number, coinsEarned: number) => void;
@@ -26,6 +31,10 @@ interface GameState {
   /** Compra a próxima dica; retorna false se não houver moedas suficientes */
   buyHint: (missionId: number, cost: number) => boolean;
   revealSolution: (missionId: number) => void;
+  /** Compra um item da loja; retorna false sem moedas, se já tiver ou se ainda não liberou */
+  buyItem: (itemId: string) => boolean;
+  /** Equipa um item comprado (ou tira, com `null`) */
+  equipItem: (slot: keyof Equipped, itemId: string | null) => void;
   setCurrentMission: (missionId: number) => void;
   /** Substitui todo o progresso (ex.: save baixado da nuvem ao entrar na conta) */
   loadProgress: (snapshot: ProgressSnapshot) => void;
@@ -36,12 +45,13 @@ interface GameState {
 /** Campos persistidos do progresso — o mesmo formato vai para o localStorage e para a nuvem */
 export type ProgressSnapshot = typeof initialState;
 
-/** Versão do formato persistido — também gravada junto do save na nuvem */
+/** Versão do formato persistido — também gravada junto do save na nuvem.
+ *  Campos novos com valor padrão (ex.: ownedItems/equipped) não exigem subir a versão: saves antigos recebem o padrão. */
 export const PROGRESS_VERSION = 1;
 
 export function progressSnapshot(state: GameState): ProgressSnapshot {
-  const { profile, totalXP, coins, completedMissionIds, unlockedMissionIds, xpByMission, attempts, currentMissionId, level, levelLabel } = state;
-  return { profile, totalXP, coins, completedMissionIds, unlockedMissionIds, xpByMission, attempts, currentMissionId, level, levelLabel };
+  const { profile, totalXP, coins, completedMissionIds, unlockedMissionIds, xpByMission, attempts, currentMissionId, level, levelLabel, ownedItems, equipped } = state;
+  return { profile, totalXP, coins, completedMissionIds, unlockedMissionIds, xpByMission, attempts, currentMissionId, level, levelLabel, ownedItems, equipped };
 }
 
 const NO_ATTEMPTS: MissionAttempts = { fails: 0, hintsBought: 0, solutionRevealed: false };
@@ -61,6 +71,8 @@ const initialState = {
   currentMissionId: 0,
   level: 1,
   levelLabel: "Aprendiz",
+  ownedItems: [] as string[],
+  equipped: {} as Equipped,
 };
 
 export const useGameStore = create<GameState>()(
@@ -110,6 +122,29 @@ export const useGameStore = create<GameState>()(
         set((state) => {
           const a = getAttempts(state, missionId);
           return { attempts: { ...state.attempts, [missionId]: { ...a, solutionRevealed: true } } };
+        }),
+
+      buyItem: (itemId) => {
+        const state = get();
+        const item = getItem(itemId);
+        if (!item || state.ownedItems.includes(itemId) || state.coins < item.price) return false;
+        if (item.requiresMissionId !== undefined && !state.completedMissionIds.includes(item.requiresMissionId)) return false;
+        // comprou → já equipa (é o que todo mundo quer fazer em seguida)
+        set({
+          coins: state.coins - item.price,
+          ownedItems: [...state.ownedItems, itemId],
+          equipped: { ...state.equipped, [item.slot]: itemId },
+        });
+        return true;
+      },
+
+      equipItem: (slot, itemId) =>
+        set((state) => {
+          if (itemId !== null && !state.ownedItems.includes(itemId)) return state;
+          const equipped = { ...state.equipped };
+          if (itemId === null) delete equipped[slot];
+          else equipped[slot] = itemId;
+          return { equipped };
         }),
 
       setCurrentMission: (missionId) =>

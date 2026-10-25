@@ -6,6 +6,9 @@ import { RACES } from "@/lib/races";
 import { computeLevel } from "@/lib/xp";
 import Sprite from "@/components/ui/Sprite";
 import ProfileDialog from "./ProfileDialog";
+import HeroPortrait from "./HeroPortrait";
+import { useGameStore } from "@/store/gameStore";
+import { equippedLook } from "@/lib/shop";
 
 interface PlayerChipProps {
   profile: PlayerProfile;
@@ -18,17 +21,16 @@ export default function PlayerChip({ profile, totalXP, coins }: PlayerChipProps)
   const [open, setOpen] = useState(false);
   const race = RACES[profile.race];
   const { level, label } = computeLevel(totalXP);
+  const look = equippedLook(useGameStore((s) => s.equipped));
 
   const content = (
     <>
-      <span
-        className="flex items-center justify-center overflow-hidden"
-        style={{ width: 40, height: 40, borderRadius: 10, background: `rgba(${race.rgb},0.14)`, border: `1px solid rgba(${race.rgb},0.45)` }}
-      >
-        <Sprite src={race.sprite} size={32} alt={race.name} />
-      </span>
+      <HeroPortrait race={profile.race} box={40} sprite={32} frame={look.frame} />
       <span className="flex flex-col items-start" style={{ lineHeight: 1.25 }}>
-        <span style={{ fontSize: 14, fontWeight: 800, color: "var(--color-text)" }}>{profile.name}</span>
+        <span style={{ fontSize: 14, fontWeight: 800, color: "var(--color-text)" }}>
+          {profile.name}
+          {look.title && <span style={{ fontWeight: 700, color: "var(--color-accent)" }}>, {look.title}</span>}
+        </span>
         <span style={{ fontSize: 12, color: "var(--color-muted)" }}>
           {race.name} · Nv {level} {label} · <span style={{ color: "var(--color-xp)", fontWeight: 700 }}>{totalXP} XP</span>
         </span>

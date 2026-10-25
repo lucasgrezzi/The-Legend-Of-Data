@@ -11,6 +11,7 @@ import { useAccountStore } from "@/store/accountStore";
 import Sprite from "@/components/ui/Sprite";
 import WorldBackground from "@/components/ui/WorldBackground";
 import AccountButton from "./AccountButton";
+import { getItem } from "@/lib/shop";
 
 interface Row {
   name: string;
@@ -18,6 +19,8 @@ interface Row {
   total_xp: number;
   missions_done: number;
   is_me: boolean;
+  /** Título equipado (só depois de rodar supabase/2026-10-titulo-no-ranking.sql) */
+  title_id?: string | null;
 }
 
 const MEDALS = ["🥇", "🥈", "🥉"];
@@ -104,7 +107,11 @@ export default function Leaderboard() {
                     )}
                     <span className="flex-1 min-w-0 flex flex-col" style={{ lineHeight: 1.3 }}>
                       <span className="truncate" style={{ fontSize: 15, fontWeight: 800, color: "var(--color-text)" }}>
-                        {r.name}{r.is_me && <span style={{ color: "var(--color-accent)", fontWeight: 700 }}> (você)</span>}
+                        {r.name}
+                        {getItem(r.title_id ?? undefined)?.slot === "titulo" && (
+                          <span style={{ fontWeight: 700, color: "var(--color-accent)" }}>, {getItem(r.title_id!)!.value}</span>
+                        )}
+                        {r.is_me && <span style={{ color: "var(--color-accent)", fontWeight: 700 }}> (você)</span>}
                       </span>
                       <span style={{ fontSize: 12, color: "var(--color-muted)" }}>
                         {race?.name ?? r.race} · {label} · {r.missions_done}/{MISSIONS.length} missões

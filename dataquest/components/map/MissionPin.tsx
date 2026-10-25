@@ -19,6 +19,8 @@ interface MissionPinProps {
   xpEarned?: number;
   /** Sprite do personagem do jogador — aparece ao lado da próxima missão */
   heroSprite?: string;
+  /** Mascote comprado na Loja do Mercador — acompanha o herói */
+  petSprite?: string;
 }
 
 const STATE_LABEL: Record<PinState, string> = {
@@ -30,7 +32,7 @@ const STATE_LABEL: Record<PinState, string> = {
 const LABEL_GAP = 16;
 const NODE_R = 40;
 
-export default function MissionPin({ mission, state, x, y, isNext, lockReasons, xpEarned, heroSprite }: MissionPinProps) {
+export default function MissionPin({ mission, state, x, y, isNext, lockReasons, xpEarned, heroSprite, petSprite }: MissionPinProps) {
   const track = TRACKS[mission.track];
   const locked = state === "locked";
   const labelOnRight = x <= 50;
@@ -74,6 +76,7 @@ export default function MissionPin({ mission, state, x, y, isNext, lockReasons, 
       {isNext && heroSprite && (
         <div className="map-hero" style={{ left: `calc(${x}% ${labelOnRight ? "-" : "+"} ${NODE_R + 44}px)`, top: y }}>
           <Sprite src={heroSprite} size={64} />
+          {petSprite && <span className="map-pet"><Sprite src={petSprite} size={32} /></span>}
         </div>
       )}
 

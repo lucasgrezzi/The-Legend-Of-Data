@@ -35,13 +35,14 @@ grant select, insert, update on public.saves to authenticated;
 
 -- ── Ranking: expõe só nome, raça, XP e missões (nunca e-mail nem o save completo) ──
 create or replace function public.get_leaderboard(lim int default 50)
-returns table (name text, race text, total_xp int, missions_done int, is_me boolean)
+returns table (name text, race text, total_xp int, missions_done int, is_me boolean, title_id text)
 language sql
 stable
 security definer
 set search_path = ''
 as $$
-  select s.name, s.race, s.total_xp, s.missions_done, s.user_id = auth.uid()
+  select s.name, s.race, s.total_xp, s.missions_done, s.user_id = auth.uid(),
+         s.state -> 'state' -> 'equipped' ->> 'titulo'
   from public.saves s
   order by s.total_xp desc, s.missions_done desc, s.updated_at asc
   limit least(greatest(lim, 1), 100);
