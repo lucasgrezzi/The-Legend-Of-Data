@@ -1,4 +1,4 @@
-import type { Mission, RunResult, ValidationResult, TableData } from "@/types";
+import type { Mission, RunResult, ValidationResult, TableData, ChartMeta } from "@/types";
 import { explainError, errorContext } from "@/lib/friendlyErrors";
 
 function normalize(s: string): string {
@@ -75,17 +75,77 @@ Obtida: ${got.join(", ")}`,
   };
 }
 
+/** O que a missão espera do gráfico (expectedOutput em JSON). Campos ausentes não são conferidos. */
+interface ChartExpectation {
+  kind?: "bar" | "line";
+  /** nº de barras ou de pontos da linha */
+  count?: number;
+  /** alturas das barras / valores da linha, na ordem */
+  values?: number[];
+  /** texto exato do título, ou true = só precisa ter título */
+  title?: string | boolean;
+  xlabel?: string | boolean;
+  ylabel?: string | boolean;
+}
+
+const sameText = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
 function validateChart(
   chartBase64: string | undefined,
+  meta: ChartMeta | undefined,
   mission: Mission
 ): ValidationResult {
-  const passed = !!chartBase64;
+  const fail = (feedback: string): ValidationResult => ({ passed: false, feedback, xpEarned: 0 });
+  if (!chartBase64) {
+    return fail("Nenhum gráfico apareceu.\n\nConfira se você chamou plt.bar(...) ou plt.plot(...) com os dados — e se não apagou o gráfico com plt.close().");
+  }
+  let exp: ChartExpectation = {};
+  try { exp = mission.expectedOutput ? JSON.parse(mission.expectedOutput) : {}; } catch { /* sem expectativa: basta existir */ }
+
+  if (meta) {
+    const bars = meta.bars;
+    const line = meta.lines[0];
+    if (exp.kind === "bar" && !bars.length) {
+      return fail(meta.lines.length
+        ? "Saiu um gráfico de LINHA, mas a missão pede BARRAS.\n\nTroque plt.plot(...) por plt.bar(...)."
+        : "O gráfico não tem barras. Use plt.bar(nomes, valores).");
+    }
+    if (exp.kind === "line" && !line) {
+      return fail(bars.length
+        ? "Saiu um gráfico de BARRAS, mas a missão pede uma LINHA.\n\nTroque plt.bar(...) por plt.plot(...)."
+        : "O gráfico não tem linha. Use plt.plot(x, y).");
+    }
+    if (exp.kind === "line" && bars.length) {
+      return fail("A missão pede só a LINHA, mas o gráfico também tem barras.\n\nApague o plt.bar(...) e deixe só o plt.plot(...).");
+    }
+    if (exp.kind === "bar" && meta.lines.length) {
+      return fail("A missão pede só as BARRAS, mas o gráfico também tem uma linha.\n\nApague o plt.plot(...) e deixe só o plt.bar(...).");
+    }
+    const got = exp.kind === "line" ? line ?? [] : bars;
+    const what = exp.kind === "line" ? "pontos na linha" : "barras";
+    if (exp.count !== undefined && got.length !== exp.count) {
+      return fail(`O gráfico tem ${got.length} ${what}, mas eram para ser ${exp.count}.\n\nConfira se passou todos os dados (e só eles).`);
+    }
+    if (exp.values && exp.values.some((v, i) => got[i] !== v)) {
+      return fail(`Os valores do gráfico não batem.\n\nEsperado: ${exp.values.join(", ")}\nNo seu gráfico: ${got.map((v) => v ?? "?").join(", ")}\n\nConfira a ordem das listas e se os nomes e os valores não foram trocados.`);
+    }
+    const checkText = (label: string, wanted: string | boolean | undefined, have: string, how: string) => {
+      if (wanted === undefined || wanted === false) return null;
+      if (!have.trim()) return `O gráfico está sem ${label}.\n\nUse ${how}.`;
+      if (typeof wanted === "string" && !sameText(have, wanted)) return `O ${label} precisa ser "${wanted}", mas está "${have}".`;
+      return null;
+    };
+    const textErr =
+      checkText("título", exp.title, meta.title, "plt.title(\"...\")") ??
+      checkText("nome do eixo de baixo (x)", exp.xlabel, meta.xlabel, "plt.xlabel(\"...\")") ??
+      checkText("nome do eixo do lado (y)", exp.ylabel, meta.ylabel, "plt.ylabel(\"...\")");
+    if (textErr) return fail(textErr);
+  }
+
   return {
-    passed,
-    feedback: passed
-      ? `Gráfico gerado! +${mission.xpReward} XP conquistados!`
-      : "Nenhum gráfico foi gerado. Use matplotlib para criar um gráfico.",
-    xpEarned: passed ? mission.xpReward : 0,
+    passed: true,
+    feedback: `Gráfico perfeito! +${mission.xpReward} XP conquistados!`,
+    xpEarned: mission.xpReward,
   };
 }
 
@@ -147,7 +207,7 @@ A explicação completa e a mensagem original estão no painel Saída.`,
     case "table":
       return validateTable(result.tableData, mission);
     case "chart":
-      return validateChart(result.chartBase64, mission);
+      return validateChart(result.chartBase64, result.chartMeta, mission);
     case "contains": {
       const passed = normalize(result.stdout).includes(normalize(mission.expectedOutput));
       return {

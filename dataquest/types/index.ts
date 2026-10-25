@@ -69,8 +69,18 @@ export interface RunResult {
   stderr: string;
   tableData?: TableData;
   chartBase64?: string;
+  /** O que o gráfico desenhou (alturas das barras, valores das linhas, título e eixos) */
+  chartMeta?: ChartMeta;
   success: boolean;
   executionTimeMs: number;
+}
+
+export interface ChartMeta {
+  bars: (number | null)[];
+  lines: (number | null)[][];
+  title: string;
+  xlabel: string;
+  ylabel: string;
 }
 
 export interface ValidationResult {

@@ -54,13 +54,29 @@ sys.stdout = _dq_buf
   const stdout = pyodide.runPython("_dq_buf.getvalue()") ?? "";
 
   let chartBase64 = null;
+  let chartMeta = null;
   if (!error) {
     try {
       pyodide.runPython(`
-import io as _io, base64 as _b64
+import io as _io, base64 as _b64, json as _json
 import matplotlib.pyplot as _plt
+from matplotlib.patches import Rectangle as _Rect
 _fignums = _plt.get_fignums()
+_chart_meta = ""
 if _fignums:
+    # O que foi desenhado (para validar o gráfico, não só "existe um gráfico")
+    _axes = _plt.gcf().axes
+    if _axes:
+        _ax = _axes[0]
+        _bars = [p for p in _ax.patches if isinstance(p, _Rect)]
+        _num = lambda v: float(v) if hasattr(v, "__float__") else None
+        _chart_meta = _json.dumps({
+            "bars": [_num(p.get_height()) for p in _bars],
+            "lines": [[_num(v) for v in l.get_ydata()] for l in _ax.lines],
+            "title": _ax.get_title() or (_plt.gcf()._suptitle.get_text() if _plt.gcf()._suptitle else ""),
+            "xlabel": _ax.get_xlabel(),
+            "ylabel": _ax.get_ylabel(),
+        })
     _imgbuf = _io.BytesIO()
     _plt.gcf().savefig(_imgbuf, format="png", bbox_inches="tight", dpi=96)
     _imgbuf.seek(0)
@@ -70,6 +86,7 @@ else:
     _chart = ""
 `);
       chartBase64 = pyodide.globals.get("_chart") || null;
+      chartMeta = pyodide.globals.get("_chart_meta") || null;
     } catch (err) {
       error = err && err.message ? err.message : String(err);
     }
@@ -77,5 +94,5 @@ else:
     pyodide.runPython("import matplotlib.pyplot as _plt\n_plt.close('all')");
   }
 
-  self.postMessage({ type: "RESULT", id, stdout, chartBase64, tableJson: null, error });
+  self.postMessage({ type: "RESULT", id, stdout, chartBase64, chartMeta, tableJson: null, error });
 };

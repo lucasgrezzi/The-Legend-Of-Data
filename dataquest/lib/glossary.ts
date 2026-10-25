@@ -165,6 +165,30 @@ export const GLOSSARY: GlossaryEntry[] = [
     example: "df.groupby(\"regiao\")[\"ouro\"].sum()" },
   { id: "sortvalues", term: ".sort_values()", kind: "codigo", missionId: 13,
     text: "Ordena os dados. ascending=False deixa do maior para o menor." },
+  { id: "colunacalc", term: "Coluna calculada", kind: "codigo", missionId: 14,
+    text: "Coluna nova criada com uma conta a partir de outras. O Pandas faz a conta em todas as linhas de uma vez.",
+    example: "df[\"total\"] = df[\"quantidade\"] * df[\"preco\"]" },
+
+  // ───────── Data Viz ─────────
+  { id: "farol", term: "Farol da Verdade", kind: "jogo", missionId: 15,
+    text: "A região dos gráficos. Farol é a torre de luz que guia os navios — aqui, os gráficos guiam quem precisa decidir." },
+  { id: "dataviz", term: "Data Viz", kind: "codigo", missionId: 15,
+    text: "Visualização de dados: transformar números em imagens (gráficos) para entender de relance o que uma tabela esconde." },
+  { id: "grafico", term: "Gráfico", kind: "codigo", missionId: 15,
+    text: "Desenho que mostra dados. Barras comparam categorias; linhas mostram como algo muda com o tempo." },
+  { id: "matplotlib", term: "matplotlib (plt)", kind: "codigo", missionId: 15,
+    text: "A biblioteca de gráficos mais usada do Python. Por costume, chamamos a parte de desenhar de plt.",
+    example: "import matplotlib.pyplot as plt" },
+  { id: "pltbar", term: "plt.bar()", kind: "codigo", missionId: 15,
+    text: "Desenha um gráfico de barras: primeiro a lista de nomes, depois a lista de valores (a altura de cada barra).",
+    example: "plt.bar([\"A\", \"B\"], [3, 5])" },
+  { id: "titulo", term: "Título do gráfico", kind: "codigo", missionId: 15,
+    text: "O texto no topo que diz do que o gráfico fala. Sem título, ninguém sabe o que está vendo.",
+    example: "plt.title(\"Vendas do mês\")" },
+  { id: "pltplot", term: "plt.plot()", kind: "codigo", missionId: 16,
+    text: "Desenha um gráfico de linha: os valores do eixo de baixo (x) e os do eixo do lado (y), ligados em ordem." },
+  { id: "eixos", term: "Eixos (x e y)", kind: "codigo", missionId: 16,
+    text: "As duas réguas do gráfico: x é a de baixo (normalmente o tempo ou as categorias) e y a do lado (os valores). Dê nome a elas com plt.xlabel e plt.ylabel." },
 ];
 
 export const GLOSSARY_KIND_LABEL: Record<GlossaryKind, string> = {

@@ -30,3 +30,23 @@ export const ENCOMENDAS = csvFile(
 11,Arco Reforçado,Leste,100,paga
 12,Broquel,Oeste,40,pendente`
 );
+
+/**
+ * Pedidos de lâminas para o Rei (missão 14 — chefe da Forja). Faturamento = quantidade × preco,
+ * só pedidos com 2+ peças: Norte 220 · Leste 210 · Oeste 200 · Sul 190.
+ * (Sem o filtro: Norte 310 · Sul 270 · Leste 210 · Oeste 200 — a ordem muda, e reprova.)
+ */
+export const PEDIDOS = csvFile(
+  "pedidos",
+  `id,peca,regiao,quantidade,preco
+1,Espada,Norte,2,50
+2,Elmo,Sul,1,80
+3,Escudo,Leste,3,40
+4,Ferradura,Sul,10,5
+5,Machado,Norte,1,90
+6,Adaga,Oeste,4,20
+7,Lança,Leste,2,45
+8,Grevas,Oeste,2,60
+9,Martelo,Norte,3,40
+10,Arco,Sul,2,70`
+);

@@ -112,12 +112,13 @@ export default function EditorPanel({
   // objeto novo a cada execução: reaplica o destaque mesmo se a linha for a mesma
   const errorMark = useMemo(() => (friendly?.line ? { line: friendly.line } : null), [friendly]);
 
-  // Com erro, a saída cresce para mostrar a explicação inteira (sem espremer o editor)
+  // Com erro ou gráfico, a saída cresce para mostrar tudo (sem espremer o editor)
+  const hasChart = !!result?.chartBase64;
   useEffect(() => {
-    if (!friendly || !containerRef.current) return;
+    if ((!friendly && !hasChart) || !containerRef.current) return;
     const max = containerRef.current.getBoundingClientRect().height - EDITOR_MIN - 120;
     setOutputHeight((h) => Math.max(h, Math.min(OUTPUT_ERROR, max)));
-  }, [friendly]);
+  }, [friendly, hasChart]);
   const rowCount = result?.tableData?.rows.length;
 
   return (
@@ -217,7 +218,9 @@ export default function EditorPanel({
         </div>
 
         <div className="flex-1 overflow-auto">
-          {(!result?.tableData || result.stdout || result.stderr || isRunning) && (
+          {hasChart && !result?.stdout && !result?.stderr && !isRunning && !isSubmitting ? (
+            <div className="terminal">✓ Gráfico desenhado logo abaixo.</div>
+          ) : (!result?.tableData || result.stdout || result.stderr || isRunning) && (
             <TerminalOutput
               stdout={result?.stdout ?? ""}
               stderr={result?.stderr ?? ""}

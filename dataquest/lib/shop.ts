@@ -38,7 +38,9 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: "titulo-tabelas", slot: "titulo", name: "Domador de Tabelas", price: 60, value: "Domador de Tabelas",
     requiresMissionId: 12, description: "Derrotou o Rei Esquecido com um JOIN certeiro." },
   { id: "titulo-ferreiro", slot: "titulo", name: "Ferreiro de Dados", price: 60, value: "Ferreiro de Dados",
-    requiresMissionId: 13, description: "Brokk aprova. E Brokk não aprova quase nada." },
+    requiresMissionId: 14, description: "Brokk aprova. E Brokk não aprova quase nada." },
+  { id: "titulo-farol", slot: "titulo", name: "Guardião do Farol", price: 50, value: "Guardião do Farol",
+    requiresMissionId: 16, description: "Dona Íris não elogia ninguém. Mas deixou você segurar a lente." },
   { id: "titulo-lenda", slot: "titulo", name: "Lenda do Arquivo", price: 150, value: "Lenda do Arquivo",
     description: "O título mais caro do reino. Ninguém sabe o que faz. Todo mundo quer." },
 

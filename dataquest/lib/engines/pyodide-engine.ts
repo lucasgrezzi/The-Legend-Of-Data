@@ -46,6 +46,7 @@ export function initPyodideWorker(): void {
         stdout: msg.stdout ?? "",
         stderr: msg.error ?? "",
         chartBase64: msg.chartBase64 ?? undefined,
+        chartMeta: msg.chartMeta ? JSON.parse(msg.chartMeta) : undefined,
         success: !msg.error,
         executionTimeMs: 0,
       });

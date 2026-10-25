@@ -13,6 +13,9 @@ import mission10 from "@/data/missions/mission-10";
 import mission11 from "@/data/missions/mission-11";
 import mission12 from "@/data/missions/mission-12";
 import mission13 from "@/data/missions/mission-13";
+import mission14 from "@/data/missions/mission-14";
+import mission15 from "@/data/missions/mission-15";
+import mission16 from "@/data/missions/mission-16";
 
 /**
  * Ordem de jogo. O `id` é estável (é a chave do progresso salvo) e NÃO define a ordem:
@@ -33,6 +36,9 @@ export const MISSIONS: Mission[] = [
   mission12, // SQL — JOIN (chefe)
   mission4,  // Pandas — ler CSV e filtrar
   mission13, // Pandas — groupby, sum e sort_values
+  mission14, // Pandas — colunas calculadas (chefe)
+  mission15, // Data Viz — gráfico de barras
+  mission16, // Data Viz — gráfico de linha, título e eixos
 ];
 
 /** Todos os arquivos de dados da missão (principal + extras), na ordem da aba Dados */
