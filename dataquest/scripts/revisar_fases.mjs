@@ -9,7 +9,7 @@ const SP = process.argv[2];
 const BASE = process.argv[3] ?? "http://localhost:3001";
 const ONLY = process.argv[4]?.split(",").map(Number);
 const ROOT = new URL("../data/missions/", import.meta.url);
-const ORDER = [0, 1, 5, 6, 2, 7, 8, 3, 17, 9, 18, 10, 11, 12, 4, 19, 20, 21, 13, 14, 15, 16]
+const ORDER = [0, 1, 5, 6, 2, 7, 8, 3, 17, 9, 18, 10, 11, 12, 4, 19, 20, 21, 13, 14, 15, 16, 22]
   .filter((id) => !ONLY || ONLY.includes(id));
 const solution = (id) => fs.readFileSync(new URL(`mission-${id}.ts`, ROOT), "utf-8").match(/solution: `([\s\S]*?)`,/)[1];
 
@@ -51,6 +51,9 @@ const MISTAKES = {
   13: [["sem filtro", P + 't = df.groupby("regiao")["ouro"].sum().sort_values(ascending=False)\nfor r, v in t.items():\n    print(f"{r}: {v}")']],
   14: [["coluna errada", P + 'df["total"] = df["quantidade"] * df["preco"]\ng = df[df["quantidade"] >= 2]\nt = g.groupby("regiao")["totl"].sum()']],
   15: [["título sem acento", 'import matplotlib.pyplot as plt\nregioes = ["Norte", "Sul", "Leste", "Oeste"]\nnavios = [12, 7, 9, 4]\nplt.bar(regioes, navios)\nplt.title("Navios por regiao")']],
+  22: [["sem ordenar", P.replace("import pandas", "import matplotlib.pyplot as plt\nimport pandas") + 't = df.groupby("porto")["caixas"].sum()\nplt.bar(t.index, t.values)\nplt.title("C")\nplt.xlabel("P")\nplt.ylabel("C")'],
+       ["linha no lugar de barras", P.replace("import pandas", "import matplotlib.pyplot as plt\nimport pandas") + 't = df.groupby("porto")["caixas"].sum().sort_values(ascending=False)\nplt.plot(t.index, t.values)\nplt.title("C")\nplt.xlabel("P")\nplt.ylabel("C")'],
+       ["totais à mão", 'import matplotlib.pyplot as plt\nplt.bar(["Norte", "Leste", "Sul", "Oeste"], [48, 35, 27, 14])\nplt.title("C")\nplt.xlabel("P")\nplt.ylabel("C")']],
   16: [["esqueceu xlabel", P.replace("import pandas", "import matplotlib.pyplot as plt\nimport pandas") + 'plt.plot(df["mes"], df["tempestades"])\nplt.title("T")\nplt.ylabel("Q")']],
 };
 

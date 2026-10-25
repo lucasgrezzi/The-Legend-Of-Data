@@ -203,6 +203,9 @@ export const GLOSSARY: GlossaryEntry[] = [
     example: "plt.title(\"Vendas do mês\")" },
   { id: "pltplot", term: "plt.plot()", kind: "codigo", missionId: 16,
     text: "Desenha um gráfico de linha: os valores do eixo de baixo (x) e os do eixo do lado (y), ligados em ordem." },
+  { id: "indexvalues", term: ".index e .values", kind: "codigo", missionId: 22,
+    text: "As duas partes de uma Series (o resultado de um groupby): .index são os nomes e .values são os números.",
+    example: "plt.bar(totais.index, totais.values)" },
   { id: "eixos", term: "Eixos (x e y)", kind: "codigo", missionId: 16,
     text: "As duas réguas do gráfico: x é a de baixo (normalmente o tempo ou as categorias) e y a do lado (os valores). Dê nome a elas com plt.xlabel e plt.ylabel." },
 ];

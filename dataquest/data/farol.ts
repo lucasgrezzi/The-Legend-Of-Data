@@ -19,3 +19,18 @@ Abr,6
 Mai,2
 Jun,1`
 );
+
+/** Caixas que chegaram a cada porto (missão 22 — chefe do Farol). Por porto: Norte 48 · Leste 35 · Sul 27 · Oeste 14 */
+export const CARGAS = csvFile(
+  "cargas",
+  `id,porto,caixas
+1,Norte,20
+2,Sul,12
+3,Leste,15
+4,Oeste,6
+5,Norte,18
+6,Leste,20
+7,Sul,15
+8,Oeste,8
+9,Norte,10`
+);

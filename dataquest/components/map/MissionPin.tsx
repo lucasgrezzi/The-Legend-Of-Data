@@ -14,6 +14,8 @@ interface MissionPinProps {
   x: number;
   y: number;
   isNext: boolean;
+  /** Última fase da região: o chefe — medalhão maior e etiqueta própria */
+  isBoss?: boolean;
   lockReasons: string[];
   /** XP realmente ganho (pode ser metade se usou o Grimório) */
   xpEarned?: number;
@@ -32,8 +34,9 @@ const STATE_LABEL: Record<PinState, string> = {
 const LABEL_GAP = 16;
 const NODE_R = 40;
 
-export default function MissionPin({ mission, state, x, y, isNext, lockReasons, xpEarned, heroSprite, petSprite }: MissionPinProps) {
+export default function MissionPin({ mission, state, x, y, isNext, isBoss, lockReasons, xpEarned, heroSprite, petSprite }: MissionPinProps) {
   const track = TRACKS[mission.track];
+  const r = isBoss ? NODE_R + 8 : NODE_R; // o medalhão do chefe é maior (96px)
   const locked = state === "locked";
   const labelOnRight = x <= 50;
   const halfXP = state === "completed" && xpEarned !== undefined && xpEarned < mission.xpReward;
@@ -45,7 +48,7 @@ export default function MissionPin({ mission, state, x, y, isNext, lockReasons, 
 
   const node = (
     <div
-      className={`map-node is-${state}`}
+      className={`map-node is-${state}${isBoss ? " is-boss" : ""}`}
       style={{
         left: `${x}%`,
         top: y,
@@ -55,26 +58,30 @@ export default function MissionPin({ mission, state, x, y, isNext, lockReasons, 
     >
       <Sprite src={sprite} size={64} />
       {state === "completed" && <span className="node-check" aria-hidden>✓</span>}
+      {isBoss && <span className="boss-crown" aria-hidden>👑</span>}
     </div>
   );
 
   const title = (
+    <span className="block">
+      {isBoss && <span className="boss-tag">👑 CHEFE</span>}
     <span style={{ fontSize: 14, fontWeight: 800, lineHeight: 1.35, color: locked ? "var(--color-muted)" : "var(--ink)" }}>
       {mission.missionTitle}
+    </span>
     </span>
   );
 
   return (
     <>
       {isNext && (
-        <span className="next-flag" style={{ left: `${x}%`, top: y - NODE_R - 10 }}>
+        <span className="next-flag" style={{ left: `${x}%`, top: y - r - (isBoss ? 30 : 10) }}>
           ▼ PRÓXIMA
         </span>
       )}
 
       {/* O herói espera do lado oposto ao rótulo */}
       {isNext && heroSprite && (
-        <div className="map-hero" style={{ left: `calc(${x}% ${labelOnRight ? "-" : "+"} ${NODE_R + 44}px)`, top: y }}>
+        <div className="map-hero" style={{ left: `calc(${x}% ${labelOnRight ? "-" : "+"} ${r + 44}px)`, top: y }}>
           <Sprite src={heroSprite} size={64} />
           {petSprite && <span className="map-pet"><Sprite src={petSprite} size={32} /></span>}
         </div>
@@ -86,12 +93,12 @@ export default function MissionPin({ mission, state, x, y, isNext, lockReasons, 
 
       {/* Rótulo sempre dentro de um cartão sólido — nunca texto direto sobre o fundo */}
       <div
-        className={`map-label is-${state}`}
+        className={`map-label is-${state}${isBoss ? " is-boss" : ""}`}
         style={{
           top: y,
           ...(labelOnRight
-            ? { left: `calc(${x}% + ${NODE_R + LABEL_GAP}px)` }
-            : { right: `calc(${100 - x}% + ${NODE_R + LABEL_GAP}px)` }),
+            ? { left: `calc(${x}% + ${r + LABEL_GAP}px)` }
+            : { right: `calc(${100 - x}% + ${r + LABEL_GAP}px)` }),
         }}
       >
         {locked ? title : <Link href={`/mission/${mission.id}`}>{title}</Link>}

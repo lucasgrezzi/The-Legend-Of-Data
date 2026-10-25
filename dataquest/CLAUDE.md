@@ -32,7 +32,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessão 14 commitada e enviada** em 2026-10-24 (revisão das 17 fases). Em 2026-10-25, para liberar espaço no PC
   (disco 96% cheio), foram apagados `node_modules/`, `.next/` e o cache do npm: **rode `npm install` antes de
   `npm run dev`/`build`**. O script de revisão das fases foi salvo em `scripts/revisar_fases.mjs`.
-- Hoje são **22 missões** (7 de Python, 7 de SQL, 6 Pandas, 2 Data Viz) — ver "As 22 Missões". Os `expectedOutput` das
+- Hoje são **23 missões** (7 de Python, 7 de SQL, 6 Pandas, 3 Data Viz), em 4 regiões, cada uma terminando num chefe — ver "As 23 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
 ### Sessão 1 — Redesign da interface
@@ -389,6 +389,21 @@ de SQL e, principalmente, de Pandas antes do Data Viz.
 - **Revisão no navegador** (`scripts/revisar_fases.mjs`, que agora roda no Modo Teste e aceita uma lista de ids): as 21
   soluções passam e os 33 erros de iniciante são recusados com mensagem clara.
 
+### Sessão 16 — Mapa-Múndi, uma tela por região e chefe em toda região (2026-10-26)
+Pedido do usuário: o mapa não deve virar uma rolagem infinita. Ele quer algo como o Codédex, sem perder a essência
+do DataQuest: cada tema numa região, e toda região terminando num chefe ("transformar cada vez mais em RPG").
+- `/map` virou o **Mapa-Múndi**, e cada região tem sua tela em `/regiao/[track]` (detalhes em "Mapa" mais abaixo).
+- Chefe marcado no mapa e no Mapa-Múndi. **Fase 22 "O Conselho dos Portos"**: novo chefe do Farol (groupby + barras).
+  O título "Guardião do Farol" da loja agora exige a fase 22.
+- **Próxima região: Data Science** ("O Observatório dos Oráculos"), com o scikit-learn do Pyodide. Fases sugeridas:
+  - espalhamento (desvio);
+  - correlação;
+  - 1ª previsão com uma reta (regressão linear);
+  - treino × teste;
+  - árvore de decisão;
+  - chefe: acurácia.
+  Ao adicionar, esticar a tabela de níveis (o XP total passa de 660).
+
 ### Próximos passos sugeridos
 1. **Rodar `supabase/2026-10-titulo-no-ranking.sql`** (tarefa do usuário) para o título aparecer no ranking.
 2. Mais fases: Pandas `merge`/`pivot_table` (o worker só injeta UM CSV — para merge, aceitar vários arquivos em
@@ -568,7 +583,7 @@ dataquest/
 
 ---
 
-## As 22 Missões (na ordem de jogo)
+## As 23 Missões (na ordem de jogo)
 
 Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Escudo 150, Pocao 80, Manto 200, Anel 180)
 
@@ -596,6 +611,7 @@ Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Esc
 | 20    | 14 | pandas | A Têmpera do Rei         | Pandas: colunas com contas (chefe)| 5/5    | +40 | +30    | 13          | `read_csv(`, `df["x"] = … * …`, `["quantidade"] >=`, `.groupby(`, `.sort_values(` |
 | 21    | 15 | dataviz| O Farol se Acende        | Gráfico de barras com matplotlib  | 1/5    | +30 | +25    | 14          | `plt.bar(`, `plt.title(` (validação `chart`) |
 | 22    | 16 | dataviz| A Rota das Tempestades   | Gráfico de linha, título e eixos  | 2/5    | +35 | +25    | 15          | `read_csv(`, `plt.plot(` (validação `chart`) |
+| 23    | 22 | dataviz| O Conselho dos Portos    | Gráfico a partir de groupby (chefe)| 4/5   | +45 | +35    | 16          | `.groupby(`, `.sort_values(`, `plt.bar(`, `read_csv(` (validação `chart`) |
 
 Tabelas SQL das missões 9–12 em `data/catacumbas.ts`: `reliquias` (12 linhas: id, nome, tipo, sala, valor,
 amaldicoada 'sim'/'nao'), `herois` (5) e `expedicoes` (9: id, heroi_id, destino, ouro).
@@ -635,6 +651,8 @@ Sul: 100"` (só `paga`, groupby regiao, sum ouro, desc)
 - M19: `"Cota de Malha\nMartelo de Guerra\nMachado Duplo"` (sort_values preco desc + head(3))
 - M20: `"Total: 57\nPor dia: 9.5\nRecorde: 15"` (sum, mean, max da coluna sacos; rótulos sem acento de propósito)
 - M21: `"anao: 5\nelfo: 3\norc: 2\ngoblin: 1"` (value_counts da coluna raca)
+- M22 (chart, chefe do Farol): `{ kind: "bar", count: 4, values: [48, 35, 27, 14], title: true, xlabel: true, ylabel: true }`
+  (CSV `cargas` em `data/farol.ts`; groupby porto, sum caixas, desc; a única novidade é `.index`/`.values`)
 
 **Arco da história (Python):** Prólogo na Guilda (bolsa de ouro) → Cap. I o Grimório pede que você se apresente →
 Cap. II Mercado da Vila → Cap. III Guardião do Portão → Cap. IV Corredor das Tochas → Cap. V Salão das Relíquias
@@ -645,7 +663,8 @@ o primeiro Arquivista-Rei, com o Livro das Expedições) → **Pandas:** "Atrás
 II A Vitrine de Brokk, as 3 peças mais caras → III O Carvão da Semana → IV O Livro de Visitas, qual raça mais visita →
 V O Fole das Regiões, o ferreiro anão e as encomendas das quatro regiões → VI A Têmpera do Rei, chefe: carta do Rei pedindo o faturamento) →
 **Data Viz:** Brokk forja a lente e você a leva ao Farol da Verdade, de Dona Íris, a faroleira (Cap. I O Farol se Acende:
-navios por região em barras → II A Rota das Tempestades: tempestades por mês em linha).
+navios por região em barras → II A Rota das Tempestades: tempestades por mês em linha → III O Conselho dos Portos, chefe:
+quatro capitães discutem qual porto recebe mais caixas, e o gráfico encerra a briga).
 O **Grimório** é, na lore, um livro vivo e ganancioso que vende dicas por ouro — e o **narrador** da campanha, que
 quebra a quarta parede. Ao escrever fases novas: tom bem-humorado e meta, frases curtas, explicar todo termo de RPG
 na 1ª vez e sempre preencher `realWorld`.
@@ -761,15 +780,30 @@ Sempre usar o padrão: emoji grande (20px) + pixel label + linha separadora colo
 ### Texto sobre imagem
 Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo sólido 94–96%). Nunca texto solto sobre a imagem.
 
-### Mapa (WorldMap + MissionPin)
-- Estilo RPG da Sessão 9: `.rpg-frame`, `.region-banner`, `.map-label` pergaminho, `.map-hero`, `.wood-bar` (ver lá)
-- Layout calculado em `layout()`: banner de região (132px) + nós (140px), x em zigue-zague `[50, 74, 50, 26]%`
-- SVG com `preserveAspectRatio="none"` + `vectorEffect="non-scaling-stroke"` liga os nós; dourado sólido = alcançado, tracejado = bloqueado
-- Banner de região bloqueada mostra `Requer: …` via `missingRequirements()`; trilha sem missões mostra "Em breve"
-- **Neblina** (`MapFog`, z-index 8): cobre tudo abaixo da próxima missão (ou só as trilhas "Em breve" se tudo foi
-  concluído), bloqueia cliques e mostra "Terras inexploradas" + o que concluir. Âncora = id da próxima missão
-  (`fogTop` em `WorldMap`). `localStorage["dataquest-fog-seen"]` guarda a última âncora vista: se o jogador avançou,
-  a neblina começa na antiga e recua (transição de `top` 1,9 s + rolagem até a próxima missão).
+### Mapa (WorldMap + MissionPin) — Mapa-Múndi + uma tela por região (Sessão 16)
+- `/map` = **Mapa-Múndi** (`WorldHub` em `components/map/WorldMap.tsx`). Ele cabe numa tela de 1366×768:
+  - painel compacto do jogador;
+  - um lugar por região em `HUB_SPOTS`, ligados por estrada SVG, e um lugar "???" (Terras inexploradas, em breve);
+  - cada lugar mostra o progresso e o chefe ("👑 Chefe: …" ou "✓ Chefe derrotado");
+  - região bloqueada fica cinza e diz "Vença o chefe anterior";
+  - o herói e "VOCÊ ESTÁ AQUI" ficam na região da próxima fase.
+- `/regiao/[track]` (`app/regiao/[track]/page.tsx` → `<WorldMap track>` → `RegionTrail`) = trilha só daquela região:
+  - "← Mapa-Múndi" e Continuar no topo, depois o estandarte, depois as fases;
+  - layout em `trailLayout()`: nós de 128px, x em zigue-zague `[50, 70, 50, 30]%`;
+  - neblina depois da última fase não bloqueada; região bloqueada fica toda coberta ("Região bloqueada");
+  - depois do chefe, aparece "Próxima região →".
+- **Chefe = a última fase de cada região** (`bossOf`/`isBoss` em `lib/missions.ts`). Toda região precisa terminar
+  num chefe. No mapa ele tem um medalhão de 96px com aro carmesim (`.map-node.is-boss`), 👑 em cima e a etiqueta
+  "👑 CHEFE" no cartão.
+- **Região nova:**
+  - Somar a trilha em `Track` (`types`), `TRACKS` e `TRACK_ORDER` (`lib/tracks.ts`), com um sprite de medalhão.
+  - O Mapa-Múndi tem 5 lugares. A 6ª região pede mais um ponto em `HUB_SPOTS`; a 5ª ocupa o lugar do "???".
+- Os links "Mapa" da tela de missão voltam para a região da fase. O logo DataQuest leva ao Mapa-Múndi.
+- Estilo RPG da Sessão 9: `.rpg-frame`, `.region-banner`, `.map-label` pergaminho, `.map-hero`, `.wood-bar`.
+  **Cuidado:** `.rpg-frame` tem `position: relative`, que vence a classe `absolute` do Tailwind. Um elemento com
+  `.rpg-frame` que precisa ser absolute deve receber o `position` no `style`.
+- **Neblina** (`MapFog`): `localStorage["dataquest-fog-seen"]` guarda a última âncora vista. Se o jogador avançou, a
+  neblina começa na antiga e recua com animação.
 - Nó: bloqueado `missao-bloqueada`, disponível = sprite da trilha (borda dourada pulsando), concluído `missao-concluida`; tag `▼ PRÓXIMA`
 
 ### Layout da tela de missão
@@ -788,7 +822,7 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 
 ## Como Adicionar uma Nova Missão
 
-1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 22) — nunca reaproveitar/renumerar ids
+1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 23) — nunca reaproveitar/renumerar ids
    (são a chave do progresso salvo). Preencher `concept` com linguagem direta (o que a pessoa aprende).
    Campos de conteúdo (padrão da Sessão 4):
    - `narrative` — continua a história da missão anterior (ver "Arco da história"; tom meta e bem-humorado)

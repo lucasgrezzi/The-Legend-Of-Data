@@ -21,6 +21,7 @@ import mission18 from "@/data/missions/mission-18";
 import mission19 from "@/data/missions/mission-19";
 import mission20 from "@/data/missions/mission-20";
 import mission21 from "@/data/missions/mission-21";
+import mission22 from "@/data/missions/mission-22";
 
 /**
  * Ordem de jogo. O `id` é estável (é a chave do progresso salvo) e NÃO define a ordem:
@@ -49,6 +50,7 @@ export const MISSIONS: Mission[] = [
   mission14, // Pandas — colunas calculadas (chefe)
   mission15, // Data Viz — gráfico de barras
   mission16, // Data Viz — gráfico de linha, título e eixos
+  mission22, // Data Viz — gráfico a partir de groupby (chefe)
 ];
 
 /** Todos os arquivos de dados da missão (principal + extras), na ordem da aba Dados */
@@ -59,6 +61,19 @@ export function missionDataFiles(m: Mission): DataFilePreview[] {
 export function getMission(id: number): Mission | undefined {
   return MISSIONS.find((m) => m.id === id);
 }
+
+/** Fases de uma região (trilha), na ordem de jogo */
+export function missionsOfTrack(track: Mission["track"]): Mission[] {
+  return MISSIONS.filter((m) => m.track === track);
+}
+
+/** O chefe de uma região é sempre a última fase dela */
+export function bossOf(track: Mission["track"]): Mission | undefined {
+  const list = missionsOfTrack(track);
+  return list[list.length - 1];
+}
+
+export const isBoss = (m: Mission) => bossOf(m.track)?.id === m.id;
 
 /** Missão anterior/seguinte na ordem de jogo */
 export function getNeighbors(id: number): { prev: Mission | null; next: Mission | null } {

@@ -55,7 +55,7 @@ function LockedMission({ mission, reasons }: { mission: Mission; reasons: string
           ))}
         </ul>
       </div>
-      <Link href="/map" className="btn-next">⬡ Voltar ao Mapa</Link>
+      <Link href={`/regiao/${mission.track}`} className="btn-next">⬡ Voltar ao Mapa</Link>
     </FullScreenMessage>
   );
 }
@@ -174,7 +174,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
             DataQuest
           </Link>
           <span style={{ color: "var(--frame-gold-lo)", fontSize: 18 }}>/</span>
-          <Link href="/map" className="flex items-center gap-2 shrink-0" style={{ color: track.color, fontSize: 14, fontWeight: 700 }}>
+          <Link href={`/regiao/${mission.track}`} className="flex items-center gap-2 shrink-0" style={{ color: track.color, fontSize: 14, fontWeight: 700 }}>
             <Sprite src={track.sprite} size={32} /> {track.name}
           </Link>
           <span style={{ color: "var(--frame-gold-lo)", fontSize: 18 }}>/</span>

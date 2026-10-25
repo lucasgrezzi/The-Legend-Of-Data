@@ -261,7 +261,7 @@ export default function MissionPanel({
           {prevId !== null ? (
             <Link href={`/mission/${prevId}`} className="btn-nav btn-pixel is-compact">← Voltar</Link>
           ) : (
-            <Link href="/map" className="btn-nav btn-pixel is-compact">⬡ Mapa</Link>
+            <Link href={`/regiao/${mission.track}`} className="btn-nav btn-pixel is-compact">⬡ Mapa</Link>
           )}
 
           {nextId !== null ? (
@@ -273,7 +273,7 @@ export default function MissionPanel({
               </button>
             )
           ) : validated ? (
-            <Link href="/map" className="btn-next btn-pixel is-compact"><span style={{ fontFamily: "var(--font-body)" }}>⭐</span> Concluído</Link>
+            <Link href={`/regiao/${mission.track}`} className="btn-next btn-pixel is-compact"><span style={{ fontFamily: "var(--font-body)" }}>⭐</span> Concluído</Link>
           ) : (
             <button className="btn-next btn-pixel is-compact" disabled><span style={{ fontFamily: "var(--font-body)" }}>🔒</span> Próximo</button>
           )}
