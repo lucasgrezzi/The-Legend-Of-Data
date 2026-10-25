@@ -10,7 +10,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 
 ## 📍 Onde paramos (retomar aqui)
 
-> Última sessão: **2026-10-24** (com Claude Code). Leia esta seção primeiro ao retomar.
+> Última sessão: **2026-10-25** (com Claude Code). Leia esta seção primeiro ao retomar.
 
 ### ⚠ Estado do repositório
 - **Sessões 1–3 commitadas e enviadas** ao GitHub (`master`, commit `10363cd`) em 2026-09-22.
@@ -28,6 +28,9 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessão 11 commitada e enviada** em 2026-10-24 (o Grimório traduz os erros de Python e SQL).
 - **Sessão 12 commitada e enviada** em 2026-10-24 (tela da missão no estilo RPG + tutorial guiado).
 - **Sessão 13 commitada e enviada** em 2026-10-24 (Bestiário, Loja do Mercador, M14–M16, login/ranking RPG).
+- **Sessão 14 commitada e enviada** em 2026-10-24 (revisão das 17 fases). Em 2026-10-25, para liberar espaço no PC
+  (disco 96% cheio), foram apagados `node_modules/`, `.next/` e o cache do npm: **rode `npm install` antes de
+  `npm run dev`/`build`**. O script de revisão das fases foi salvo em `scripts/revisar_fases.mjs`.
 - Hoje são **17 missões** (7 de Python, 5 de SQL, 3 Pandas, 2 Data Viz) — ver "As 17 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
@@ -353,9 +356,13 @@ Pedido do usuário: "pode fazer todas as etapas e a gente verifica tudo depois".
   Python só diz "invalid syntax"; KeyError do Pandas sem o prefixo "Column not found:".
 - **Teste no navegador** (`review.mjs` no scratchpad: jogador novo, 17 fases em ordem, 23 erros típicos de iniciante):
   as 16 soluções passam e nenhum erro passa por engano. As 3 últimas correções de mensagem foram conferidas só com teste
-  em Node (a 2ª rodada no navegador foi interrompida por falta de memória no PC).
+  em Node (a 2ª rodada no navegador foi interrompida por falta de memória no PC; em 2026-10-25 ela foi adiada de
+  novo pelo mesmo motivo).
 
 ### Próximos passos sugeridos
+0. **Pendente:** depois de `npm install`, repetir a rodada no navegador com `scripts/revisar_fases.mjs` (cerca de 10 min,
+   com uns 2 GB de RAM livres). O passo a passo está em "Como testar rapidamente". O que se espera: as 16 soluções
+   passam e os 23 erros são recusados com a mensagem certa.
 1. **Rodar `supabase/2026-10-titulo-no-ranking.sql`** (tarefa do usuário) para o título aparecer no ranking.
 2. Mais fases: Pandas `merge`/`pivot_table` (o worker só injeta UM CSV — para merge, aceitar vários arquivos em
    `/data/`); Data Viz III (chefe: gráfico a partir de groupby, cores/legenda).
@@ -376,6 +383,15 @@ Pedido do usuário: "pode fazer todas as etapas e a gente verifica tudo depois".
   migração) e redireciona — **apagar depois**.
 - Teste de todas as soluções: extrair `solution` de `data/missions/*.ts` e enviá-las pela tela da missão via CDP
   (foi assim que as 8 soluções foram validadas na Sessão 4).
+- **Revisão completa (`scripts/revisar_fases.mjs`):**
+  1. Crie `.env.production.local` com `NEXT_PUBLIC_SUPABASE_URL=`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=` e
+     `NEXT_PUBLIC_SUPABASE_ANON_KEY=` vazios (assim o jogo roda sem login).
+  2. Crie `public/__seed.html` gravando um jogador novo com `profile` `{name,race}` e `completedMissionIds:[0]`,
+     `unlockedMissionIds:[0,1]`, `currentMissionId:1` e `localStorage["dataquest-tour-seen"]="1"`.
+  3. Rode `npx next build` e depois `npx next start -p 3100`.
+  4. Rode `node scripts/revisar_fases.mjs <pasta temporária>`.
+  5. **Apague `.env.production.local` e `__seed.html` no fim.** Se a porta 9333 ou 3100 ficar ocupada, mate o processo
+     pelo PID (`netstat -ano` e `taskkill`).
 - Screenshots headless: Chrome `--headless=new --screenshot` com **um `--user-data-dir` novo por captura**
   (reutilizar o perfil gera tela branca). Fluxos (digitar no CodeMirror, clicar, enviar) foram testados via
   Chrome DevTools Protocol com um script Node (`WebSocket` nativo do Node 24).
