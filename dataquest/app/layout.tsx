@@ -3,6 +3,7 @@ import { Press_Start_2P, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import CloudSync from "@/components/account/CloudSync";
 import Bestiary from "@/components/glossary/Bestiary";
+import TestPanel from "@/components/dev/TestPanel";
 
 const pressStart = Press_Start_2P({
   weight: "400",
@@ -34,6 +35,7 @@ export default function RootLayout({
         <CloudSync />
         {children}
         <Bestiary />
+        <TestPanel />
       </body>
     </html>
   );

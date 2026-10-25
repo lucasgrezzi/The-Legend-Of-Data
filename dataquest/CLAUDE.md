@@ -373,6 +373,20 @@ Pedido do usuário: "pode fazer todas as etapas e a gente verifica tudo depois".
 7. Limpeza: apagar as contas de teste `dataquest.teste.*@example.com` no Supabase (tarefa do usuário).
 
 ### Como testar rapidamente
+- **Modo Teste: `npm run teste` → http://localhost:3001.** É o jeito de analisar as fases sem jogar tudo de novo.
+  - Todas as fases ficam abertas.
+  - Não tem login, e nada vai para a nuvem nem para o ranking (o `supabase` fica `null`).
+  - O botão 🧪 (canto de baixo à direita) abre o painel, que permite:
+    - ir para qualquer fase;
+    - ver a solução da fase aberta;
+    - ganhar +100 moedas (para testar a loja);
+    - concluir todas;
+    - zerar o progresso (mantém o personagem e mostra o tutorial de novo).
+  - Como usa outra porta, o progresso não se mistura com o do `npm run dev` (3000).
+  - Arquivos: `lib/testMode.ts` (`TEST_MODE`), `components/dev/TestPanel.tsx`, `scripts/modo-teste.mjs` e o
+    `computeUnlockedMissions`/`missingRequirements` em `lib/xp.ts`.
+  - Ele só liga com `next dev` + `NEXT_PUBLIC_MODO_TESTE=1`. No build de produção, `TEST_MODE` vira `false`
+    (conferido no bundle), então o site público nunca mostra nada disso.
 - `npm run dev` → http://localhost:3000 (com `.env.local`, abre a tela de login). Produção:
   https://the-legend-of-data.vercel.app — status do deploy aparece no commit do GitHub (API `commits/<sha>/statuses`).
 - Contas de teste: criar com e-mail `dataquest.teste.<algo>@example.com` (a confirmação está desligada, então

@@ -1,4 +1,5 @@
 import type { Mission } from "@/types";
+import { TEST_MODE } from "@/lib/testMode";
 
 /** Após quantos envios errados a SOLUÇÃO completa do Grimório pode ser revelada */
 export const SOLUTION_UNLOCK_FAILS = 3;
@@ -53,7 +54,7 @@ export function computeUnlockedMissions(
 ): number[] {
   return missions
     .filter((m) => {
-      if (!m.unlockCondition) return true;
+      if (!m.unlockCondition || TEST_MODE) return true; // Modo Teste: todas as fases abertas
       const { requiredMissionIds, requiredXP } = m.unlockCondition;
       const missionsOk = requiredMissionIds
         ? requiredMissionIds.every((id) => completedIds.includes(id))
@@ -104,7 +105,7 @@ export function missingRequirements(
 ): string[] {
   const reqs: string[] = [];
   const cond = mission.unlockCondition;
-  if (!cond) return reqs;
+  if (!cond || TEST_MODE) return reqs;
   for (const id of cond.requiredMissionIds ?? []) {
     if (!completedIds.includes(id)) {
       const m = missions.find((x) => x.id === id);
