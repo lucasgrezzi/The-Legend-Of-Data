@@ -32,7 +32,7 @@ export default function CharacterCreation({ onConfirm, showSteps, corner }: Char
 
   return (
     <GateShell step={showSteps ? 2 : undefined} maxWidth={760} corner={corner}>
-      <form onSubmit={submit} className="panel w-full" style={{ padding: "18px 24px" }}>
+      <form onSubmit={submit} className="panel rpg-frame w-full" style={{ padding: "18px 24px" }}>
 
         <div className="text-center mb-3">
           <h2 style={{ fontSize: 21, fontWeight: 800, margin: "0 0 2px", color: "var(--color-accent)", textShadow: "0 0 30px rgba(240,192,64,0.35)" }}>

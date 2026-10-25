@@ -30,9 +30,9 @@ export default function GateShell({ step, maxWidth, corner, children }: GateShel
         </div>
       )}
 
-      <div className="w-full flex flex-col items-center gap-3" style={{ maxWidth }}>
+      <div className="w-full flex flex-col items-center gap-6" style={{ maxWidth }}>
         {/* Logo + tagline + etapas num único painel compacto (texto nunca direto sobre a imagem) */}
-        <header className="panel anim-rise flex flex-col items-center gap-2" style={{ padding: "10px 22px", borderRadius: 14 }}>
+        <header className="panel rpg-frame anim-rise flex flex-col items-center gap-2" style={{ padding: "10px 22px" }}>
           <div className="text-center">
             <h1 className="gate-logo">DataQuest</h1>
             <p style={{ margin: 0, fontSize: 12, color: "var(--color-muted)", whiteSpace: "nowrap" }}>

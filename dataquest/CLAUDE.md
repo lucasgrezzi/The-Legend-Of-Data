@@ -27,7 +27,8 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessão 10 commitada e enviada** em 2026-10-09 (Forja II: groupby; história reescrita em tom meta + "No mundo real").
 - **Sessão 11 commitada e enviada** em 2026-10-24 (o Grimório traduz os erros de Python e SQL).
 - **Sessão 12 commitada e enviada** em 2026-10-24 (tela da missão no estilo RPG + tutorial guiado).
-- Hoje são **14 missões** (7 de Python, 5 de SQL, 2 Pandas) — ver "As 14 Missões". Os `expectedOutput` das
+- **Sessão 13 commitada e enviada** em 2026-10-24 (Bestiário, Loja do Mercador, M14–M16, login/ranking RPG).
+- Hoje são **17 missões** (7 de Python, 5 de SQL, 3 Pandas, 2 Data Viz) — ver "As 17 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
 ### Sessão 1 — Redesign da interface
@@ -313,14 +314,39 @@ missão)" no fim de `globals.css`.
 - Testado (build sem Supabase + CDP, 1366×768): jogador novo na M1 → tutorial abre, 8 passos com alvo e balão dentro da
   tela, fecha e grava; reload não reabre; "Como jogar" reabre; M9 não abre sozinho. Os 13 cenários da Sessão 11 passam.
 
+### Sessão 13 — Bestiário, Loja do Mercador, fases novas e login/ranking RPG (2026-10-24)
+Pedido do usuário: "pode fazer todas as etapas e a gente verifica tudo depois". Um commit por etapa.
+- **Bestiário de Palavras** (`lib/glossary.ts`, `components/glossary/Bestiary.tsx`, `store/glossaryStore.ts`): 70 termos
+  (`kind` "jogo" ou "codigo", `missionId` = fase onde aparece). Descoberto = a missão já está disponível (derivado, nada
+  salvo). Diálogo montado no `layout.tsx`, aberto por `useGlossary().show(id?)`; abas Todas/Jogo/Programação, busca (só
+  entre as descobertas), destaque da palavra pedida. `BestiaryButton` no mapa, na loja e na missão (`compact` = só ícone
+  abaixo de 1536px). `MissionWords` = "Palavras novas nesta fase" na tela da missão. Passo "bestiary" no tutorial.
+  **Fase nova → acrescentar as palavras dela no glossário.**
+- **Loja do Mercador** (`/loja`, `components/shop/MerchantShop.tsx`, catálogo em `lib/shop.ts`): títulos, molduras e
+  mascotes, só visuais. Abre após a M5 (`SHOP_UNLOCK_MISSION_ID`); alguns itens exigem um chefe (`requiresMissionId`).
+  Store: `ownedItems` + `equipped` (por espaço) + `buyItem` (comprar já equipa) / `equipItem(slot, id|null)` — campos novos
+  com padrão, **sem subir `PROGRESS_VERSION`**. `HeroPortrait` (retrato + moldura + mascote) no chip, na ficha e na loja;
+  mascote ao lado do herói no mapa (`.map-pet`). Mascotes em pixel art próprio: `scripts/gerar_mascotes.py` →
+  `public/assets/pets/*.png`. Ids de item são estáveis (ficam no save).
+  **Ranking com título:** o usuário precisa rodar `supabase/2026-10-titulo-no-ranking.sql` no SQL Editor (a função passa a
+  devolver `title_id`); sem isso o ranking funciona, só sem título. `schema.sql` já está atualizado.
+- **Fases novas** M14 (chefe Pandas), M15 e M16 (Data Viz, região aberta). **Validação de gráfico real:** o worker devolve
+  `chartMeta` (alturas das barras, valores das linhas, título, eixos) e `validateChart` compara com o `expectedOutput`
+  JSON `{ kind, count, values, title, xlabel, ylabel }` (texto exato ou `true` = só precisa existir), recusando também
+  tipo misturado (barra + linha). A Saída mostra "✓ Gráfico desenhado logo abaixo." e cresce como no erro.
+- **Login, criação de personagem, nova senha e ranking** com `.rpg-frame`; ranking com `.wood-bar` ("Salão da Fama") e
+  linhas `.rank-row` (pódio em pergaminho, "você" com aro dourado).
+- Testado (build sem Supabase + CDP, 1366×768): Bestiário (20/60 para novato → 60/60, foco, busca não revela bloqueadas);
+  loja (fechada para novato, compra desconta, sem saldo não compra, equipado aparece no chip/ficha/mapa); M14–M16 com
+  variações erradas recusadas (sem filtro, sem coluna, linha em vez de barra, sem barras, título errado, valores fora de
+  ordem, sem ylabel, barra + linha) e soluções aceitas. Login e ranking vistos com `next dev` + `.env.local` (sem entrar).
+- ⚠ Neste Windows, `\n` dentro de heredoc no Bash às vezes vira quebra de linha real — para editar strings com `\n`
+  em .ts, use o Edit (ou um script Python salvo em arquivo).
+
 ### Próximos passos sugeridos
-0. **Roteiro da Sessão 11:** ~~(2) tela da missão RPG + tutorial~~ ✅; **(3) glossário fixo do jogador** ("Bestiário de
-   Palavras": termos de RPG e de programação, preenchido conforme avança); depois (4) abaixo. Login e ranking ainda no
-   visual antigo.
-1. **Loja do Mercador (combinado com o usuário):** cosméticos/títulos compráveis com moedas —
-   títulos aparecendo no ranking, molduras/cores do personagem, talvez pet no mapa. Nada que ajude a resolver
-   (não competir com as dicas). Economia hoje: 275 moedas possíveis; dicas custam 5 e 10.
-2. Continuar **Pandas** (merge, colunas calculadas, pivot_table — groupby feito na M13) e ao módulo **Data Viz** (validação `"chart"`).
+1. **Rodar `supabase/2026-10-titulo-no-ranking.sql`** (tarefa do usuário) para o título aparecer no ranking.
+2. Mais fases: Pandas `merge`/`pivot_table` (o worker só injeta UM CSV — para merge, aceitar vários arquivos em
+   `/data/`); Data Viz III (chefe: gráfico a partir de groupby, cores/legenda).
 3. Python extra (opcional): `while` e dicionários (fichas de personagem) como missões bônus.
 4. Talvez: dar efeito real às raças (hoje só visuais) — ex.: desconto em dicas de uma trilha.
 5. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px).
@@ -448,7 +474,7 @@ dataquest/
 │   └── accountStore.ts          # Conta Supabase: ready, email, sync (não persistido)
 ├── data/
 │   ├── missions/
-│   │   ├── mission-0.ts … mission-13.ts  # ordem de jogo definida em lib/missions.ts
+│   │   ├── mission-0.ts … mission-16.ts  # ordem de jogo definida em lib/missions.ts
 │   ├── catacumbas.ts            # Tabelas SQL das missões 9–12 (reliquias, herois, expedicoes) + csvTable
 │   ├── forja.ts                 # CSVs da trilha Pandas (encomendas — missão 13)
 │   └── csv/vendas.csv
@@ -470,7 +496,7 @@ dataquest/
 
 ---
 
-## As 14 Missões (na ordem de jogo)
+## As 17 Missões (na ordem de jogo)
 
 Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Escudo 150, Pocao 80, Manto 200, Anel 180)
 
@@ -490,10 +516,15 @@ Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Esc
 | 12    | 12 | sql    | O Rei Esquecido          | SQL: JOIN entre tabelas (chefe)   | 5/5    | +40 | +30    | 11          | `JOIN`, `ON … heroi_id`, `GROUP BY` |
 | 13    | 4  | pandas | A Forja Desperta         | Pandas: ler CSV e filtrar linhas  | 2/5    | +30 | +25    | 12          | `read_csv(`, filtro `["valor"] >`, `len(` |
 | 14    | 13 | pandas | O Fole das Regiões       | Pandas: groupby, sum e sort_values| 3/5    | +35 | +25    | 4           | `read_csv(`, `["status"]`, `.groupby(`, `.sum(`, `.sort_values(` |
+| 15    | 14 | pandas | A Têmpera do Rei         | Pandas: colunas com contas (chefe)| 5/5    | +40 | +30    | 13          | `read_csv(`, `df["x"] = … * …`, `["quantidade"] >=`, `.groupby(`, `.sort_values(` |
+| 16    | 15 | dataviz| O Farol se Acende        | Gráfico de barras com matplotlib  | 1/5    | +30 | +25    | 14          | `plt.bar(`, `plt.title(` (validação `chart`) |
+| 17    | 16 | dataviz| A Rota das Tempestades   | Gráfico de linha, título e eixos  | 2/5    | +35 | +25    | 15          | `read_csv(`, `plt.plot(` (validação `chart`) |
 
 Tabelas SQL das missões 9–12 em `data/catacumbas.ts`: `reliquias` (12 linhas: id, nome, tipo, sala, valor,
 amaldicoada 'sim'/'nao'), `herois` (5) e `expedicoes` (9: id, heroi_id, destino, ouro).
 CSV da missão 13 em `data/forja.ts`: `encomendas` (12 linhas: id, peca, regiao, ouro, status 'paga'/'pendente').
+CSV da missão 14 em `data/forja.ts`: `pedidos` (10 linhas: id, peca, regiao, quantidade, preco).
+CSV da missão 16 em `data/farol.ts`: `tempestades` (6 linhas: mes, tempestades). A M15 usa listas no próprio código.
 
 Cada missão tem 2 dicas (`hints`) e uma `solution`. A missão 0 não tem Grimório.
 
@@ -514,13 +545,18 @@ Cada missão tem 2 dicas (`hints`) e uma `solution`. A missão 0 não tem Grimó
 Oeste: 220
 Leste: 150
 Sul: 100"` (só `paga`, groupby regiao, sum ouro, desc)
+- M14: `"Norte: 220\nLeste: 210\nOeste: 200\nSul: 190"` (total = quantidade × preco, só quantidade ≥ 2; sem o filtro a ordem muda)
+- M15 (chart): `{ kind: "bar", count: 4, values: [12, 7, 9, 4], title: "Navios por região" }`
+- M16 (chart): `{ kind: "line", count: 6, values: [3, 5, 8, 6, 2, 1], title: true, xlabel: true, ylabel: true }`
 
 **Arco da história (Python):** Prólogo na Guilda (bolsa de ouro) → Cap. I o Grimório pede que você se apresente →
 Cap. II Mercado da Vila → Cap. III Guardião do Portão → Cap. IV Corredor das Tochas → Cap. V Salão das Relíquias
 (mochila) → Cap. VI Selo das Catacumbas (chefe) → **SQL:** "Com o Selo rompido…" desce às Catacumbas (Cap. I Primeira Escavação → II Salão dos Ossos, onde o
 Guardião dos Ossos cataloga as relíquias → III Inventário do Guardião → IV Criptas por Tipo → V O Rei Esquecido,
 o primeiro Arquivista-Rei, com o Livro das Expedições) → **Pandas:** "Atrás do trono do Rei Esquecido…" a Forja (Cap. I A Forja Desperta → II O Fole das Regiões, o
-ferreiro anão e as encomendas das quatro regiões).
+ferreiro anão e as encomendas das quatro regiões → III A Têmpera do Rei, chefe: carta do Rei pedindo o faturamento) →
+**Data Viz:** Brokk forja a lente e você a leva ao Farol da Verdade, de Dona Íris, a faroleira (Cap. I O Farol se Acende:
+navios por região em barras → II A Rota das Tempestades: tempestades por mês em linha).
 O **Grimório** é, na lore, um livro vivo e ganancioso que vende dicas por ouro — e o **narrador** da campanha, que
 quebra a quarta parede. Ao escrever fases novas: tom bem-humorado e meta, frases curtas, explicar todo termo de RPG
 na 1ª vez e sempre preencher `realWorld`.
@@ -531,8 +567,9 @@ na 1ª vez e sempre preencher `realWorld`.
 
 **Níveis (10, `LEVEL_THRESHOLDS` em `lib/xp.ts`):** Aprendiz (0) → Escriba (40) → Copista (90) → Cronista (150) →
 Explorador de Criptas (200) → Arquivista (260) → Guardião do Saber (330) → Mestre da Forja (420) → Sábio dos Dados (530) →
-Mestre dos Dados (660). Calibrados pela jornada: fim do Python ≈ 155 XP (Nv 4), fim do SQL ≈ 305 (Nv 6), Forja I 335 (Nv 7), Forja II 370;
-8–10 esperam o conteúdo futuro — **ao adicionar missões, revisar a tabela**.
+Mestre dos Dados (660). Calibrados pela jornada: fim do Python ≈ 155 XP (Nv 4), fim do SQL ≈ 305 (Nv 6), Forja I 335 (Nv 7), Forja II 370,
+chefe da Forja 410, Data Viz I 440 (Nv 8), Data Viz II 475; 9–10 esperam o conteúdo futuro — **ao adicionar missões, revisar a tabela**.
+Moedas possíveis hoje: 355.
 
 **Fluxo por missão:**
 1. Aluno digita código no editor
@@ -662,7 +699,7 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 
 ## Como Adicionar uma Nova Missão
 
-1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 14) — nunca reaproveitar/renumerar ids
+1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 17) — nunca reaproveitar/renumerar ids
    (são a chave do progresso salvo). Preencher `concept` com linguagem direta (o que a pessoa aprende).
    Campos de conteúdo (padrão da Sessão 4):
    - `narrative` — continua a história da missão anterior (ver "Arco da história"; tom meta e bem-humorado)

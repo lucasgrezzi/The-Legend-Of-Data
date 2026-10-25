@@ -1270,3 +1270,28 @@ body {
 .shop-price { display: inline-flex; align-items: center; gap: 2px; font-size: 15px; font-weight: 800; color: #7a4d00; }
 .shop-lock { font-size: 12px; color: var(--ink-soft); }
 .map-pet { position: absolute; right: -26px; bottom: -6px; animation: bob 1.6s steps(2) infinite 0.4s; filter: drop-shadow(2px 0 0 #0b0d13) drop-shadow(-2px 0 0 #0b0d13) drop-shadow(0 2px 0 #0b0d13); }
+
+/* ── Ranking (Salão da Fama): placas escuras; pódio em pergaminho ── */
+.rank-row {
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #1c2131, #141824);
+  box-shadow: 0 0 0 2px var(--frame-dark), 0 0 0 3px #353b4b, inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.rank-row .rank-pos { color: var(--color-muted); }
+.rank-row .rank-name { color: var(--color-text); }
+.rank-row .rank-sub { color: var(--color-muted); }
+.rank-row .rank-xp { color: var(--color-xp); }
+.rank-row.is-podium {
+  color: var(--ink);
+  background:
+    radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(120,84,36,0.25) 100%),
+    linear-gradient(180deg, var(--parchment), var(--parchment-lo));
+  box-shadow: 0 0 0 2px #6b4f26, 0 0 0 4px var(--frame-dark), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+.rank-row.is-podium .rank-name, .rank-row.is-podium .rank-pos { color: var(--ink); }
+.rank-row.is-podium .rank-sub { color: var(--ink-soft); }
+.rank-row.is-podium .rank-xp { color: #7a4d00; }
+.rank-row.is-podium .rank-name span { color: #8a4d00 !important; }
+.rank-row.is-me { box-shadow: 0 0 0 2px var(--frame-gold), 0 0 0 4px var(--frame-dark), 0 0 18px rgba(240,192,64,0.4); }

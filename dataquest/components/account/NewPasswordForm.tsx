@@ -73,7 +73,7 @@ export default function NewPasswordForm() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <WorldBackground />
-      <section className="panel w-full" style={{ maxWidth: 440, padding: "28px 28px 24px" }}>
+      <section className="panel rpg-frame w-full" style={{ maxWidth: 440, padding: "28px 28px 24px" }}>
         <p className="pixel-chapter" style={{ margin: 0 }}>CONTA</p>
         <h1 style={{ fontSize: 22, fontWeight: 800, margin: "10px 0 16px", color: "var(--color-accent)" }}>Criar nova senha</h1>
         {body}

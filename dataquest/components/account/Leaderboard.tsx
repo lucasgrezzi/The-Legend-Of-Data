@@ -46,16 +46,16 @@ export default function Leaderboard() {
     <div className="min-h-screen flex flex-col">
       <WorldBackground />
 
-      <header
-        className="flex items-center justify-between gap-4 px-6 shrink-0 sticky top-0 z-20"
-        style={{ background: "rgba(22,27,39,0.94)", borderBottom: "1px solid var(--color-border)", height: 68, backdropFilter: "blur(6px)" }}
-      >
-        <Link href="/map" className="btn-nav">← Mapa</Link>
+      <header className="wood-bar flex items-center justify-between gap-4 px-6 shrink-0 sticky top-0 z-20" style={{ height: 68 }}>
+        <div className="flex items-center gap-4">
+          <Link href="/map" className="btn-nav btn-pixel is-compact">← Mapa</Link>
+          <p className="gate-logo" style={{ margin: 0 }}>Salão da Fama</p>
+        </div>
         <AccountButton guestOnly />
       </header>
 
       <main className="flex-1 px-4 pt-8 pb-16">
-        <section className="panel mx-auto" style={{ maxWidth: 680, padding: "24px 24px 12px" }}>
+        <section className="panel rpg-frame mx-auto" style={{ maxWidth: 680, padding: "24px 24px 12px" }}>
           <p className="pixel-chapter" style={{ margin: 0 }}>SALÃO DA FAMA</p>
           <h1 style={{ fontSize: 26, fontWeight: 800, margin: "10px 0 6px", color: "var(--color-accent)", textShadow: "0 0 30px rgba(240,192,64,0.35)" }}>
             🏆 Ranking
@@ -83,18 +83,8 @@ export default function Leaderboard() {
                 const race = RACES[r.race];
                 const { label } = computeLevel(r.total_xp);
                 return (
-                  <li
-                    key={i}
-                    className="flex items-center gap-3"
-                    style={{
-                      padding: "10px 12px",
-                      marginBottom: 6,
-                      borderRadius: 12,
-                      background: r.is_me ? "rgba(240,192,64,0.10)" : "var(--color-bg)",
-                      border: `1px solid ${r.is_me ? "rgba(240,192,64,0.5)" : "var(--color-border)"}`,
-                    }}
-                  >
-                    <span style={{ width: 36, textAlign: "center", fontSize: i < 3 ? 22 : 14, fontWeight: 800, color: "var(--color-muted)" }}>
+                  <li key={i} className={`rank-row flex items-center gap-3 ${i < 3 ? "is-podium" : ""} ${r.is_me ? "is-me" : ""}`}>
+                    <span className="rank-pos" style={{ width: 36, textAlign: "center", fontSize: i < 3 ? 22 : 14, fontWeight: 800 }}>
                       {MEDALS[i] ?? `${i + 1}º`}
                     </span>
                     {race && (
@@ -106,18 +96,18 @@ export default function Leaderboard() {
                       </span>
                     )}
                     <span className="flex-1 min-w-0 flex flex-col" style={{ lineHeight: 1.3 }}>
-                      <span className="truncate" style={{ fontSize: 15, fontWeight: 800, color: "var(--color-text)" }}>
+                      <span className="rank-name truncate" style={{ fontSize: 15, fontWeight: 800 }}>
                         {r.name}
                         {getItem(r.title_id ?? undefined)?.slot === "titulo" && (
                           <span style={{ fontWeight: 700, color: "var(--color-accent)" }}>, {getItem(r.title_id!)!.value}</span>
                         )}
                         {r.is_me && <span style={{ color: "var(--color-accent)", fontWeight: 700 }}> (você)</span>}
                       </span>
-                      <span style={{ fontSize: 12, color: "var(--color-muted)" }}>
+                      <span className="rank-sub" style={{ fontSize: 12 }}>
                         {race?.name ?? r.race} · {label} · {r.missions_done}/{MISSIONS.length} missões
                       </span>
                     </span>
-                    <span style={{ fontSize: 16, fontWeight: 800, color: "var(--color-xp)", whiteSpace: "nowrap" }}>{r.total_xp} XP</span>
+                    <span className="rank-xp" style={{ fontSize: 16, fontWeight: 800, whiteSpace: "nowrap" }}>{r.total_xp} XP</span>
                   </li>
                 );
               })}

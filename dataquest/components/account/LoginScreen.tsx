@@ -9,7 +9,7 @@ import { AuthForm } from "./AuthDialog";
 export default function LoginScreen() {
   return (
     <GateShell step={1} maxWidth={420}>
-      <section className="panel" style={{ padding: "18px 24px 20px" }}>
+      <section className="panel rpg-frame" style={{ padding: "18px 24px 20px" }}>
         {/* As quatro raças esperando o novo Arquivista */}
         <div className="flex justify-center gap-2" aria-hidden style={{ marginBottom: 8 }}>
           {RACE_ORDER.map((r, i) => (
