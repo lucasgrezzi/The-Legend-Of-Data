@@ -21,6 +21,7 @@ import { supabase } from "@/lib/supabase";
 import { useAccountStore } from "@/store/accountStore";
 import MissionPin, { type PinState } from "./MissionPin";
 import MapFog, { useFogReveal } from "./MapFog";
+import { BestiaryButton } from "@/components/glossary/Bestiary";
 
 // ── Geometria do mapa (px verticais, % horizontais) ──
 const VIEW_W = 100;
@@ -142,6 +143,7 @@ export default function WorldMap() {
           <p style={{ margin: 0, fontSize: 12, color: "#b8a88c" }}>Aprenda Python, SQL e análise de dados jogando um RPG</p>
         </div>
         <div className="flex items-center gap-3">
+          <BestiaryButton />
           {supabase && (
             <Link href="/ranking" className="icon-btn" title="Ranking dos jogadores">
               <span style={{ fontSize: 15 }}>🏆</span> Ranking

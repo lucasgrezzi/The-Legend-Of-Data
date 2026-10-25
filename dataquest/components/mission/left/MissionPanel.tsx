@@ -9,6 +9,7 @@ import Link from "next/link";
 import TypewriterText from "@/components/ui/TypewriterText";
 import RichText from "@/components/ui/RichText";
 import HintShop from "./HintShop";
+import { MissionWords } from "@/components/glossary/Bestiary";
 import { SOLUTION_UNLOCK_FAILS, solutionXP } from "@/lib/xp";
 
 interface MissionPanelProps {
@@ -104,6 +105,8 @@ export default function MissionPanel({
         <p className="mb-4" style={{ margin: "0 0 16px", fontSize: 15, color: "var(--color-muted)" }}>
           Você vai aprender: <b style={{ color: track.color }}>{mission.concept}</b>
         </p>
+
+        <MissionWords missionId={mission.id} />
 
         {/* Badges */}
         <div className="flex flex-wrap items-center gap-2 mb-6">

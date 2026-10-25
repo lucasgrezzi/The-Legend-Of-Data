@@ -177,6 +177,11 @@ export function missionTourSteps(opts: { hasBlanks: boolean; hasGrimoire: boolea
       text: "Eu vendo **dicas** em troca de moedas. Depois de 3 envios errados, também mostro a solução completa — mas aí a fase vale metade do XP.",
     },
     {
+      target: "bestiary",
+      title: "Palavra estranha? Bestiário!",
+      text: "Todo termo do jogo e da programação (XP, variável, chefe, SQL…) está explicado no **Bestiário de Palavras**. Ele vai se completando conforme você avança.",
+    },
+    {
       target: "player",
       title: "Sua ficha de personagem",
       text: "Seu nível, XP e moedas ficam aqui. Clique para ver a ficha completa. Pronto — o resto se aprende jogando!",

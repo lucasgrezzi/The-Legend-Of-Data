@@ -18,6 +18,7 @@ import Link from "next/link";
 import Sprite from "@/components/ui/Sprite";
 import PlayerChip from "@/components/player/PlayerChip";
 import GuidedTour, { missionTourSteps, tourSeen } from "./GuidedTour";
+import { BestiaryButton } from "@/components/glossary/Bestiary";
 
 /** O tutorial abre sozinho na primeira fase com código (depois, só pelo botão "Como jogar") */
 const FIRST_CODE_MISSION_ID = MISSIONS.find((m) => m.validationType !== "narrative")?.id;
@@ -210,10 +211,11 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
         {/* Personagem + XP */}
         <div className="flex items-center gap-3 shrink-0">
           {!isNarrative && (
-            <button type="button" className="icon-btn" onClick={() => setTourOpen(true)} title="Ver o tutorial de novo">
-              <span style={{ fontSize: 14 }}>❔</span> Como jogar
+            <button type="button" className="icon-btn" onClick={() => setTourOpen(true)} title="Como jogar: ver o tutorial de novo">
+              <span style={{ fontSize: 14 }}>❔</span><span className="hidden 2xl:inline">Como jogar</span>
             </button>
           )}
+          <div data-tour="bestiary"><BestiaryButton compact /></div>
           <div data-tour="player">
             <PlayerChip profile={profile} totalXP={totalXP} coins={coins} />
           </div>
