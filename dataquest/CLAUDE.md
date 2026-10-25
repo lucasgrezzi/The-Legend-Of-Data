@@ -712,7 +712,7 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 2. Definir `validationType`:
    - `"exact"` — compara stdout string literal
    - `"table"` — `expectedOutput` é JSON `{ headers, rowCount, firstRow? }`
-   - `"chart"` — só verifica se `chartBase64` foi gerado
+   - `"chart"` — `expectedOutput` é JSON `{ kind, count, values, title, xlabel, ylabel }` (ver Sessão 13)
    - `"narrative"` — auto-valida sem executar código
 3. Adicionar `unlockCondition` com `requiredMissionIds` e/ou `requiredXP`; ajustar o `unlockCondition`
    da missão que vem **depois** dela para apontar para a nova
@@ -721,6 +721,24 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 6. Para `exact`, adicionar `requiredCode` (regex em string TS — **escapar em dobro**: `"\\bif\\s+"`) para que
    imprimir a resposta pronta não passe. Comentários do aluno são ignorados na checagem.
 7. Testar a solução real no navegador (Pyodide) — o `expectedOutput` precisa bater exatamente
+8. Acrescentar as palavras novas da fase em `lib/glossary.ts` (`missionId` = id da fase) e, se for chefe, pensar num
+   item da loja liberado por ela (`requiresMissionId`)
+
+### ✅ Checklist de fase acessível (regra do usuário — vale para fases NOVAS e para REVISAR as existentes)
+O público inclui quem **nunca programou** e quem **nunca jogou RPG**. Nada pode ser difícil demais para essas pessoas.
+- [ ] **Um conceito novo por fase.** O resto é revisão do que já foi ensinado. Chefe = juntar o que já se sabe, nunca
+      algo que não foi explicado.
+- [ ] **Todo termo explicado na 1ª vez** em que aparece (de RPG e de programação), na fala do Grimório ou no Estudo, e
+      cadastrado no Bestiário.
+- [ ] **Estudo** ensina a sintaxe com exemplo de outro contexto, em frases curtas, mostrando o resultado de cada linha.
+- [ ] **QUEST** diz o objetivo e a saída esperada com clareza — dá para saber quando se acertou.
+- [ ] **Dicas** destravam de verdade: a 1ª aponta o caminho, a 2ª quase entrega.
+- [ ] **No mundo real** preenchido, com analogia do dia a dia.
+- [ ] **Template** coerente com a dificuldade (lacunas `___` na 1ª fase da trilha).
+- [ ] **Testar no navegador:** a solução passa; os 2–3 erros mais prováveis de um iniciante dão uma mensagem
+      compreensível (erro traduzido pelo Grimório ou feedback de saída/tabela/gráfico).
+- [ ] Dados sem ambiguidade (sem empates que mudem a ordem, sem armadilha que não foi ensinada).
+- [ ] Revisão de português (acentos, sem jargão sem explicação). Depois: `tsc`, `build`, commit e push.
 
 ---
 
