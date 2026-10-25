@@ -19,6 +19,8 @@ import Sprite from "@/components/ui/Sprite";
 import PlayerChip from "@/components/player/PlayerChip";
 import GuidedTour, { missionTourSteps, tourSeen } from "./GuidedTour";
 import { BestiaryButton } from "@/components/glossary/Bestiary";
+import { Brand } from "@/components/ui/TopBar";
+import Icon from "@/components/ui/Icon";
 
 /** O tutorial abre sozinho na primeira fase com código (depois, só pelo botão "Como jogar") */
 const FIRST_CODE_MISSION_ID = MISSIONS.find((m) => m.validationType !== "narrative")?.id;
@@ -38,24 +40,23 @@ function FullScreenMessage({ children }: { children: React.ReactNode }) {
 function LockedMission({ mission, reasons }: { mission: Mission; reasons: string[] }) {
   return (
     <FullScreenMessage>
-      <Sprite src="/assets/sprites/missao-bloqueada.png" size={96} />
-      <p className="pixel-title" style={{ color: "var(--color-accent)" }}>Missão Bloqueada</p>
-      <div>
-        <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0 }}>{mission.missionTitle}</h1>
-        <p style={{ margin: "4px 0 0", fontSize: 14, color: "var(--color-muted)" }}>{mission.concept}</p>
+      <div className="rpg-frame flex flex-col items-center gap-5 text-center" style={{ padding: "32px 32px 28px", maxWidth: 460, width: "100%" }}>
+        <Sprite src="/assets/sprites/missao-bloqueada.png" size={96} />
+        <div>
+          <p className="pixel-title" style={{ margin: 0, color: "var(--color-accent)" }}>Missão Bloqueada</p>
+          <h1 style={{ fontSize: 24, fontWeight: 900, margin: "8px 0 0" }}>{mission.missionTitle}</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, fontWeight: 600, color: "var(--color-muted)" }}>{mission.concept}</p>
+        </div>
+        <div className="hint-card text-left w-full">
+          <p className="pixel-label" style={{ margin: "0 0 8px", color: "var(--color-muted)" }}>Para desbloquear</p>
+          <ul style={{ margin: 0, paddingLeft: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 6, fontSize: 14, fontWeight: 600 }}>
+            {reasons.map((r) => (
+              <li key={r} className="flex items-center gap-2"><Icon name="lock" size={15} style={{ color: "var(--color-muted)" }} /> {r}</li>
+            ))}
+          </ul>
+        </div>
+        <Link href={`/regiao/${mission.track}`} className="btn-next"><Icon name="arrowLeft" size={16} /> Voltar ao mapa</Link>
       </div>
-      <div
-        className="text-left px-5 py-4"
-        style={{ background: "var(--color-panel)", border: "1px solid var(--color-border)", borderRadius: 12, maxWidth: 440, width: "100%" }}
-      >
-        <p className="pixel-label mb-3" style={{ color: "var(--color-muted)" }}>Para desbloquear:</p>
-        <ul style={{ margin: 0, paddingLeft: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 6, fontSize: 14 }}>
-          {reasons.map((r) => (
-            <li key={r}><span style={{ fontFamily: "var(--font-body)" }}>🔒</span> {r}</li>
-          ))}
-        </ul>
-      </div>
-      <Link href={`/regiao/${mission.track}`} className="btn-next">⬡ Voltar ao Mapa</Link>
     </FullScreenMessage>
   );
 }
@@ -144,9 +145,8 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
   if (gate !== "play" || !profile) {
     return (
       <FullScreenMessage>
-        <p className="pixel-label" style={{ color: "var(--color-muted)", animation: "blink 1.2s step-end infinite" }}>
-          Abrindo o pergaminho…
-        </p>
+        <span className="spinner" aria-hidden />
+        <p className="pixel-label" style={{ margin: 0, color: "var(--color-muted)" }}>Abrindo o pergaminho…</p>
       </FullScreenMessage>
     );
   }
@@ -162,30 +162,28 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: "var(--color-bg)" }}>
 
       {/* ── Top bar ── */}
-      <div className="wood-bar flex items-center justify-between gap-6 px-6 shrink-0 relative z-10" style={{ height: 66 }}>
+      <div className="wood-bar flex items-center justify-between gap-5 px-5 shrink-0 relative z-10" style={{ height: 64 }}>
         {/* Logo + breadcrumb */}
         <div className="flex items-center gap-3 min-w-0">
+          <Brand />
+          <span className="crumb-sep" aria-hidden><Icon name="chevronRight" size={16} /></span>
           <Link
-            href="/map"
-            className="gate-logo no-underline shrink-0"
-            title="Voltar ao mapa"
-            style={{ fontSize: 20 }}
+            href={`/regiao/${mission.track}`}
+            className="region-chip"
+            title={`Voltar para ${track.subtitle}`}
+            style={{ color: track.color, ["--tint" as string]: track.rgb }}
           >
-            DataQuest
+            <Sprite src={track.sprite} size={32} style={{ margin: "-4px 0" }} /> {track.name}
           </Link>
-          <span style={{ color: "var(--frame-gold-lo)", fontSize: 18 }}>/</span>
-          <Link href={`/regiao/${mission.track}`} className="flex items-center gap-2 shrink-0" style={{ color: track.color, fontSize: 14, fontWeight: 700 }}>
-            <Sprite src={track.sprite} size={32} /> {track.name}
-          </Link>
-          <span style={{ color: "var(--frame-gold-lo)", fontSize: 18 }}>/</span>
-          <span className="truncate" style={{ color: "#b8a88c", fontSize: 14 }}>
+          <span className="crumb-sep" aria-hidden><Icon name="chevronRight" size={16} /></span>
+          <span className="truncate" style={{ color: "var(--color-text-2)", fontSize: 14, fontWeight: 700 }}>
             {mission.missionTitle}
           </span>
         </div>
 
         {/* Progresso real da trilha: um segmento por missão */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 shrink-0" title={`${trackDone} de ${trackTotal} fases concluídas nesta região`}>
+          <div className="flex items-center gap-[6px]">
             {trackMissions.map((m) => {
               const done = completedMissionIds.includes(m.id);
               const current = m.id === mission.id;
@@ -197,22 +195,22 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
                 />
               );
               return canOpen && !current ? (
-                <Link key={m.id} href={`/mission/${m.id}`} title={m.missionTitle}>{seg}</Link>
+                <Link key={m.id} href={`/mission/${m.id}`} title={m.missionTitle} className="py-2">{seg}</Link>
               ) : (
-                <span key={m.id} title={m.missionTitle}>{seg}</span>
+                <span key={m.id} title={m.missionTitle} className="py-2">{seg}</span>
               );
             })}
           </div>
-          <span style={{ fontSize: 12, color: "#b8a88c", whiteSpace: "nowrap" }}>
-            {trackDone}/{trackTotal} concluídas
+          <span style={{ fontSize: 13, fontWeight: 800, color: "var(--color-muted)", whiteSpace: "nowrap" }}>
+            {trackDone}/{trackTotal}
           </span>
         </div>
 
-        {/* Personagem + XP */}
-        <div className="flex items-center gap-3 shrink-0">
+        {/* Ajuda + Bestiário + personagem */}
+        <div className="flex items-center gap-2 shrink-0">
           {!isNarrative && (
             <button type="button" className="icon-btn" onClick={() => setTourOpen(true)} title="Como jogar: ver o tutorial de novo">
-              <span style={{ fontSize: 14 }}>❔</span><span className="hidden 2xl:inline">Como jogar</span>
+              <Icon name="help" /><span className="hidden 2xl:inline">Como jogar</span>
             </button>
           )}
           <div data-tour="bestiary"><BestiaryButton compact /></div>
@@ -248,13 +246,13 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
         <div className="mission-tome flex flex-col flex-1 overflow-hidden">
           {isNarrative ? (
             <div className="flex items-center justify-center h-full px-10">
-            <div className="rpg-frame flex flex-col items-center gap-6 px-10 py-9 text-center" style={{ maxWidth: 460 }}>
+            <div className="rpg-frame flex flex-col items-center gap-6 px-10 py-9 text-center" style={{ maxWidth: 480 }}>
               <div className="flex gap-3" style={{ animation: "float 3s ease-in-out infinite" }}>
                 {(["python", "sql", "pandas", "dataviz"] as const).map((t) => (
                   <Sprite key={t} src={TRACKS[t].sprite} size={64} alt={TRACKS[t].name} />
                 ))}
               </div>
-              <p style={{ fontSize: 15, color: "var(--color-muted)", maxWidth: 360, lineHeight: 1.8, margin: 0 }}>
+              <p style={{ fontSize: 15, fontWeight: 600, color: "var(--color-text-2)", maxWidth: 380, lineHeight: 1.7, margin: 0 }}>
                 Esta missão é só história — leia o chamado ao lado. Na próxima, você escreve seu primeiro código, e eu mostro a tela
                 passo a passo antes. Nada de pânico.
               </p>
@@ -266,7 +264,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
                 ))}
               </div>
               {nextId !== null && (
-                <Link href={`/mission/${nextId}`} className="btn-next btn-pixel">Começar a jornada →</Link>
+                <Link href={`/mission/${nextId}`} className="btn-next">Começar a jornada <Icon name="arrowRight" size={16} /></Link>
               )}
             </div>
             </div>

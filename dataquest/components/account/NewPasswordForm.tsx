@@ -50,7 +50,7 @@ export default function NewPasswordForm() {
       <form onSubmit={submit}>
         <p style={{ margin: "0 0 16px", fontSize: 13, color: "var(--color-muted)" }}>Conta: <b style={{ color: "var(--color-text)" }}>{email}</b></p>
         <label className="block">
-          <span className="pixel-label" style={{ color: "var(--color-muted)" }}>Nova senha</span>
+          <span className="field-label">Nova senha</span>
           <input
             type="password"
             required
@@ -74,7 +74,7 @@ export default function NewPasswordForm() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <WorldBackground />
       <section className="panel rpg-frame w-full" style={{ maxWidth: 440, padding: "28px 28px 24px" }}>
-        <p className="pixel-chapter" style={{ margin: 0 }}>CONTA</p>
+        <p className="pixel-chapter" style={{ margin: 0 }}>Conta</p>
         <h1 style={{ fontSize: 22, fontWeight: 800, margin: "10px 0 16px", color: "var(--color-accent)" }}>Criar nova senha</h1>
         {body}
       </section>

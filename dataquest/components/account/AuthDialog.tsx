@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import Icon from "@/components/ui/Icon";
 
 type Mode = "login" | "signup" | "forgot";
 
@@ -84,7 +85,7 @@ export function AuthForm({ onDone, secondaryAction }: AuthFormProps) {
     <form onSubmit={submit} className="flex flex-col">
       {mode === "forgot" ? (
         <div className="anim-rise" style={{ marginBottom: 18 }}>
-          <button type="button" className="link-btn" onClick={() => switchMode("login")}>← Voltar para o login</button>
+          <button type="button" className="link-btn" onClick={() => switchMode("login")}><Icon name="arrowLeft" size={14} /> Voltar para o login</button>
           <p style={{ margin: "12px 0 0", fontSize: 13, color: "var(--color-muted)", lineHeight: 1.6 }}>
             Digite o e-mail da sua conta e enviaremos um link para criar uma nova senha.
           </p>
@@ -102,7 +103,7 @@ export function AuthForm({ onDone, secondaryAction }: AuthFormProps) {
       )}
 
       <label className="block mb-3">
-        <span className="pixel-label" style={{ color: "var(--color-muted)" }}>E-mail</span>
+        <span className="field-label">E-mail</span>
         <input
           type="email"
           required
@@ -117,7 +118,7 @@ export function AuthForm({ onDone, secondaryAction }: AuthFormProps) {
 
       {mode !== "forgot" && (
         <label className="block">
-          <span className="pixel-label" style={{ color: "var(--color-muted)" }}>Senha</span>
+          <span className="field-label">Senha</span>
           <input
             type="password"
             required
@@ -147,7 +148,8 @@ export function AuthForm({ onDone, secondaryAction }: AuthFormProps) {
       <div className="flex items-center justify-end gap-2" style={{ marginTop: 14 }}>
         {secondaryAction}
         <button type="submit" className="btn-next" disabled={busy} style={{ minWidth: 160, justifyContent: "center" }}>
-          {busy ? "Aguarde…" : mode === "login" ? "Entrar →" : mode === "signup" ? "Criar conta →" : "Enviar link"}
+          {busy ? "Aguarde…" : mode === "login" ? "Entrar" : mode === "signup" ? "Criar conta" : "Enviar link"}
+          {!busy && mode !== "forgot" && <Icon name="arrowRight" size={16} />}
         </button>
       </div>
     </form>
@@ -166,11 +168,11 @@ export default function AuthDialog({ onClose }: { onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
         style={{ padding: "26px 28px 24px" }}
       >
-        <p className="pixel-chapter" style={{ margin: 0 }}>CONTA</p>
-        <h2 id="auth-title" style={{ fontSize: 22, fontWeight: 800, margin: "10px 0 6px", color: "var(--color-accent)" }}>
+        <p className="pixel-chapter" style={{ margin: 0 }}>Conta</p>
+        <h2 id="auth-title" style={{ fontSize: 23, fontWeight: 900, margin: "4px 0 6px", color: "var(--color-text)" }}>
           Salve seu progresso
         </h2>
-        <p style={{ margin: "0 0 20px", fontSize: 13, color: "var(--color-muted)", lineHeight: 1.6 }}>
+        <p style={{ margin: "0 0 20px", fontSize: 14, fontWeight: 600, color: "var(--color-muted)", lineHeight: 1.6 }}>
           Com uma conta, seu progresso fica na nuvem (continue em qualquer aparelho) e você aparece no ranking.
         </p>
         <AuthForm

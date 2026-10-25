@@ -70,7 +70,7 @@ let n = 0; const pend = new Map();
 ws.addEventListener("message", (e) => { const m = JSON.parse(e.data); if (m.id && pend.has(m.id)) { pend.get(m.id)(m); pend.delete(m.id); } });
 const cmd = (method, params = {}) => new Promise((r) => { const id = ++n; pend.set(id, r); ws.send(JSON.stringify({ id, method, params })); });
 const ev = async (expr) => (await cmd("Runtime.evaluate", { expression: expr, awaitPromise: true, returnByValue: true })).result?.result?.value;
-const waitFor = async (expr, ms = 45000) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await ev(expr)) return true; await sleep(300); } return false; };
+const waitFor = async (expr, ms = 120000) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await ev(expr)) return true; await sleep(300); } return false; };
 await cmd("Emulation.setDeviceMetricsOverride", { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
 
 async function setCode(code) {
@@ -83,8 +83,8 @@ async function setCode(code) {
 async function send(code) {
   await ev(`document.querySelector(".modal-backdrop")?.click()`); await sleep(200);
   await setCode(code);
-  await waitFor(`!![...document.querySelectorAll("button")].find(b => b.textContent.includes("Enviar Resposta") && !b.disabled)`);
-  await ev(`[...document.querySelectorAll("button")].find(b => b.textContent.includes("Enviar Resposta")).click()`);
+  await waitFor(`!!document.querySelector('[data-tour="submit"]:not(:disabled)')`);
+  await ev(`document.querySelector('[data-tour="submit"]').click()`);
   await waitFor(`!!document.querySelector(".modal")`); await sleep(400);
   const dialog = await ev(`document.querySelector(".modal").innerText`);
   return { ok: dialog.includes("Missão Concluída"), dialog };

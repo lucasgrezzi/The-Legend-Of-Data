@@ -9,7 +9,7 @@ import { AuthForm } from "./AuthDialog";
 export default function LoginScreen() {
   return (
     <GateShell step={1} maxWidth={420}>
-      <section className="panel rpg-frame" style={{ padding: "18px 24px 20px" }}>
+      <section className="panel rpg-frame" style={{ padding: "22px 26px 24px" }}>
         {/* As quatro raças esperando o novo Arquivista */}
         <div className="flex justify-center gap-2" aria-hidden style={{ marginBottom: 8 }}>
           {RACE_ORDER.map((r, i) => (
@@ -17,7 +17,7 @@ export default function LoginScreen() {
               key={r}
               className="anim-bob flex items-center justify-center"
               style={{
-                width: 38, height: 38, borderRadius: 9,
+                width: 44, height: 44, borderRadius: 12,
                 background: `rgba(${RACES[r].rgb},0.12)`,
                 border: `1px solid rgba(${RACES[r].rgb},0.4)`,
                 ...delay(i * 220),
@@ -29,10 +29,10 @@ export default function LoginScreen() {
         </div>
 
         <div className="text-center" style={{ marginBottom: 14 }}>
-          <h2 style={{ fontSize: 19, fontWeight: 800, margin: 0, color: "var(--color-text)" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 900, margin: 0, color: "var(--color-text)" }}>
             Boas-vindas, Arquivista!
           </h2>
-          <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--color-muted)", lineHeight: 1.5 }}>
+          <p style={{ margin: "4px 0 0", fontSize: 14, fontWeight: 600, color: "var(--color-muted)", lineHeight: 1.5 }}>
             Entre ou crie sua conta para começar a jornada.
           </p>
         </div>

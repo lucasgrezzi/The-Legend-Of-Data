@@ -8,6 +8,8 @@ import { isMissionUnlocked } from "@/lib/xp";
 import { useGameStore } from "@/store/gameStore";
 import { useGlossary } from "@/store/glossaryStore";
 import { useHydrated } from "@/hooks/useHydrated";
+import Icon from "@/components/ui/Icon";
+import Sprite from "@/components/ui/Sprite";
 
 type Filter = "todas" | GlossaryKind;
 
@@ -68,15 +70,15 @@ export default function Bestiary() {
       >
         <div className="bestiary-head">
           <div className="flex items-center gap-3">
-            <span style={{ fontSize: 30, lineHeight: 1 }}>📖</span>
+            <span className="grimoire-error-book" style={{ width: 48, height: 48 }}><Sprite src="/assets/sprites/grimorio.png" size={32} /></span>
             <div>
               <p className="pixel-chapter" style={{ margin: 0, color: "var(--color-accent)" }}>Bestiário de Palavras</p>
-              <h2 id="bestiary-title" style={{ margin: "4px 0 0", fontSize: 18, fontWeight: 800 }}>
+              <h2 id="bestiary-title" style={{ margin: "2px 0 0", fontSize: 20, fontWeight: 900 }}>
                 {discovered.size} de {total} palavras descobertas
               </h2>
             </div>
           </div>
-          <button type="button" className="btn-nav btn-pixel is-compact" onClick={close}>Fechar</button>
+          <button type="button" className="icon-btn is-square" onClick={close} title="Fechar" aria-label="Fechar"><Icon name="x" /></button>
         </div>
         <p className="bestiary-intro">
           Toda palavra estranha do jogo e da programação mora aqui. Novas palavras aparecem conforme você avança no mapa.
@@ -86,7 +88,8 @@ export default function Bestiary() {
           <div className="tabs" role="tablist">
             {(["todas", "jogo", "codigo"] as Filter[]).map((f) => (
               <button key={f} role="tab" className="tab" aria-selected={filter === f} onClick={() => setFilter(f)}>
-                {f === "todas" ? "Todas" : f === "jogo" ? "🎲 Jogo" : "💻 Programação"}
+                {f !== "todas" && <span className="tab-icon"><Icon name={f === "jogo" ? "dice" : "code"} size={16} /></span>}
+                {f === "todas" ? "Todas" : f === "jogo" ? "Jogo" : "Programação"}
               </button>
             ))}
           </div>
@@ -114,7 +117,7 @@ export default function Bestiary() {
               </article>
             ) : (
               <article key={g.id} data-word={g.id} className="bestiary-entry is-locked">
-                <h3>🔒 ???</h3>
+                <h3><Icon name="lock" size={15} /> ???</h3>
                 <p>Aparece em: <b>{mission?.missionTitle ?? "uma missão futura"}</b></p>
               </article>
             );
@@ -136,7 +139,7 @@ export function BestiaryButton({ compact = false }: { compact?: boolean }) {
   const show = useGlossary((s) => s.show);
   return (
     <button type="button" className="icon-btn" onClick={() => show()} title="Bestiário de Palavras: o glossário do jogo">
-      <span style={{ fontSize: 15 }}>📖</span>
+      <Icon name="book" />
       <span className={compact ? "hidden 2xl:inline" : undefined}>Bestiário</span>
     </button>
   );
@@ -149,7 +152,7 @@ export function MissionWords({ missionId }: { missionId: number }) {
   if (!words.length) return null;
   return (
     <p className="mission-words">
-      <span style={{ fontSize: 14 }}>📖</span> Palavras novas nesta fase:
+      <Icon name="book" size={15} /> Palavras novas nesta fase:
       {words.map((w) => (
         <button key={w.id} type="button" className="word-chip" onClick={() => show(w.id)} title="Ver no Bestiário">
           {w.term}

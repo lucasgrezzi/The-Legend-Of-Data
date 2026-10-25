@@ -458,6 +458,11 @@ function explainSql(stderr: string, ctx: ErrorContext): FriendlyError {
   }
   if ((m = msg.match(/Referenced column "([^"]+)" not found/))) {
     const col = m[1];
+    if (/^_{2,}$/.test(col)) {
+      return r("Ainda tem lacuna para preencher",
+        "O `___` é um espaço em branco que o Grimório deixou para VOCÊ completar. O SQL não sabe o que colocar ali.",
+        `Troque cada \`___\` pelo que falta (a linha está marcada). ${columnsHint(ctx)}`);
+    }
     if (new RegExp(`"${col.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`).test(code) && !allCols.includes(col)) {
       return r("Texto em SQL usa aspas simples",
         `No SQL, aspas DUPLAS (\`"${col}"\`) significam nome de coluna — então ele foi procurar uma coluna chamada ${col}. Para escrever um TEXTO, use aspas simples.`,

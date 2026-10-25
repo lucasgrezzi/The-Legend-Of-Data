@@ -8,7 +8,7 @@ export default function GraphPanel({ chartBase64 }: GraphPanelProps) {
   if (!chartBase64) return null;
 
   return (
-    <div className="mx-4 my-3 p-2" style={{ background: "#fff", borderRadius: 8 }}>
+    <div className="mx-4 my-3 p-2" style={{ background: "#fff", borderRadius: 12, boxShadow: "var(--shadow-md)" }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`data:image/png;base64,${chartBase64}`}

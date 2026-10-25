@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Sprite from "@/components/ui/Sprite";
+import Icon from "@/components/ui/Icon";
 
 export interface TourStep {
   /** Valor do atributo data-tour do elemento iluminado */
@@ -114,14 +115,14 @@ export default function GuidedTour({ steps, onClose }: { steps: TourStep[]; onCl
           </div>
           <div className="flex items-center gap-2">
             {!last && <button type="button" className="link-btn" onClick={close}>Pular</button>}
-            {i > 0 && <button type="button" className="btn-nav btn-pixel is-compact" onClick={() => setI(i - 1)}>←</button>}
+            {i > 0 && <button type="button" className="btn-nav btn-pixel is-compact" onClick={() => setI(i - 1)} aria-label="Voltar"><Icon name="arrowLeft" size={16} /></button>}
             <button
               type="button"
               className="btn-next btn-pixel is-compact"
               autoFocus
               onClick={() => (last ? close() : setI(i + 1))}
             >
-              {last ? "Bora jogar!" : "Próximo →"}
+              {last ? "Bora jogar!" : <>Próximo <Icon name="arrowRight" size={16} /></>}
             </button>
           </div>
         </div>
@@ -158,7 +159,7 @@ export function missionTourSteps(opts: { hasBlanks: boolean; hasGrimoire: boolea
     },
     {
       target: "run",
-      title: "▶ Executar: testar à vontade",
+      title: "Executar: testar à vontade",
       text: "Roda o código e mostra o resultado. **Teste quantas vezes quiser — não conta como erro.** Atalho: Ctrl + Enter.",
     },
     {

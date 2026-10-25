@@ -8,7 +8,7 @@ import { useGate } from "@/hooks/useGate";
 import { MISSIONS, bossOf, isBoss, missionsOfTrack } from "@/lib/missions";
 import { TRACKS, TRACK_ORDER } from "@/lib/tracks";
 import { RACES } from "@/lib/races";
-import { isMissionUnlocked, missingRequirements } from "@/lib/xp";
+import { computeLevel, isMissionUnlocked, missingRequirements } from "@/lib/xp";
 import XPBar from "@/components/ui/XPBar";
 import Sprite from "@/components/ui/Sprite";
 import WorldBackground from "@/components/ui/WorldBackground";
@@ -17,12 +17,12 @@ import LoginScreen from "@/components/account/LoginScreen";
 import GateShell, { delay } from "@/components/ui/GateShell";
 import PlayerChip from "@/components/player/PlayerChip";
 import AccountButton from "@/components/account/AccountButton";
-import { supabase } from "@/lib/supabase";
 import { useAccountStore } from "@/store/accountStore";
 import MissionPin, { type PinState } from "./MissionPin";
 import MapFog, { useFogReveal } from "./MapFog";
-import { BestiaryButton } from "@/components/glossary/Bestiary";
-import { equippedLook, SHOP_UNLOCK_MISSION_ID } from "@/lib/shop";
+import { equippedLook } from "@/lib/shop";
+import TopBar from "@/components/ui/TopBar";
+import Icon from "@/components/ui/Icon";
 
 // ── Geometria da trilha de uma região (px verticais, % horizontais) ──
 const VIEW_W = 100;
@@ -68,7 +68,7 @@ function usePinState() {
  */
 export default function WorldMap({ track }: { track?: Track }) {
   const gate = useGate();
-  const { profile, setProfile, completedMissionIds, totalXP, coins } = useGameStore();
+  const { profile, setProfile, totalXP, coins } = useGameStore();
   const loggedIn = useAccountStore((s) => s.email !== null);
 
   // ── Entrada: conta (sempre primeiro, se o Supabase estiver configurado) → personagem → mapa ──
@@ -103,32 +103,7 @@ export default function WorldMap({ track }: { track?: Track }) {
     <div className="min-h-screen flex flex-col">
       <WorldBackground />
 
-      {/* ── Top bar ── */}
-      <header
-        className="wood-bar flex items-center justify-between gap-4 px-6 shrink-0 sticky top-0 z-20"
-        style={{ height: 68 }}
-      >
-        <Link href="/map" className="no-underline" title="Mapa-Múndi">
-          <p className="gate-logo">DataQuest</p>
-          <p style={{ margin: 0, fontSize: 12, color: "#b8a88c" }}>Aprenda Python, SQL e análise de dados jogando um RPG</p>
-        </Link>
-        <div className="flex items-center gap-3">
-          <BestiaryButton />
-          <Link
-            href="/loja"
-            className="icon-btn"
-            title={completedMissionIds.includes(SHOP_UNLOCK_MISSION_ID) ? "Loja do Mercador: títulos, molduras e mascotes" : "Abre depois do Mercado da Vila"}
-          >
-            <span style={{ fontSize: 15 }}>🛒</span> Loja
-          </Link>
-          {supabase && (
-            <Link href="/ranking" className="icon-btn" title="Ranking dos jogadores">
-              <span style={{ fontSize: 15 }}>🏆</span> Ranking
-            </Link>
-          )}
-          <PlayerChip profile={profile} totalXP={totalXP} coins={coins} />
-        </div>
-      </header>
+      <TopBar right={<PlayerChip profile={profile} totalXP={totalXP} coins={coins} />} />
 
       <main className="flex-1 px-4 pt-6 pb-16" style={{ overflowX: "clip" }}>
         {track ? <RegionTrail track={track} /> : <WorldHub />}
@@ -141,9 +116,9 @@ export default function WorldMap({ track }: { track?: Track }) {
 
 /** Onde cada lugar fica no Mapa-Múndi (% da largura, px do topo) — a estrada sobe e desce entre eles */
 const HUB_SPOTS = [
-  { x: 10, y: 285 }, { x: 30, y: 125 }, { x: 50, y: 285 }, { x: 70, y: 125 }, { x: 90, y: 285 },
+  { x: 10, y: 300 }, { x: 30, y: 140 }, { x: 50, y: 300 }, { x: 70, y: 140 }, { x: 90, y: 300 },
 ];
-const HUB_H = 470;
+const HUB_H = 516;
 const HUB_W = 1080;
 
 function WorldHub() {
@@ -152,6 +127,7 @@ function WorldHub() {
   const look = equippedLook(equipped);
   const nextMission = MISSIONS.find((m) => stateOf(m) === "available");
   const completedCount = completedMissionIds.filter((id) => MISSIONS.some((m) => m.id === id)).length;
+  const lvl = computeLevel(totalXP);
   // o herói espera na região da próxima fase (ou na última, se tudo foi concluído)
   const heroTrack = nextMission?.track ?? TRACK_ORDER[TRACK_ORDER.length - 1];
 
@@ -164,28 +140,26 @@ function WorldHub() {
   return (
     <div className="mx-auto flex flex-col gap-5" style={{ maxWidth: HUB_W }}>
       {/* ── Painel do jogador (compacto: o Mapa-Múndi inteiro cabe numa tela de notebook) ── */}
-      <section className="rpg-frame anim-rise flex flex-col gap-4 mx-auto w-full" style={{ padding: "18px 24px", maxWidth: 680 }}>
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <p className="pixel-label" style={{ margin: 0, color: "var(--color-accent)" }}>📜 SUA JORNADA</p>
-            <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--color-muted)" }}>
-              <b style={{ color: "var(--color-text)" }}>{completedCount}</b> de {MISSIONS.length} missões concluídas
-            </p>
-          </div>
-          {nextMission ? (
-            <Link href={`/mission/${nextMission.id}`} className="btn-next btn-pixel" title={`Próxima: ${nextMission.missionTitle}`}>
-              ▶ {completedCount === 0 ? "Começar" : "Continuar"}
-            </Link>
-          ) : (
-            <span className="pixel-label" style={{ color: "var(--color-run)" }}>✓ Tudo concluído!</span>
-          )}
+      <section className="rpg-frame anim-rise flex items-center gap-5 mx-auto w-full" style={{ padding: "14px 18px 14px 16px", maxWidth: 860 }}>
+        <span className="level-badge" title={`Nível ${lvl.level}`}>{lvl.level}</span>
+        <div className="flex-1 min-w-0"><XPBar totalXP={totalXP} pixel /></div>
+        <span className="topbar-sep" style={{ height: 40 }} aria-hidden />
+        <div className="journey-stat shrink-0">
+          <b>{completedCount}<span style={{ fontSize: 14, color: "var(--color-muted)" }}> / {MISSIONS.length}</span></b>
+          <span>missões concluídas</span>
         </div>
-        <XPBar totalXP={totalXP} pixel />
+        {nextMission ? (
+          <Link href={`/mission/${nextMission.id}`} className="btn-next shrink-0" title={`Próxima: ${nextMission.missionTitle}`}>
+            <Icon name="play" size={16} /> {completedCount === 0 ? "Começar" : "Continuar"}
+          </Link>
+        ) : (
+          <span className="chip is-done shrink-0" style={{ height: 32, fontSize: 13 }}><Icon name="check" size={14} /> Tudo concluído!</span>
+        )}
       </section>
 
       {/* ── O reino: uma região em cada lugar, ligadas por uma estrada ── */}
       <section className="hub-world rpg-frame anim-rise" style={{ height: HUB_H, ...delay(150) }}>
-        <p className="hub-title pixel-label">🗺 MAPA-MÚNDI · escolha uma região</p>
+        <p className="hub-title pixel-label"><Icon name="map" size={15} /> Mapa-Múndi · escolha uma região</p>
         <svg className="absolute inset-0" width="100%" height={HUB_H} viewBox={`0 0 ${VIEW_W} ${HUB_H}`} preserveAspectRatio="none" aria-hidden style={{ zIndex: 1 }}>
           {spots.slice(1).map((b, i) => {
             const a = spots[i];
@@ -233,7 +207,7 @@ function WorldHub() {
               style={{ left: `${s.x}%`, top: s.y, "--tint": info.rgb } as React.CSSProperties}
               title={open ? `Entrar em ${info.subtitle}` : `Bloqueada — ${reasons.join("; ")}`}
             >
-              {hereHero && <span className="next-flag hub-flag">▼ VOCÊ ESTÁ AQUI</span>}
+              {hereHero && <span className="next-flag hub-flag"><Icon name="mapPin" size={12} /> VOCÊ ESTÁ AQUI</span>}
               {hereHero && (
                 <div className="hub-hero">
                   <Sprite src={RACES[profile!.race].sprite} size={64} />
@@ -243,7 +217,7 @@ function WorldHub() {
               <div className="hub-medal"><Sprite src={info.sprite} size={72} alt={info.name} /></div>
               <div className="hub-card">
                 <p className="pixel-label" style={{ margin: 0, color: open ? info.color : "var(--color-muted)" }}>
-                  {i + 1}. {info.name.toUpperCase()}
+                  Região {i + 1} · {info.name}
                 </p>
                 <p className="hub-name">{info.subtitle}</p>
                 {open ? (
@@ -251,15 +225,16 @@ function WorldHub() {
                     <div className="banner-progress" style={{ margin: "6px 0 4px" }}>
                       <div style={{ width: `${(done / list.length) * 100}%`, background: info.color }} />
                     </div>
-                    <p className="hub-line">{done}/{list.length} fases</p>
+                    <p className="hub-line">{done} de {list.length} fases</p>
                     {boss && (
-                      <p className="hub-line" style={{ color: bossDown ? "#7ee08a" : "#ff9b8a" }}>
-                        {bossDown ? "✓ Chefe derrotado" : `👑 Chefe: ${boss.missionTitle}`}
+                      <p className="hub-line" style={{ color: bossDown ? "var(--color-run)" : "#ff8a80" }}>
+                        <Icon name={bossDown ? "check" : "crown"} size={13} />
+                        {bossDown ? "Chefe derrotado" : `Chefe: ${boss.missionTitle}`}
                       </p>
                     )}
                   </>
                 ) : (
-                  <p className="hub-line">🔒 {reasons.length ? `Vença o chefe anterior` : "Em breve"}</p>
+                  <p className="hub-line"><Icon name="lock" size={13} /> {reasons.length ? `Vença o chefe anterior` : "Em breve"}</p>
                 )}
               </div>
             </div>
@@ -319,37 +294,44 @@ function RegionTrail({ track }: { track: Track }) {
   return (
     <div className="mx-auto flex flex-col gap-6" style={{ maxWidth: CONTENT_W }}>
       <div className="flex items-center justify-between gap-3 anim-rise">
-        <Link href="/map" className="btn-nav btn-pixel is-compact">← Mapa-Múndi</Link>
+        <Link href="/map" className="btn-nav btn-pixel is-compact"><Icon name="arrowLeft" size={16} /> Mapa-Múndi</Link>
         {nextHere && (
-          <Link href={`/mission/${nextHere.id}`} className="btn-next btn-pixel is-compact">▶ Continuar</Link>
+          <Link href={`/mission/${nextHere.id}`} className="btn-next btn-pixel is-compact" title={`Próxima: ${nextHere.missionTitle}`}>
+            <Icon name="play" size={14} /> Continuar
+          </Link>
         )}
       </div>
 
       {/* ── Estandarte da região ── */}
       <div
         className={`rpg-frame region-banner${open ? "" : " is-locked"} flex items-center gap-4 anim-rise`}
-        style={{ height: 88, margin: "0 34px", padding: "0 22px 0 14px", ...(open ? { "--tint": info.rgb } : {}) } as React.CSSProperties}
+        style={{ height: 100, padding: "0 24px 0 18px", ...(open ? { "--tint": info.rgb } : {}) } as React.CSSProperties}
       >
         <span className="banner-tail is-left" aria-hidden />
         <span className="banner-tail is-right" aria-hidden />
         <div className="banner-medal"><Sprite src={info.sprite} size={64} alt={info.name} /></div>
         <div className="flex-1 min-w-0">
-          <p className="pixel-label" style={{ margin: 0, color: open ? info.color : "var(--color-muted)", textShadow: "2px 2px 0 #0b0d13" }}>
-            {info.name.toUpperCase()}
+          <p className="pixel-label" style={{ margin: 0, color: open ? info.color : "var(--color-muted)" }}>
+            Região {TRACK_ORDER.indexOf(track) + 1} · {info.name}
           </p>
-          <p style={{ margin: "4px 0 0", fontSize: 17, fontWeight: 800, color: open ? "var(--color-text)" : "var(--color-muted)", textShadow: "0 2px 0 #0b0d13" }}>
+          <p style={{ margin: "2px 0 0", fontSize: 21, fontWeight: 900, lineHeight: 1.2, color: open ? "var(--color-text)" : "var(--color-muted)" }}>
             {info.subtitle}
           </p>
-          {!open && (
-            <p className="truncate" style={{ margin: "2px 0 0", fontSize: 12, color: "var(--color-muted)" }}>
-              🔒 Requer: {reasons.join(" · ")}
+          {open && boss ? (
+            <p className="truncate flex items-center gap-1" style={{ margin: "4px 0 0", fontSize: 12.5, fontWeight: 700, color: bossDown ? "var(--color-run)" : "#ff8a80" }}>
+              <Icon name={bossDown ? "check" : "crown"} size={13} /> {bossDown ? "Chefe derrotado" : `Chefe: ${boss.missionTitle}`}
+            </p>
+          ) : !open && (
+            <p className="truncate flex items-center gap-1" style={{ margin: "4px 0 0", fontSize: 12.5, fontWeight: 700, color: "var(--color-muted)" }}>
+              <Icon name="lock" size={13} /> Requer: {reasons.join(" · ")}
             </p>
           )}
         </div>
-        <div className="text-right shrink-0" style={{ width: 88 }}>
-          <p className="pixel-label" style={{ margin: 0, color: open ? info.color : "var(--color-muted)", textShadow: "2px 2px 0 #0b0d13" }}>
-            {done}/{list.length}
+        <div className="text-right shrink-0" style={{ width: 96 }}>
+          <p style={{ margin: 0, fontSize: 20, fontWeight: 900, lineHeight: 1.1, color: open ? "var(--color-text)" : "var(--color-muted)" }}>
+            {done}<span style={{ fontSize: 14, color: "var(--color-muted)" }}> / {list.length}</span>
           </p>
+          <p style={{ margin: "2px 0 0", fontSize: 12, fontWeight: 700, color: "var(--color-muted)" }}>fases</p>
           <div className="banner-progress" style={{ marginTop: 8 }}>
             <div style={{ width: `${(done / Math.max(1, list.length)) * 100}%`, background: open ? info.color : "#4a5163" }} />
           </div>
@@ -413,12 +395,12 @@ function RegionTrail({ track }: { track: Track }) {
       {/* ── Fim da região: depois do chefe, a viagem continua ── */}
       {bossDown && (
         <div className="rpg-frame anim-rise flex items-center justify-between gap-4" style={{ padding: "16px 22px" }}>
-          <p style={{ margin: 0, fontSize: 14 }}>
-            <b style={{ color: "#7ee08a" }}>✓ Chefe derrotado!</b>{" "}
+          <p className="flex items-center gap-2" style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--color-text-2)" }}>
+            <b className="flex items-center gap-1" style={{ color: "var(--color-run)" }}><Icon name="check" size={16} /> Chefe derrotado!</b>{" "}
             {nextTrack ? `A estrada segue para ${TRACKS[nextTrack].subtitle}.` : "Novas regiões chegam em breve."}
           </p>
           {nextTrack ? (
-            <Link href={`/regiao/${nextTrack}`} className="btn-next btn-pixel is-compact">Próxima região →</Link>
+            <Link href={`/regiao/${nextTrack}`} className="btn-next btn-pixel is-compact">Próxima região <Icon name="arrowRight" size={16} /></Link>
           ) : (
             <Link href="/map" className="btn-nav btn-pixel is-compact">Mapa-Múndi</Link>
           )}

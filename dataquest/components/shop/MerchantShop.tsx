@@ -11,9 +11,11 @@ import Sprite from "@/components/ui/Sprite";
 import WorldBackground from "@/components/ui/WorldBackground";
 import PlayerChip from "@/components/player/PlayerChip";
 import HeroPortrait from "@/components/player/HeroPortrait";
-import { BestiaryButton } from "@/components/glossary/Bestiary";
+import TopBar from "@/components/ui/TopBar";
+import Icon from "@/components/ui/Icon";
 
 const SLOTS: ShopSlot[] = ["titulo", "moldura", "mascote"];
+const SLOT_ICON = { titulo: "crown", moldura: "user", mascote: "sparkle" } as const;
 
 /** Falas do Seu Bartolo — uma por visita, para a loja não parecer um formulário */
 const GREETINGS = [
@@ -50,7 +52,7 @@ export default function MerchantShop() {
   if (gate !== "play" || !profile) {
     return (
       <div className="flex items-center justify-center h-screen" style={{ background: "var(--color-bg)" }}>
-        <p className="pixel-label" style={{ color: "var(--color-muted)", animation: "blink 1.2s step-end infinite" }}>Abrindo a loja…</p>
+        <span className="spinner" aria-hidden />
       </div>
     );
   }
@@ -69,29 +71,26 @@ export default function MerchantShop() {
     <div className="min-h-screen flex flex-col">
       <WorldBackground />
 
-      <header className="wood-bar flex items-center justify-between gap-4 px-6 shrink-0 sticky top-0 z-20" style={{ height: 68 }}>
-        <div className="flex items-center gap-4">
-          <Link href="/map" className="btn-nav btn-pixel is-compact">← Mapa</Link>
-          <p className="gate-logo" style={{ margin: 0 }}>Loja do Mercador</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <BestiaryButton />
-          <PlayerChip profile={profile} totalXP={totalXP} coins={coins} />
-        </div>
-      </header>
+      <TopBar right={<PlayerChip profile={profile} totalXP={totalXP} coins={coins} />} />
 
       <main className="flex-1 px-4 pt-8 pb-16">
-        <div className="mx-auto flex flex-col gap-8" style={{ maxWidth: 920 }}>
-
-          {/* ── Balcão: Seu Bartolo + prévia do personagem ── */}
-          <section className="rpg-frame anim-rise flex items-center gap-6 flex-wrap" style={{ padding: "22px 26px" }}>
+        <div className="mx-auto flex flex-col gap-6" style={{ maxWidth: 960 }}>
+          {/* ── Balcão: Seu Bartolo + prévia do personagem (o título da página fica dentro do cartão, nunca solto sobre o mapa) ── */}
+          <section className="rpg-frame anim-rise flex items-center gap-6 flex-wrap" style={{ padding: "22px 26px", background: "radial-gradient(60% 140% at 0% 50%, rgba(245,196,81,0.1), transparent 70%), linear-gradient(180deg, rgba(27,33,49,0.97), rgba(19,24,36,0.97))" }}>
             <HeroPortrait race={profile.race} box={120} sprite={96} frame={look.frame} pet={look.pet} radius={18} className="anim-bob" />
             <div className="flex-1" style={{ minWidth: 260 }}>
-              <p className="pixel-chapter" style={{ margin: 0, color: "var(--color-accent)" }}>Seu Bartolo, mercador</p>
-              <p style={{ margin: "8px 0 0", fontSize: 15, lineHeight: 1.65 }}>
-                {open ? greeting : "Ô de casa! A loja ainda está fechada para balanço. Passe no Mercado da Vila primeiro — aí a gente conversa."}
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="pixel-chapter" style={{ margin: 0 }}>Vila do Arquivo</p>
+                  <h1 style={{ margin: "2px 0 0", fontSize: 28, fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1.15 }}>Loja do Mercador</h1>
+                </div>
+                <Link href="/map" className="btn-nav btn-pixel is-compact shrink-0"><Icon name="arrowLeft" size={16} /> Mapa-Múndi</Link>
+              </div>
+              <p style={{ margin: "12px 0 0", fontSize: 16, fontWeight: 600, lineHeight: 1.55, color: "var(--color-text)" }}>
+                <b style={{ color: "var(--color-accent)" }}>Seu Bartolo:</b>{" "}
+                “{open ? greeting : "Ô de casa! A loja ainda está fechada para balanço. Passe no Mercado da Vila primeiro — aí a gente conversa."}”
               </p>
-              <p style={{ margin: "10px 0 0", fontSize: 13, color: "var(--color-muted)" }}>
+              <p style={{ margin: "10px 0 0", fontSize: 13.5, fontWeight: 600, color: "var(--color-muted)" }}>
                 <b style={{ color: "var(--color-text)" }}>{profile.name}</b>
                 {look.title && <span style={{ color: "var(--color-accent)" }}>, {look.title}</span>}
                 {" · "}você tem <b style={{ color: "var(--color-xp)" }}>{coins} moedas</b>. Itens são só visuais: não dão XP nem dicas.
@@ -101,8 +100,9 @@ export default function MerchantShop() {
 
           {!open && (
             <section className="rpg-frame" style={{ padding: "18px 22px" }}>
-              <p style={{ margin: 0, fontSize: 14 }}>
-                🔒 A loja abre depois de concluir <b>{getMission(SHOP_UNLOCK_MISSION_ID)?.missionTitle}</b>.
+              <p className="flex items-center gap-2" style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+                <Icon name="lock" size={16} style={{ color: "var(--color-muted)" }} />
+                <span>A loja abre depois de concluir <b>{getMission(SHOP_UNLOCK_MISSION_ID)?.missionTitle}</b>.</span>
               </p>
             </section>
           )}
@@ -113,11 +113,11 @@ export default function MerchantShop() {
             return (
               <section key={slot} className="rpg-frame" style={{ padding: "18px 22px 22px" }}>
                 <div className="section-header">
-                  <span className="section-icon">{info.icon}</span>
+                  <span className="section-icon" style={{ color: "var(--color-accent)" }}><Icon name={SLOT_ICON[slot]} size={18} /></span>
                   <span className="section-label" style={{ color: "var(--color-accent)" }}>{info.label}</span>
                   <div className="section-line" style={{ background: "var(--color-accent)" }} />
                 </div>
-                <p style={{ margin: "-4px 0 14px", fontSize: 13, color: "var(--color-muted)" }}>{info.hint}</p>
+                <p style={{ margin: "-6px 0 16px", fontSize: 14, fontWeight: 600, color: "var(--color-muted)" }}>{info.hint}</p>
 
                 <div className="shop-grid">
                   {items.map((item) => {
@@ -139,7 +139,7 @@ export default function MerchantShop() {
                               <button type="button" className="btn-run btn-pixel is-compact" onClick={() => equipItem(slot, item.id)}>Usar</button>
                             )
                           ) : lockedBy ? (
-                            <span className="shop-lock">🔒 Conclua <b>{lockedBy.missionTitle}</b></span>
+                            <span className="shop-lock"><Icon name="lock" size={13} /> Conclua <b>{lockedBy.missionTitle}</b></span>
                           ) : (
                             <button
                               type="button"
@@ -152,7 +152,7 @@ export default function MerchantShop() {
                             </button>
                           )}
                           <span className="shop-price">
-                            {owned ? (isOn ? "✓ Em uso" : "✓ Seu") : <><Sprite src="/assets/sprites/moedas.png" size={32} style={{ margin: "-8px -4px" }} />{item.price}</>}
+                            {owned ? <span className="chip is-done"><Icon name="check" size={11} style={{ strokeWidth: 3 }} />{isOn ? "Em uso" : "Seu"}</span> : <><Sprite src="/assets/sprites/moedas.png" size={32} style={{ margin: "-8px -4px" }} />{item.price}</>}
                           </span>
                         </div>
                       </article>

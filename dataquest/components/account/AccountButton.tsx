@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { supabase } from "@/lib/supabase";
 import { useAccountStore, type SyncStatus } from "@/store/accountStore";
 import AuthDialog from "./AuthDialog";
+import Icon from "@/components/ui/Icon";
 
 const SYNC_LABEL: Record<SyncStatus, { text: string; color: string }> = {
   idle:    { text: "Conectado",       color: "var(--color-muted)" },
@@ -34,7 +35,7 @@ export default function AccountButton({ guestOnly = false }: { guestOnly?: boole
           onClick={() => setDialogOpen(true)}
           title="Crie uma conta para salvar o progresso na nuvem e aparecer no ranking"
         >
-          <span style={{ fontSize: 15 }}>☁️</span> Entrar
+          <Icon name="cloud" /> Entrar
         </button>
         {/* Portal: a top bar tem backdrop-filter, que prenderia o position:fixed da janela dentro dela (cortada) */}
         {dialogOpen && createPortal(<AuthDialog onClose={() => setDialogOpen(false)} />, document.body)}
@@ -47,7 +48,7 @@ export default function AccountButton({ guestOnly = false }: { guestOnly?: boole
   return (
     <div className="relative">
       <button type="button" className="icon-btn" onClick={() => setMenuOpen((o) => !o)} aria-expanded={menuOpen} title={email}>
-        <span style={{ fontSize: 15 }}>☁️</span>
+        <Icon name="cloud" />
         <span style={{ color: status.color }}>{status.text}</span>
       </button>
       {menuOpen && (
@@ -61,10 +62,10 @@ export default function AccountButton({ guestOnly = false }: { guestOnly?: boole
           </span>
           <button
             type="button"
-            className="btn-nav"
+            className="btn-nav btn-sm"
             onClick={() => { setMenuOpen(false); supabase!.auth.signOut(); }}
           >
-            Sair da conta
+            <Icon name="logout" size={15} /> Sair da conta
           </button>
         </div>
       )}

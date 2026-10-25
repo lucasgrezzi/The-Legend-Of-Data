@@ -29,6 +29,8 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessão 12 commitada e enviada** em 2026-10-24 (tela da missão no estilo RPG + tutorial guiado).
 - **Sessão 13 commitada e enviada** em 2026-10-24 (Bestiário, Loja do Mercador, M14–M16, login/ranking RPG).
 - **Sessão 15 commitada e enviada** em 2026-10-26 (mapa corrigido + 5 fases novas de SQL e Pandas; Modo Teste local).
+- **Sessão 16 commitada e enviada** (`dc0d855`): Mapa-Múndi, uma tela por região e chefe do Data Viz (fase 22).
+- **Sessão 17 commitada e enviada** (redesign profissional de todas as telas; aprovado pelo usuário).
 - **Sessão 14 commitada e enviada** em 2026-10-24 (revisão das 17 fases). Em 2026-10-25, para liberar espaço no PC
   (disco 96% cheio), foram apagados `node_modules/`, `.next/` e o cache do npm: **rode `npm install` antes de
   `npm run dev`/`build`**. O script de revisão das fases foi salvo em `scripts/revisar_fases.mjs`.
@@ -404,6 +406,19 @@ do DataQuest: cada tema numa região, e toda região terminando num chefe ("tran
   - chefe: acurácia.
   Ao adicionar, esticar a tabela de níveis (o XP total passa de 660).
 
+### Sessão 17 — Redesign profissional de todas as telas (2026-10-25)
+Pedido do usuário: "deixar tudo mais profissional em relação ao design… acho que tá bem iniciante".
+- Novo sistema visual (ver "## Design"): Nunito no texto, mono só no código, pixel só no logo e celebrações;
+  ícones SVG (`components/ui/Icon.tsx`) no lugar dos emojis da interface; cartões escuros com borda fina no lugar de
+  molduras com rebites, madeira e pergaminho; botões sólidos com degrau.
+- `components/ui/TopBar.tsx`: a mesma barra (logo + Mapa · Bestiário · Loja · Ranking) em mapa, região, loja e ranking.
+- Mapa-Múndi: painel da jornada numa linha (nível, XP, missões, Continuar). Região: estandarte com o chefe.
+  Tela da missão: título maior, QUEST como cartão com a cor da trilha, abas com ícones, editor no mesmo tom escuro.
+- Janelas (resultado, ficha, Bestiário, tutorial, confirmação do Grimório), loja, ranking, login e criação de
+  personagem no mesmo padrão. Ranking: medalhas de ouro/prata/bronze desenhadas.
+- `friendlyErrors.ts`: no SQL, `___` agora vira "Ainda tem lacuna para preencher" (antes: "Não existe a coluna ___").
+- `scripts/revisar_fases.mjs` acha o botão de enviar por `data-tour="submit"` (o texto mudou) e espera até 120 s.
+
 ### Próximos passos sugeridos
 1. **Rodar `supabase/2026-10-titulo-no-ranking.sql`** (tarefa do usuário) para o título aparecer no ranking.
 2. Mais fases: Pandas `merge`/`pivot_table` (o worker só injeta UM CSV — para merge, aceitar vários arquivos em
@@ -464,7 +479,7 @@ do DataQuest: cada tema numa região, e toda região terminando num chefe ("tran
 |--------|-----------|
 | Framework | Next.js 16 (App Router, Turbopack) |
 | UI | React 19 + Tailwind CSS v4 (NES.css **removido** — seu reset sem layer sobrescrevia `flex`/`gap` do Tailwind) |
-| Fontes | Press Start 2P (pixel labels/botões) + JetBrains Mono (corpo/títulos bold) via `next/font/google` |
+| Fontes | Nunito (interface) + JetBrains Mono (código) + Press Start 2P (logo e celebrações) via `next/font/google` |
 | Estado | Zustand 5 com `persist` → `localStorage` (+ nuvem via Supabase quando logado) |
 | Contas | Supabase Auth (e-mail/senha) + Postgres (`saves`, `get_leaderboard`) — opcional |
 | Editor | @uiw/react-codemirror + @codemirror/lang-python + lang-sql |
@@ -730,46 +745,69 @@ O store é persistido com `version: 1` — mudou o formato? incremente a versão
 
 ## Design
 
-### Paleta
+Sistema visual da Sessão 17: fantasia sombria e limpa. Fundo azul-noite, cartões com borda fina e brilho dourado
+no topo, ouro só para o que importa (próximo passo, XP, moedas) e as sprites pixel art como protagonistas.
+Tudo fica em `app/globals.css`, com os nomes de classe antigos mantidos (`.rpg-frame`, `.wood-bar`, `.btn-pixel`…).
+
+### Paleta (tokens em `:root`)
 ```
---color-bg:      #0e1117   (fundo principal)
---color-surface: #161b27   (painéis)
---color-panel:   #1c2333   (cards/blocos)
---color-border:  #2a3142   (bordas)
---color-submit:  #4aaeff   (botão Submit — azul)
---color-run:     #22c55e   (botão Run — verde)
---color-accent:  #f0c040   (amarelo/dourado — logo, XP, LORE)
---color-python:  #4fc3f7
---color-sql:     #6bcb77
---color-pandas:  #ffb74d
---color-dataviz: #f48fb1
+--color-bg / --color-bg-2      #0a0d14 / #0e121b   (fundo; barras do editor)
+--color-surface / --color-panel #141925 / #1b2131  (cartões)
+--line / --line-strong         branco 7% / 12%     (bordas finas — preferir a cores sólidas)
+--editor-bg / --editor-bg-2    #0c1018 / #080b11   (editor, blocos de código, saída)
+--color-text / -text-2 / -muted #edf0f6 / #b7bfce / #8b94a8
+--color-accent  #f5c451  (ouro: Continuar, PRÓXIMA, XP, moedas)
+--color-run #3ccf7e · --color-submit #4aa8ff · --color-error #ff6b6b · --color-boss #ef5350
+--color-python #4fc3f7 · --color-sql #6bcb77 · --color-pandas #ffb74d · --color-dataviz #f48fb1
+--radius-sm/md/lg/xl 8/12/16/20 · --shadow-sm/md/lg
 ```
+`--ink`/`--ink-soft` (antigo texto sobre pergaminho) agora apontam para o texto claro. Não há mais pergaminho.
 
 ### Tipografia
-- `var(--font-pixel)` (Press Start 2P) → chapter labels, pixel labels, botões — **jamais** usado com emoji (emoji vira ■)
-- Pixel font: **mínimo 9px** e **sem maiúsculas acentuadas** (a fonte não tem Í/Ó/Ã maiúsculos → usar "Grimório", "Saída" em caixa mista)
-- `var(--font-body)` (JetBrains Mono 400/700/800) → tudo o mais: narrativa, teoria, títulos bold, terminal
-- Emojis sempre em `<span style={{ fontSize: N }}>` separado da pixel font
+- `var(--font-body)` = **Nunito** (400–900): todo o texto da interface, títulos e narrativa.
+- `var(--font-mono)` = **JetBrains Mono**: só código — editor, `.code-block`, terminal, tabelas, nomes de arquivo.
+- `var(--font-pixel)` = **Press Start 2P**: só o logo (`.gate-logo`), `.pixel-title` (Missão Concluída!, Ainda não…,
+  Missão Bloqueada) e o número do nível (`.level-badge`). A fonte não tem maiúsculas acentuadas.
+- `.pixel-label` / `.pixel-chapter` / `.section-label` viraram rótulos em Nunito caixa alta (o nome ficou por compatibilidade).
+- Títulos: 900, `letter-spacing: -0.02em` (h1 da missão = `.mission-title`, 32px).
+
+### Ícones (`components/ui/Icon.tsx`)
+- `<Icon name="map" size={18} />`: SVG de traço 2px no estilo Lucide, cor = `currentColor`. **Na interface não se usa
+  emoji** (cada sistema desenha diferente). Para um ícone novo, somar o `path` em `PATHS`.
+- Ícones das abas: Lore `scroll`, Estudo `book`, Grimório `wand`, Dados `folder`. QUEST `target`. Chefe `crown`.
+- Emoji só dentro de textos de conteúdo (falas, feedback da validação).
+
+### Barra do topo (`components/ui/TopBar.tsx`)
+- `<TopBar right={…} />` em mapa, região, loja e ranking: `Brand` (marca dourada + "DataQuest" em pixel, leva ao
+  Mapa-Múndi) + `TopNav` (Mapa · Bestiário · Loja · Ranking, com o atual em `.icon-btn.is-active`).
+- A tela de missão usa `Brand` + breadcrumb (`.region-chip` da trilha → título) + segmentos `.quest-gem`.
 
 ### Botões (classes CSS)
+Botões "de jogo": cor sólida com degrau embaixo (`--edge`) que afunda ao clicar. Ícone + texto, sem setas em texto.
 | Classe | Cor | Uso |
 |--------|-----|-----|
-| `.btn-run` | Verde `#22c55e` gradiente | Executar código |
-| `.btn-submit` | Azul `#4aaeff` gradiente | Enviar resposta |
-| `.btn-next` | Dourado `#f0c040` gradiente | Próxima missão |
-| `.btn-nav` | Cinza neutro | Voltar / Mapa |
+| `.btn-next` | Ouro (texto escuro) | Ação principal: Continuar, Próxima, Comprar |
+| `.btn-run` | Verde (texto escuro) | Executar código |
+| `.btn-submit` | Azul (texto branco) | Enviar resposta |
+| `.btn-nav` | Neutro | Voltar / Mapa / Fechar |
+| `.icon-btn` | Contorno discreto | Barra do topo, Copiar/Resetar (`.is-square` = só ícone) |
+Tamanhos: padrão 44px, `.btn-pixel.is-compact` 38px, `.btn-sm` 32px. Desativado = neutro cinza (não ouro apagado).
+
+### Peças reutilizáveis
+- `.rpg-frame` / `.panel`: cartão principal. `.modal` + `.modal-foot` (rodapé das janelas).
+- `.chip` (`.is-xp`, `.is-done`, `.is-open`, `.is-locked`, `.is-boss`): pílulas pequenas de estado.
+- `.track-badge`: selo maior (trilha, XP, moedas). `.field` + `.field-label`: campos de formulário.
+- `.xp-pixel` / `.banner-progress`: barras de progresso arredondadas. `.level-badge`: quadrado dourado do nível.
+- Cuidado com `display: flex` + `gap` num parágrafo com `<b>` no meio: o gap separa o texto. Envolver o texto num `<span>`.
 
 ### Section headers (classe `.section-header`)
-Sempre usar o padrão: emoji grande (20px) + pixel label + linha separadora colorida.
 ```tsx
 <div className="section-header">
-  <span className="section-icon">📯</span>
-  <span className="section-label" style={{ color }}>LORE</span>
+  <span className="section-icon" style={{ color }}><Icon name="target" size={18} /></span>
+  <span className="section-label" style={{ color }}>Quest · seu objetivo</span>
   <div className="section-line" style={{ background: color }} />
 </div>
 ```
-
-Ícones por seção: `🗡️ QUEST` (card fixo no topo) e abas `📯 Lore`, `📜 Estudo`, `🔮 Grimório`, `📂 Dados` (classes `.tabs`/`.tab`)
 
 ### Sprites (`/assets/sprites`, CC0 — ver `CREDITS.md`)
 - Trilhas: Python `trilha-python` (serpente), SQL `trilha-sql` (entrada da cripta), Pandas `trilha-pandas` (martelo), Data Viz `trilha-dataviz` (orbe)
@@ -784,7 +822,7 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 - `/map` = **Mapa-Múndi** (`WorldHub` em `components/map/WorldMap.tsx`). Ele cabe numa tela de 1366×768:
   - painel compacto do jogador;
   - um lugar por região em `HUB_SPOTS`, ligados por estrada SVG, e um lugar "???" (Terras inexploradas, em breve);
-  - cada lugar mostra o progresso e o chefe ("👑 Chefe: …" ou "✓ Chefe derrotado");
+  - cada lugar mostra o progresso e o chefe (ícone de coroa + "Chefe: …", ou "Chefe derrotado");
   - região bloqueada fica cinza e diz "Vença o chefe anterior";
   - o herói e "VOCÊ ESTÁ AQUI" ficam na região da próxima fase.
 - `/regiao/[track]` (`app/regiao/[track]/page.tsx` → `<WorldMap track>` → `RegionTrail`) = trilha só daquela região:
@@ -793,24 +831,26 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
   - neblina depois da última fase não bloqueada; região bloqueada fica toda coberta ("Região bloqueada");
   - depois do chefe, aparece "Próxima região →".
 - **Chefe = a última fase de cada região** (`bossOf`/`isBoss` em `lib/missions.ts`). Toda região precisa terminar
-  num chefe. No mapa ele tem um medalhão de 96px com aro carmesim (`.map-node.is-boss`), 👑 em cima e a etiqueta
-  "👑 CHEFE" no cartão.
+  num chefe. No mapa ele tem um medalhão de 96px com aro carmesim (`.map-node.is-boss`, brilho `boss-glow`), uma
+  coroa (`.boss-crown`) em cima e a pílula "CHEFE DA REGIÃO" (`.chip.is-boss`) no cartão.
 - **Região nova:**
   - Somar a trilha em `Track` (`types`), `TRACKS` e `TRACK_ORDER` (`lib/tracks.ts`), com um sprite de medalhão.
   - O Mapa-Múndi tem 5 lugares. A 6ª região pede mais um ponto em `HUB_SPOTS`; a 5ª ocupa o lugar do "???".
 - Os links "Mapa" da tela de missão voltam para a região da fase. O logo DataQuest leva ao Mapa-Múndi.
-- Estilo RPG da Sessão 9: `.rpg-frame`, `.region-banner`, `.map-label` pergaminho, `.map-hero`, `.wood-bar`.
+- Cartões do mapa: `.map-label` escuro (título `.map-label-title`, conceito na cor da trilha, pílulas de XP e estado).
   **Cuidado:** `.rpg-frame` tem `position: relative`, que vence a classe `absolute` do Tailwind. Um elemento com
   `.rpg-frame` que precisa ser absolute deve receber o `position` no `style`.
 - **Neblina** (`MapFog`): `localStorage["dataquest-fog-seen"]` guarda a última âncora vista. Se o jogador avançou, a
   neblina começa na antiga e recua com animação.
-- Nó: bloqueado `missao-bloqueada`, disponível = sprite da trilha (borda dourada pulsando), concluído `missao-concluida`; tag `▼ PRÓXIMA`
+- Nó: bloqueado `missao-bloqueada`, disponível = sprite da trilha (aro dourado pulsando), concluído `missao-concluida`
+  (aro dourado + selo verde); bandeira `PRÓXIMA` (`.next-flag`, com setinha).
 
 ### Layout da tela de missão
-- Top bar: logo + breadcrumb (com sprite da trilha) → segmentos de progresso da trilha (1 por missão, clicáveis se desbloqueadas) → `PlayerChip`
-- Coluna esquerda 55%: chapter label → h1 bold 28px → badges (trilha, XP, moedas, "−50%" se solução revelada) → card QUEST (+ links Estudo/Grimório e contador de erros) → abas Lore/Estudo/Grimório/Dados → rodapé fixo
+- Top bar: `Brand` + breadcrumb (`.region-chip` com sprite da trilha → título) → segmentos de progresso da trilha (1 por missão, clicáveis se desbloqueadas) → ajuda, Bestiário, `PlayerChip`
+- Coluna esquerda 55% (conteúdo em `.mission-col`, até 760px): "Fase N de M · capítulo" → `.mission-title` 32px → "Você vai aprender" → palavras novas → badges (trilha, XP, moedas, "−50%" se solução revelada) → card QUEST (+ links Estudo/Grimório e contador de erros) → abas Lore/Estudo/Grimório/Dados → rodapé fixo
 - Coluna direita 45%: aba arquivo → CodeMirror (flex-1) → botões → `.splitter` (arrastar / duplo clique) → painel Saída (status, ms, linhas)
-- Missão narrative: painel direito mostra os 4 sprites das trilhas + texto + botão "Começar a jornada →"
+- Missão narrative: painel direito mostra os 4 sprites das trilhas + texto + botão "Começar a jornada"
+- Editor: CodeMirror com o tema One Dark, mas fundo, números de linha e linha ativa sobrescritos em `.mission-tome .cm-editor …`
 
 ### Efeito Typewriter (`TypewriterText`)
 - Usado na seção LORE de todas as missões

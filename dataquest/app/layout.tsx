@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Press_Start_2P, JetBrains_Mono } from "next/font/google";
+import { Press_Start_2P, JetBrains_Mono, Nunito } from "next/font/google";
 import "./globals.css";
 import CloudSync from "@/components/account/CloudSync";
 import Bestiary from "@/components/glossary/Bestiary";
@@ -12,8 +12,16 @@ const pressStart = Press_Start_2P({
   display: "swap",
 });
 
+// Texto da interface: arredondada e fácil de ler (a pixel fica só no logo e em destaques)
+const nunito = Nunito({
+  weight: ["400", "600", "700", "800", "900"],
+  subsets: ["latin"],
+  variable: "--font-ui",
+  display: "swap",
+});
+
 const jetbrainsMono = JetBrains_Mono({
-  weight: ["400", "500", "700", "800"],
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
   variable: "--font-code",
   display: "swap",
@@ -30,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${pressStart.variable} ${jetbrainsMono.variable} h-full`}>
+    <html lang="pt-BR" className={`${pressStart.variable} ${nunito.variable} ${jetbrainsMono.variable} h-full`}>
       <body className="min-h-full">
         <CloudSync />
         {children}

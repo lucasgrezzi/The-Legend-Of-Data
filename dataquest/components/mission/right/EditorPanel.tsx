@@ -7,6 +7,7 @@ import TerminalOutput from "./TerminalOutput";
 import TablePreview from "./TablePreview";
 import GraphPanel from "./GraphPanel";
 import { explainError, errorContext } from "@/lib/friendlyErrors";
+import Icon from "@/components/ui/Icon";
 
 interface EditorPanelProps {
   mission: Mission;
@@ -16,11 +17,6 @@ interface EditorPanelProps {
   onSubmit: (result: RunResult, code: string) => void;
   validated: boolean;
 }
-
-const LANG_ICON: Record<string, string> = {
-  python: "🐍",
-  sql: "🗄️",
-};
 
 const LANG_COLOR: Record<string, string> = {
   python: "var(--color-python)",
@@ -127,12 +123,12 @@ export default function EditorPanel({
       {/* ── Aba do arquivo ── */}
       <div className="tome-bar flex items-center justify-between gap-3 px-4 shrink-0" style={{ height: 50 }}>
         <span className="file-tag" style={{ ["--tag-color" as string]: langColor }}>
-          <span>{LANG_ICON[mission.editorLanguage]}</span>
+          <span aria-hidden style={{ width: 8, height: 8, borderRadius: 99, background: langColor, boxShadow: `0 0 8px ${langColor}` }} />
           <span>{fileName}</span>
         </span>
-        <span className="truncate" style={{ fontSize: 12, color: "#b8a88c" }}>
-          <span style={{ fontSize: 13 }}>✍️</span> Escreva seu código aqui ·{" "}
-          <span className="kbd">Ctrl</span> + <span className="kbd">Enter</span> executa
+        <span className="truncate flex items-center gap-2" style={{ fontSize: 12.5, fontWeight: 700, color: "var(--color-muted)" }}>
+          <Icon name="keyboard" size={15} /> Escreva seu código aqui ·
+          <span><span className="kbd">Ctrl</span> + <span className="kbd">Enter</span> executa</span>
         </span>
       </div>
 
@@ -141,13 +137,14 @@ export default function EditorPanel({
         <div
           className="px-5 py-2 shrink-0 flex items-center gap-3"
           style={{
-            background: "rgba(240,192,64,0.08)",
-            borderBottom: "1px solid rgba(240,192,64,0.2)",
+            background: "rgba(245,196,81,0.08)",
+            borderBottom: "1px solid rgba(245,196,81,0.2)",
             color: "var(--color-accent)",
             fontSize: 13,
+            fontWeight: 700,
           }}
         >
-          <span style={{ animation: "blink 1s step-end infinite" }}>⏳</span>
+          <span className="spinner" aria-hidden style={{ width: 14, height: 14 }} />
           Despertando o Arquivo Antigo… (carregando Python, só na primeira vez)
         </div>
       )}
@@ -167,19 +164,19 @@ export default function EditorPanel({
       <div className="tome-bar is-actions flex items-center justify-between gap-3 px-4 py-3 shrink-0">
         <div className="flex items-center gap-2">
           <button className="icon-btn" onClick={handleCopy} title="Copiar código">
-            {copied ? "✓ Copiado" : "⎘ Copiar"}
+            <Icon name={copied ? "check" : "copy"} size={16} /> {copied ? "Copiado" : "Copiar"}
           </button>
           <button className="icon-btn" onClick={handleReset} title="Voltar ao código inicial">
-            ↺ Resetar
+            <Icon name="reset" size={16} /> Resetar
           </button>
         </div>
 
         <div className="flex items-center gap-3">
           <button className="btn-run btn-pixel is-compact" onClick={handleRun} disabled={busy} data-tour="run">
-            {isRunning ? "…" : "▶"} Executar
+            {isRunning ? <span className="spinner" aria-hidden style={{ width: 14, height: 14, borderColor: "rgba(4,35,15,0.25)", borderTopColor: "#04230f" }} /> : <Icon name="play" size={14} />} Executar
           </button>
           <button className="btn-submit btn-pixel is-compact" onClick={handleSubmit} disabled={busy || validated} data-tour="submit">
-            {validated ? "✓ Concluída" : isSubmitting ? "Verificando…" : "Enviar Resposta"}
+            {validated ? <><Icon name="check" size={16} style={{ strokeWidth: 3 }} /> Concluída</> : isSubmitting ? "Verificando…" : <><Icon name="send" size={15} /> Enviar resposta</>}
           </button>
         </div>
       </div>
@@ -198,18 +195,19 @@ export default function EditorPanel({
       />
 
       {/* ── Saída ── */}
-      <div className="flex flex-col shrink-0" style={{ height: outputHeight, background: "#060a10" }} data-tour="output">
+      <div className="flex flex-col shrink-0" style={{ height: outputHeight, background: "var(--editor-bg-2)" }} data-tour="output">
         <div className="output-header">
           <span className="flex items-center gap-2">
-            <span style={{ fontFamily: "var(--font-body)", fontSize: 14 }}>🔮</span> Saída
-            <span style={{ fontFamily: "var(--font-body)", fontSize: 11, letterSpacing: 0, opacity: 0.8 }}>— o que o código mostra</span>
+            <Icon name="terminal" size={15} /> Saída
+            <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 0, textTransform: "none", opacity: 0.85 }}>· o que o código mostra</span>
           </span>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 12, letterSpacing: 0 }}>
+          <span style={{ fontSize: 12, letterSpacing: 0, textTransform: "none" }}>
             {isRunning || isSubmitting ? (
               <span style={{ color: "var(--color-accent)" }}>executando…</span>
             ) : result ? (
-              <span style={{ color: hasError ? "var(--color-error)" : "var(--color-run)" }}>
-                {hasError ? "✗ erro" : "✓ ok"}
+              <span className="inline-flex items-center gap-1" style={{ color: hasError ? "var(--color-error)" : "var(--color-run)" }}>
+                <Icon name={hasError ? "x" : "check"} size={13} style={{ strokeWidth: 3 }} />
+                {hasError ? "erro" : "ok"}
                 {rowCount !== undefined && !hasError && ` · ${rowCount} ${rowCount === 1 ? "linha" : "linhas"}`}
                 {` · ${result.executionTimeMs} ms`}
               </span>

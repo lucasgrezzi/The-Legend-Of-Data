@@ -106,7 +106,7 @@ export default function MapFog({ top, mapHeight, revealing, title, text }: MapFo
         <p className="pixel-label" style={{ margin: "10px 0 0", color: "var(--color-accent)" }}>
           {revealing ? "A neblina se dissipa..." : title}
         </p>
-        <p style={{ margin: "10px 0 0", fontSize: 13, lineHeight: 1.6, color: "var(--color-muted)" }}>{text}</p>
+        <p style={{ margin: "8px 0 0", fontSize: 14, fontWeight: 600, lineHeight: 1.6, color: "var(--color-muted)" }}>{text}</p>
       </div>
     </div>
   );

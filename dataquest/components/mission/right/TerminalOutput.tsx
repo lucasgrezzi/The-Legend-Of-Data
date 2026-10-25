@@ -32,7 +32,7 @@ export default function TerminalOutput({ stdout, stderr, isRunning, friendly, la
   return (
     <div className="terminal">
       {stdout || (
-        <span style={{ color: "#4b5566" }}>{">"} Aguardando execução… pressione ▶ Executar ou Ctrl+Enter</span>
+        <span style={{ color: "#556078" }}>{">"} Aguardando execução… clique em Executar ou aperte Ctrl+Enter</span>
       )}
     </div>
   );

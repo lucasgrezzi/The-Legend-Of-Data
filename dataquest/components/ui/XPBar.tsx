@@ -28,8 +28,8 @@ export default function XPBar({ totalXP, fromXP, compact = false, pixel = false 
 
   return (
     <div className="flex flex-col gap-2" style={{ width: "100%" }}>
-      <div className="flex justify-between items-baseline gap-3" style={{ fontSize: compact ? 12 : 13 }}>
-        <span style={{ color: "var(--color-xp)", fontWeight: 700 }}>
+      <div className="flex justify-between items-baseline gap-3" style={{ fontSize: compact ? 12 : 13, fontWeight: 700 }}>
+        <span style={{ color: "var(--color-xp)", fontWeight: 800 }}>
           Nv {target.level} · {target.label}
         </span>
         <span style={{ color: "var(--color-muted)" }}>
@@ -38,31 +38,9 @@ export default function XPBar({ totalXP, fromXP, compact = false, pixel = false 
             : `${totalXP} XP · nível máximo`}
         </span>
       </div>
-      {pixel ? (
-        <div className="xp-pixel">
-          <div style={{ width: `${pct}%` }} />
-        </div>
-      ) : (
-        <div
-          style={{
-            height: compact ? 8 : 10,
-            background: "var(--color-border)",
-            borderRadius: 20,
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              height: "100%",
-              width: `${pct}%`,
-              background: "linear-gradient(90deg, #d4a010, #f0c040, #ffe08a)",
-              borderRadius: 20,
-              boxShadow: "0 0 10px rgba(240,192,64,0.5)",
-              transition: "width 0.9s cubic-bezier(.2,.8,.2,1)",
-            }}
-          />
-        </div>
-      )}
+      <div className="xp-pixel" style={pixel ? undefined : { height: compact ? 8 : 10 }}>
+        <div style={{ width: `${pct}%` }} />
+      </div>
     </div>
   );
 }

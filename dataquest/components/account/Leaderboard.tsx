@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import type { Race } from "@/types";
 import { supabase } from "@/lib/supabase";
 import { RACES } from "@/lib/races";
@@ -11,6 +10,8 @@ import { useAccountStore } from "@/store/accountStore";
 import Sprite from "@/components/ui/Sprite";
 import WorldBackground from "@/components/ui/WorldBackground";
 import AccountButton from "./AccountButton";
+import TopBar from "@/components/ui/TopBar";
+import Icon from "@/components/ui/Icon";
 import { getItem } from "@/lib/shop";
 
 interface Row {
@@ -23,7 +24,8 @@ interface Row {
   title_id?: string | null;
 }
 
-const MEDALS = ["🥇", "🥈", "🥉"];
+/** Ouro, prata e bronze do pódio */
+const MEDALS = ["linear-gradient(180deg,#ffe08a,#e7a92a)", "linear-gradient(180deg,#eef2f7,#a9b3c2)", "linear-gradient(180deg,#f0b98a,#b8743f)"];
 
 export default function Leaderboard() {
   const { email, sync } = useAccountStore();
@@ -46,21 +48,20 @@ export default function Leaderboard() {
     <div className="min-h-screen flex flex-col">
       <WorldBackground />
 
-      <header className="wood-bar flex items-center justify-between gap-4 px-6 shrink-0 sticky top-0 z-20" style={{ height: 68 }}>
-        <div className="flex items-center gap-4">
-          <Link href="/map" className="btn-nav btn-pixel is-compact">← Mapa</Link>
-          <p className="gate-logo" style={{ margin: 0 }}>Salão da Fama</p>
-        </div>
-        <AccountButton guestOnly />
-      </header>
+      <TopBar right={<AccountButton guestOnly />} />
 
       <main className="flex-1 px-4 pt-8 pb-16">
         <section className="panel rpg-frame mx-auto" style={{ maxWidth: 680, padding: "24px 24px 12px" }}>
-          <p className="pixel-chapter" style={{ margin: 0 }}>SALÃO DA FAMA</p>
-          <h1 style={{ fontSize: 26, fontWeight: 800, margin: "10px 0 6px", color: "var(--color-accent)", textShadow: "0 0 30px rgba(240,192,64,0.35)" }}>
-            🏆 Ranking
-          </h1>
-          <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--color-muted)" }}>
+          <div className="flex items-center gap-4" style={{ marginBottom: 18 }}>
+            <span className="grid place-items-center shrink-0" style={{ width: 52, height: 52, borderRadius: 14, color: "var(--color-accent)", background: "rgba(245,196,81,0.1)", border: "1px solid rgba(245,196,81,0.3)" }}>
+              <Icon name="trophy" size={26} />
+            </span>
+            <div>
+              <p className="pixel-chapter" style={{ margin: 0 }}>Salão da Fama</p>
+              <h1 style={{ fontSize: 28, fontWeight: 900, margin: "0 0 2px", letterSpacing: "-0.02em" }}>Ranking</h1>
+            </div>
+          </div>
+          <p style={{ margin: "0 0 18px", fontSize: 14, fontWeight: 600, color: "var(--color-muted)" }}>
             Os Arquivistas com mais XP. {!email && supabase && "Entre na sua conta para aparecer aqui."}
           </p>
 
@@ -84,8 +85,8 @@ export default function Leaderboard() {
                 const { label } = computeLevel(r.total_xp);
                 return (
                   <li key={i} className={`rank-row flex items-center gap-3 ${i < 3 ? "is-podium" : ""} ${r.is_me ? "is-me" : ""}`}>
-                    <span className="rank-pos" style={{ width: 36, textAlign: "center", fontSize: i < 3 ? 22 : 14, fontWeight: 800 }}>
-                      {MEDALS[i] ?? `${i + 1}º`}
+                    <span className="rank-pos flex justify-center" style={{ width: 36, fontSize: 14, fontWeight: 900 }}>
+                      {MEDALS[i] ? <span className="rank-medal" style={{ background: MEDALS[i] }}>{i + 1}</span> : `${i + 1}º`}
                     </span>
                     {race && (
                       <span
@@ -103,11 +104,11 @@ export default function Leaderboard() {
                         )}
                         {r.is_me && <span style={{ color: "var(--color-accent)", fontWeight: 700 }}> (você)</span>}
                       </span>
-                      <span className="rank-sub" style={{ fontSize: 12 }}>
+                      <span className="rank-sub" style={{ fontSize: 12.5, fontWeight: 600 }}>
                         {race?.name ?? r.race} · {label} · {r.missions_done}/{MISSIONS.length} missões
                       </span>
                     </span>
-                    <span className="rank-xp" style={{ fontSize: 16, fontWeight: 800, whiteSpace: "nowrap" }}>{r.total_xp} XP</span>
+                    <span className="rank-xp" style={{ fontSize: 16, fontWeight: 900, whiteSpace: "nowrap" }}>{r.total_xp} XP</span>
                   </li>
                 );
               })}
