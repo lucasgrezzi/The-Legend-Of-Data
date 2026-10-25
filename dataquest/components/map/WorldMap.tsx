@@ -89,7 +89,10 @@ export default function WorldMap() {
   const nextMission = MISSIONS.find((m) => stateOf(m) === "available");
 
   // Neblina recua (com animação) quando o jogador avançou desde a última visita ao mapa
-  const fogAnchor = nextMission ? String(nextMission.id) : FOG_END;
+  // A neblina começa depois da última fase NÃO bloqueada (não da próxima): quem já avançou e ganhou uma fase nova
+  // lá atrás continua vendo as fases que concluiu. Para quem joga em ordem, é a mesma fase que a próxima.
+  const frontier = [...MISSIONS].reverse().find((m) => stateOf(m) !== "locked");
+  const fogAnchor = frontier && stateOf(frontier) === "available" ? String(frontier.id) : FOG_END;
   const fog = useFogReveal(fogAnchor, fogOrder, gate === "play" && !!profile);
   const mapRef = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -264,8 +267,10 @@ export default function WorldMap() {
               return (
                 <div
                   key={`r${item.track}`}
-                  className={`rpg-frame region-banner${open ? "" : " is-locked"} absolute flex items-center gap-4`}
+                  className={`rpg-frame region-banner${open ? "" : " is-locked"} flex items-center gap-4`}
                   style={{
+                    // inline: o `position: relative` do .rpg-frame venceria a classe `absolute` e empurraria cada estandarte para baixo
+                    position: "absolute",
                     top: item.y,
                     left: 34,
                     right: 34,

@@ -7,7 +7,7 @@ const mission14: Mission = {
   id: 14,
   track: "pandas",
   type: "pandas",
-  chapterTitle: "A Forja de Dados — Capítulo III",
+  chapterTitle: "A Forja de Dados — Capítulo VI (Chefe)",
   missionTitle: "A Têmpera do Rei",
   concept: "Pandas: criar colunas com contas (chefe)",
   narrative: `Chegou carta do castelo. Selo vermelho, letra caprichada, cheiro de perfume caro. É do Rei — o atual, não o Esquecido.

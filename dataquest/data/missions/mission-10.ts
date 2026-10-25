@@ -2,12 +2,12 @@ import type { Mission } from "@/types";
 import { RELIQUIAS } from "@/data/catacumbas";
 
 // Dificuldade 3/5 — funções de agregação (COUNT, SUM, AVG, MAX) + apelidos com AS. Template só com comentários.
-// Ordem de jogo: depois da 9, antes da 11.
+// Ordem de jogo: depois da 18, antes da 11.
 const mission10: Mission = {
   id: 10,
   track: "sql",
   type: "sql",
-  chapterTitle: "As Catacumbas de Dados — Capítulo III",
+  chapterTitle: "As Catacumbas de Dados — Capítulo V",
   missionTitle: "O Inventário do Guardião",
   concept: "SQL: COUNT, SUM, AVG, MAX e AS",
   narrative: `Com as relíquias na mochila, você chega a uma porta de ferro. O Guardião bate o cajado no chão. A porta não se mexe. Ele bate de novo. Nada. Ele finge que era isso mesmo que queria.
@@ -71,7 +71,7 @@ WHERE amaldicoada = 'nao';`,
     { pattern: "\\bmax\\s*\\(", flags: "i", hint: "Encontre o maior valor com MAX(valor)." },
   ],
   dataFile: RELIQUIAS,
-  unlockCondition: { requiredMissionIds: [9] },
+  unlockCondition: { requiredMissionIds: [18] },
 };
 
 export default mission10;

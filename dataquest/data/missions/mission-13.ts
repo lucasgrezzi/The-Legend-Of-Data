@@ -2,12 +2,12 @@ import type { Mission } from "@/types";
 import { ENCOMENDAS } from "@/data/forja";
 
 // Dificuldade 3/5 — filtro + groupby + sum + sort_values + .items(). Template só com comentários.
-// Ordem de jogo: depois da 4 (A Forja Desperta).
+// Ordem de jogo: depois da 21 (O Livro de Visitas).
 const mission13: Mission = {
   id: 13,
   track: "pandas",
   type: "pandas",
-  chapterTitle: "A Forja de Dados — Capítulo II",
+  chapterTitle: "A Forja de Dados — Capítulo V",
   missionTitle: "O Fole das Regiões",
   concept: "Pandas: groupby, sum e sort_values",
   narrative: `Com o fogo aceso, a Forja voltou a receber encomendas das quatro regiões do reino. Mas o fole — aquele saco de couro gigante que sopra ar no fogo, tipo um pulmão de sanfona — está murcho e parado.
@@ -74,7 +74,7 @@ for regiao, total in totais.items():
     { pattern: "\\.sort_values\\(", hint: "Ordene o resultado com .sort_values(ascending=False) — não ordene na mão." },
   ],
   dataFile: ENCOMENDAS,
-  unlockCondition: { requiredMissionIds: [4] },
+  unlockCondition: { requiredMissionIds: [21] },
 };
 
 export default mission13;

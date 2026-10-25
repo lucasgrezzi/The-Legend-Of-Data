@@ -50,3 +50,46 @@ export const PEDIDOS = csvFile(
 9,Martelo,Norte,3,40
 10,Arco,Sul,2,70`
 );
+
+/** Peças à venda na Forja (missão 19 — sort_values + head). As 3 mais caras: Cota de Malha 160 · Martelo de Guerra 140 · Machado Duplo 120 */
+export const ESTOQUE = csvFile(
+  "estoque",
+  `id,peca,preco
+1,Espada Curta,60
+2,Martelo de Guerra,140
+3,Escudo de Carvalho,45
+4,Machado Duplo,120
+5,Adaga,25
+6,Elmo de Aço,85
+7,Lança Longa,95
+8,Cota de Malha,160`
+);
+
+/** Sacos de carvão gastos por dia (missão 20 — sum, mean, max): total 57 · média 9.5 · maior 15 */
+export const CARVAO = csvFile(
+  "carvao",
+  `dia,sacos
+segunda,12
+terca,8
+quarta,15
+quinta,10
+sexta,9
+sabado,3`
+);
+
+/** Livro de visitas da Forja (missão 21 — value_counts): anao 5 · elfo 3 · orc 2 · goblin 1 (sem empates) */
+export const VISITAS = csvFile(
+  "visitas",
+  `id,visitante,raca
+1,Durin,anao
+2,Lia,elfo
+3,Grosh,orc
+4,Balin,anao
+5,Thorin,anao
+6,Elara,elfo
+7,Zik,goblin
+8,Dora,anao
+9,Mug,orc
+10,Faelan,elfo
+11,Gimra,anao`
+);

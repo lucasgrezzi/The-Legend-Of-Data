@@ -2,12 +2,12 @@ import type { Mission } from "@/types";
 import { RELIQUIAS } from "@/data/catacumbas";
 
 // Dificuldade 2/5 — WHERE com AND / OR / IN e parênteses. Template só com comentários.
-// Ordem de jogo: depois da 3, antes da 10.
+// Ordem de jogo: depois da 17, antes da 18.
 const mission9: Mission = {
   id: 9,
   track: "sql",
   type: "sql",
-  chapterTitle: "As Catacumbas de Dados — Capítulo II",
+  chapterTitle: "As Catacumbas de Dados — Capítulo III",
   missionTitle: "O Salão dos Ossos",
   concept: "SQL: WHERE com AND, OR e IN",
   narrative: `Mais fundo, o chão faz crec-crec. São ossos. Muitos. Você decide não perguntar.
@@ -74,7 +74,7 @@ ORDER BY valor DESC;`,
     { pattern: "\\bamaldicoada\\b", flags: "i", hint: "Não esqueça a regra da maldição: use a coluna amaldicoada." },
   ],
   dataFile: RELIQUIAS,
-  unlockCondition: { requiredMissionIds: [3] },
+  unlockCondition: { requiredMissionIds: [17] },
 };
 
 export default mission9;

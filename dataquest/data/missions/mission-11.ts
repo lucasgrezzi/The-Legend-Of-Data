@@ -7,7 +7,7 @@ const mission11: Mission = {
   id: 11,
   track: "sql",
   type: "sql",
-  chapterTitle: "As Catacumbas de Dados — Capítulo IV",
+  chapterTitle: "As Catacumbas de Dados — Capítulo VI",
   missionTitle: "As Criptas por Tipo",
   concept: "SQL: GROUP BY e HAVING",
   narrative: `A porta de ferro range e abre. Atrás dela: quatro criptas seladas, uma para cada tipo de relíquia — armas, amuletos, pergaminhos e armaduras. Cripta é um quarto-cofre de catacumba, só que com mais teia de aranha.

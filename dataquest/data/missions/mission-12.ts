@@ -7,7 +7,7 @@ const mission12: Mission = {
   id: 12,
   track: "sql",
   type: "sql",
-  chapterTitle: "As Catacumbas de Dados — Capítulo V (Chefe)",
+  chapterTitle: "As Catacumbas de Dados — Capítulo VII (Chefe)",
   missionTitle: "O Rei Esquecido",
   concept: "SQL: JOIN entre tabelas",
   narrative: `CHEFE DA REGIÃO. Solta a música dramática de novo. Mais alto.

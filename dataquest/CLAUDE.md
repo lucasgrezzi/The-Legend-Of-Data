@@ -28,10 +28,11 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessão 11 commitada e enviada** em 2026-10-24 (o Grimório traduz os erros de Python e SQL).
 - **Sessão 12 commitada e enviada** em 2026-10-24 (tela da missão no estilo RPG + tutorial guiado).
 - **Sessão 13 commitada e enviada** em 2026-10-24 (Bestiário, Loja do Mercador, M14–M16, login/ranking RPG).
+- **Sessão 15 commitada e enviada** em 2026-10-26 (mapa corrigido + 5 fases novas de SQL e Pandas; Modo Teste local).
 - **Sessão 14 commitada e enviada** em 2026-10-24 (revisão das 17 fases). Em 2026-10-25, para liberar espaço no PC
   (disco 96% cheio), foram apagados `node_modules/`, `.next/` e o cache do npm: **rode `npm install` antes de
   `npm run dev`/`build`**. O script de revisão das fases foi salvo em `scripts/revisar_fases.mjs`.
-- Hoje são **17 missões** (7 de Python, 5 de SQL, 3 Pandas, 2 Data Viz) — ver "As 17 Missões". Os `expectedOutput` das
+- Hoje são **22 missões** (7 de Python, 7 de SQL, 6 Pandas, 2 Data Viz) — ver "As 22 Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
 ### Sessão 1 — Redesign da interface
@@ -361,6 +362,33 @@ Pedido do usuário: "pode fazer todas as etapas e a gente verifica tudo depois".
   falta de return e a coluna errada do Pandas aparece sem o prefixo.
   Melhoria possível: na M14, a lista "colunas disponíveis" mostra só as do CSV, sem a coluna `total` que o aluno cria.
 
+### Sessão 15 — Mapa corrigido e mais fases de SQL e Pandas (2026-10-26)
+Pedido do usuário: os estandartes ficavam por cima das fases e os cartões estavam desalinhados. Também pediu mais fases
+de SQL e, principalmente, de Pandas antes do Data Viz.
+- **Mapa:**
+  - **Causa da sobreposição:** o `.rpg-frame` (CSS sem layer) tem `position: relative`, que vencia a classe `absolute`
+    do Tailwind (que fica numa layer). Cada estandarte descia a altura dos anteriores, e o de Data Viz cobria a
+    2ª fase. Agora o estandarte usa `position: "absolute"` inline (`WorldMap.tsx`).
+    **Regra:** elemento com `.rpg-frame` que precisa de absolute/fixed deve receber o `position` no `style`.
+  - Os cartões das fases têm largura fixa (236px), então ficam todos alinhados.
+  - **Neblina:** agora começa depois da última fase NÃO bloqueada, e não mais depois da "próxima". Assim, quem já
+    tinha avançado e ganhou fases novas lá atrás continua vendo as que concluiu. Conferido no build de produção com
+    um jogador antigo (17 fases concluídas): sem neblina, com as fases novas "Disponível".
+- **5 fases novas** (ids 17–21), uma ideia nova em cada, todas fáceis (dificuldade 1 a 3 de 5):
+  - SQL: 17 LIMIT e 18 LIKE com `%`.
+  - Pandas: 19 `sort_values` + `head`, 20 `sum`/`mean`/`max` e 21 `value_counts`.
+  - Com elas, o `groupby` da fase 13 vira quase só revisão. As fases 19 e 21 trazem o `for` final pronto.
+  - Os capítulos das fases seguintes foram renumerados.
+  - Palavras novas no Bestiário: `limit`, `like`, `head`, `pdcontas`, `valuecounts`; `sortvalues` passou para a fase 19.
+- **Feedback:**
+  - Tabela: o JSON aceita `tooMany`/`tooFew` (dica da fase para linhas a mais ou a menos).
+  - Grimório:
+    - lacuna `___` não preenchida → "Ainda tem lacuna para preencher";
+    - método em português (`.media`, `.soma`…) → o nome em inglês. Antes, `.media` sugeria `.median`, que é outra conta;
+    - `.items()` num número (ex.: `.count()` no lugar de `.value_counts()`) → "Isso virou um número só".
+- **Revisão no navegador** (`scripts/revisar_fases.mjs`, que agora roda no Modo Teste e aceita uma lista de ids): as 21
+  soluções passam e os 33 erros de iniciante são recusados com mensagem clara.
+
 ### Próximos passos sugeridos
 1. **Rodar `supabase/2026-10-titulo-no-ranking.sql`** (tarefa do usuário) para o título aparecer no ranking.
 2. Mais fases: Pandas `merge`/`pivot_table` (o worker só injeta UM CSV — para merge, aceitar vários arquivos em
@@ -396,15 +424,18 @@ Pedido do usuário: "pode fazer todas as etapas e a gente verifica tudo depois".
   migração) e redireciona — **apagar depois**.
 - Teste de todas as soluções: extrair `solution` de `data/missions/*.ts` e enviá-las pela tela da missão via CDP
   (foi assim que as 8 soluções foram validadas na Sessão 4).
-- **Revisão completa (`scripts/revisar_fases.mjs`):**
-  1. Crie `.env.production.local` com `NEXT_PUBLIC_SUPABASE_URL=`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=` e
-     `NEXT_PUBLIC_SUPABASE_ANON_KEY=` vazios (assim o jogo roda sem login).
-  2. Crie `public/__seed.html` gravando um jogador novo com `profile` `{name,race}` e `completedMissionIds:[0]`,
-     `unlockedMissionIds:[0,1]`, `currentMissionId:1` e `localStorage["dataquest-tour-seen"]="1"`.
-  3. Rode `npx next build` e depois `npx next start -p 3100`.
-  4. Rode `node scripts/revisar_fases.mjs <pasta temporária>`.
-  5. **Apague `.env.production.local` e `__seed.html` no fim.** Se a porta 9333 ou 3100 ficar ocupada, mate o processo
-     pelo PID (`netstat -ano` e `taskkill`).
+- **Revisão completa (`scripts/revisar_fases.mjs`):** com o Modo Teste aberto (`npm run teste`), rode
+  `node scripts/revisar_fases.mjs <pasta temporária> http://localhost:3001 [ids,separados,por,vírgula]`.
+  - O script cria sozinho um jogador novo.
+  - Para cada fase, ele envia os erros típicos de iniciante e depois a solução.
+  - Leva ~15 min para as 22 fases e precisa de ~1,5 GB de RAM livre.
+  - Ao criar uma fase nova, acrescente-a ao `ORDER` e ao `MISTAKES` do script.
+  - Se a porta 9333 ficar ocupada, mate o processo pelo PID (`netstat -ano` e `taskkill`).
+- **Comportamento do jogo de verdade** (bloqueios e neblina; o Modo Teste abre tudo): faça um build sem Supabase.
+  1. Crie `.env.production.local` com as variáveis `NEXT_PUBLIC_SUPABASE_*` vazias.
+  2. Rode `npx next build` e depois `npx next start -p 3100`.
+  3. Grave o progresso desejado em `localStorage["dataquest-progress"]`.
+  4. **Apague o `.env.production.local` no fim.**
 - Screenshots headless: Chrome `--headless=new --screenshot` com **um `--user-data-dir` novo por captura**
   (reutilizar o perfil gera tela branca). Fluxos (digitar no CodeMirror, clicar, enviar) foram testados via
   Chrome DevTools Protocol com um script Node (`WebSocket` nativo do Node 24).
@@ -537,7 +568,7 @@ dataquest/
 
 ---
 
-## As 17 Missões (na ordem de jogo)
+## As 22 Missões (na ordem de jogo)
 
 Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Escudo 150, Pocao 80, Manto 200, Anel 180)
 
@@ -551,21 +582,31 @@ Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Esc
 | 6     | 7  | python | A Mochila do Arquivista  | Listas: append, len e for         | 4/5    | +25 | +20    | 2           | `mochila.append(`, `for … in mochila`, `len(mochila)` |
 | 7     | 8  | python | O Selo das Catacumbas    | Funções: def e return (chefe)     | 5/5    | +35 | +25    | 7           | `def classificar(x):`, `return`, `for … in runas`, chamada `classificar(…)` |
 | 8     | 3  | sql    | A Primeira Escavação     | SQL: SELECT, WHERE e ORDER BY     | 1/5    | +25 | +20    | 8           | — (tabela: colunas, nº de linhas e **1ª linha**) |
-| 9     | 9  | sql    | O Salão dos Ossos        | SQL: WHERE com AND, OR e IN       | 2/5    | +25 | +20    | 3           | colunas `tipo`, `sala`, `amaldicoada` |
-| 10    | 10 | sql    | O Inventário do Guardião | SQL: COUNT, SUM, AVG, MAX e AS    | 3/5    | +30 | +20    | 9           | `COUNT(`, `SUM(`, `AVG(`, `MAX(` |
-| 11    | 11 | sql    | As Criptas por Tipo      | SQL: GROUP BY e HAVING            | 4/5    | +30 | +25    | 10          | `GROUP BY`, `HAVING` |
-| 12    | 12 | sql    | O Rei Esquecido          | SQL: JOIN entre tabelas (chefe)   | 5/5    | +40 | +30    | 11          | `JOIN`, `ON … heroi_id`, `GROUP BY` |
-| 13    | 4  | pandas | A Forja Desperta         | Pandas: ler CSV e filtrar linhas  | 2/5    | +30 | +25    | 12          | `read_csv(`, filtro `["valor"] >`, `len(` |
-| 14    | 13 | pandas | O Fole das Regiões       | Pandas: groupby, sum e sort_values| 3/5    | +35 | +25    | 4           | `read_csv(`, `["status"]`, `.groupby(`, `.sum(`, `.sort_values(` |
-| 15    | 14 | pandas | A Têmpera do Rei         | Pandas: colunas com contas (chefe)| 5/5    | +40 | +30    | 13          | `read_csv(`, `df["x"] = … * …`, `["quantidade"] >=`, `.groupby(`, `.sort_values(` |
-| 16    | 15 | dataviz| O Farol se Acende        | Gráfico de barras com matplotlib  | 1/5    | +30 | +25    | 14          | `plt.bar(`, `plt.title(` (validação `chart`) |
-| 17    | 16 | dataviz| A Rota das Tempestades   | Gráfico de linha, título e eixos  | 2/5    | +35 | +25    | 15          | `read_csv(`, `plt.plot(` (validação `chart`) |
+| 9     | 17 | sql    | A Sala dos Baús          | SQL: LIMIT (só as primeiras linhas)| 1/5   | +25 | +20    | 3           | `ORDER BY`, `LIMIT 3` |
+| 10    | 9  | sql    | O Salão dos Ossos        | SQL: WHERE com AND, OR e IN       | 2/5    | +25 | +20    | 17          | colunas `tipo`, `sala`, `amaldicoada` |
+| 11    | 18 | sql    | A Memória do Guardião    | SQL: LIKE (buscar por um pedaço)  | 2/5    | +25 | +20    | 9           | `LIKE`, `ORDER BY` |
+| 12    | 10 | sql    | O Inventário do Guardião | SQL: COUNT, SUM, AVG, MAX e AS    | 3/5    | +30 | +20    | 18          | `COUNT(`, `SUM(`, `AVG(`, `MAX(` |
+| 13    | 11 | sql    | As Criptas por Tipo      | SQL: GROUP BY e HAVING            | 4/5    | +30 | +25    | 10          | `GROUP BY`, `HAVING` |
+| 14    | 12 | sql    | O Rei Esquecido          | SQL: JOIN entre tabelas (chefe)   | 5/5    | +40 | +30    | 11          | `JOIN`, `ON … heroi_id`, `GROUP BY` |
+| 15    | 4  | pandas | A Forja Desperta         | Pandas: ler CSV e filtrar linhas  | 2/5    | +30 | +25    | 12          | `read_csv(`, filtro `["valor"] >`, `len(` |
+| 16    | 19 | pandas | A Vitrine de Brokk       | Pandas: ordenar e pegar as primeiras| 2/5  | +30 | +20    | 4           | `read_csv(`, `.sort_values(`, `.head(` |
+| 17    | 20 | pandas | O Carvão da Semana       | Pandas: somar, média e maior      | 2/5    | +30 | +20    | 19          | `read_csv(`, `.sum(`, `.mean(`, `.max(` |
+| 18    | 21 | pandas | O Livro de Visitas       | Pandas: contar valores (value_counts)| 3/5 | +30 | +25    | 20          | `read_csv(`, `.value_counts(` |
+| 19    | 13 | pandas | O Fole das Regiões       | Pandas: groupby, sum e sort_values| 3/5    | +35 | +25    | 21          | `read_csv(`, `["status"]`, `.groupby(`, `.sum(`, `.sort_values(` |
+| 20    | 14 | pandas | A Têmpera do Rei         | Pandas: colunas com contas (chefe)| 5/5    | +40 | +30    | 13          | `read_csv(`, `df["x"] = … * …`, `["quantidade"] >=`, `.groupby(`, `.sort_values(` |
+| 21    | 15 | dataviz| O Farol se Acende        | Gráfico de barras com matplotlib  | 1/5    | +30 | +25    | 14          | `plt.bar(`, `plt.title(` (validação `chart`) |
+| 22    | 16 | dataviz| A Rota das Tempestades   | Gráfico de linha, título e eixos  | 2/5    | +35 | +25    | 15          | `read_csv(`, `plt.plot(` (validação `chart`) |
 
 Tabelas SQL das missões 9–12 em `data/catacumbas.ts`: `reliquias` (12 linhas: id, nome, tipo, sala, valor,
 amaldicoada 'sim'/'nao'), `herois` (5) e `expedicoes` (9: id, heroi_id, destino, ouro).
 CSV da missão 13 em `data/forja.ts`: `encomendas` (12 linhas: id, peca, regiao, ouro, status 'paga'/'pendente').
 CSV da missão 14 em `data/forja.ts`: `pedidos` (10 linhas: id, peca, regiao, quantidade, preco).
 CSV da missão 16 em `data/farol.ts`: `tempestades` (6 linhas: mes, tempestades). A M15 usa listas no próprio código.
+Tabela da missão 17 em `data/catacumbas.ts`: `baus` (8 linhas: id, nome, ouro). A M18 usa `reliquias`.
+CSVs das missões 19–21 em `data/forja.ts`: `estoque` (8: id, peca, preco), `carvao` (6: dia, sacos) e `visitas`
+(11: id, visitante, raca — contagens sem empate).
+Nas fases de tabela, o JSON do `expectedOutput` pode ter `tooMany`/`tooFew`: uma dica própria da fase para quando
+vêm linhas a mais ou a menos (ex.: esqueceu o LIMIT, esqueceu o % do LIKE). Ela substitui a dica geral.
 
 Cada missão tem 2 dicas (`hints`) e uma `solution`. A missão 0 não tem Grimório.
 
@@ -589,13 +630,20 @@ Sul: 100"` (só `paga`, groupby regiao, sum ouro, desc)
 - M14: `"Norte: 220\nLeste: 210\nOeste: 200\nSul: 190"` (total = quantidade × preco, só quantidade ≥ 2; sem o filtro a ordem muda)
 - M15 (chart): `{ kind: "bar", count: 4, values: [12, 7, 9, 4], title: "Navios por região" }`
 - M16 (chart): `{ kind: "line", count: 6, values: [3, 5, 8, 6, 2, 1], title: true, xlabel: true, ylabel: true }`
+- M17: tabela `["nome","ouro"]`, 3 linhas, 1ª = `Baú Real, 340` (ORDER BY ouro DESC LIMIT 3)
+- M18: tabela `["nome","sala"]`, 3 linhas, 1ª = `Adaga Silenciosa, Oeste` (nome LIKE 'A%' ORDER BY nome)
+- M19: `"Cota de Malha\nMartelo de Guerra\nMachado Duplo"` (sort_values preco desc + head(3))
+- M20: `"Total: 57\nPor dia: 9.5\nRecorde: 15"` (sum, mean, max da coluna sacos; rótulos sem acento de propósito)
+- M21: `"anao: 5\nelfo: 3\norc: 2\ngoblin: 1"` (value_counts da coluna raca)
 
 **Arco da história (Python):** Prólogo na Guilda (bolsa de ouro) → Cap. I o Grimório pede que você se apresente →
 Cap. II Mercado da Vila → Cap. III Guardião do Portão → Cap. IV Corredor das Tochas → Cap. V Salão das Relíquias
-(mochila) → Cap. VI Selo das Catacumbas (chefe) → **SQL:** "Com o Selo rompido…" desce às Catacumbas (Cap. I Primeira Escavação → II Salão dos Ossos, onde o
-Guardião dos Ossos cataloga as relíquias → III Inventário do Guardião → IV Criptas por Tipo → V O Rei Esquecido,
-o primeiro Arquivista-Rei, com o Livro das Expedições) → **Pandas:** "Atrás do trono do Rei Esquecido…" a Forja (Cap. I A Forja Desperta → II O Fole das Regiões, o
-ferreiro anão e as encomendas das quatro regiões → III A Têmpera do Rei, chefe: carta do Rei pedindo o faturamento) →
+(mochila) → Cap. VI Selo das Catacumbas (chefe) → **SQL:** "Com o Selo rompido…" desce às Catacumbas (Cap. I Primeira Escavação → II A Sala dos Baús, onde a
+mochila só aguenta 3 baús → III Salão dos Ossos, onde o Guardião dos Ossos cataloga as relíquias → IV A Memória do
+Guardião, que só lembra que o nome começava com A → V Inventário do Guardião → VI Criptas por Tipo → VII O Rei Esquecido,
+o primeiro Arquivista-Rei, com o Livro das Expedições) → **Pandas:** "Atrás do trono do Rei Esquecido…" a Forja (Cap. I A Forja Desperta →
+II A Vitrine de Brokk, as 3 peças mais caras → III O Carvão da Semana → IV O Livro de Visitas, qual raça mais visita →
+V O Fole das Regiões, o ferreiro anão e as encomendas das quatro regiões → VI A Têmpera do Rei, chefe: carta do Rei pedindo o faturamento) →
 **Data Viz:** Brokk forja a lente e você a leva ao Farol da Verdade, de Dona Íris, a faroleira (Cap. I O Farol se Acende:
 navios por região em barras → II A Rota das Tempestades: tempestades por mês em linha).
 O **Grimório** é, na lore, um livro vivo e ganancioso que vende dicas por ouro — e o **narrador** da campanha, que
@@ -740,7 +788,7 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 
 ## Como Adicionar uma Nova Missão
 
-1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 17) — nunca reaproveitar/renumerar ids
+1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 22) — nunca reaproveitar/renumerar ids
    (são a chave do progresso salvo). Preencher `concept` com linguagem direta (o que a pessoa aprende).
    Campos de conteúdo (padrão da Sessão 4):
    - `narrative` — continua a história da missão anterior (ver "Arco da história"; tom meta e bem-humorado)

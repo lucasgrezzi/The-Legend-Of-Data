@@ -932,7 +932,9 @@ body {
 
 /* ── Rótulos em pergaminho (fundo sólido: texto nunca direto sobre o mapa) ── */
 .map-label {
-  max-width: 236px;
+  /* largura fixa: todos os cartões do mapa alinhados, com a mesma borda */
+  width: 236px;
+  max-width: none;
   padding: 10px 14px 11px;
   border: none;
   border-radius: 3px;

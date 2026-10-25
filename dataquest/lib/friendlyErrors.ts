@@ -65,6 +65,12 @@ function distance(a: string, b: string): number {
   return d[a.length][b.length];
 }
 
+/** Comandos que o iniciante escreve em português → o nome certo, em inglês */
+const PT_METHODS: Record<string, string> = {
+  media: "mean", soma: "sum", somar: "sum", maximo: "max", maior: "max", minimo: "min", menor: "min",
+  contar: "count", ordenar: "sort_values", adicionar: "append", agrupar: "groupby", cabeca: "head",
+};
+
 /** Nome parecido (até 2 letras de diferença, ignorando maiúsculas) */
 function closest(word: string, options: string[]): string | undefined {
   // nomes curtos (x, y, df) são todos "parecidos" — sugerir só confundiria
@@ -256,6 +262,11 @@ function explainPython(stderr: string, ctx: ErrorContext): FriendlyError {
     const name = m[1];
     // o Python sugere `None` para `nome` — dica que mais confunde do que ajuda
     const pyHint = msg.match(/Did you mean: '(\w+)'\?/)?.[1]?.replace(/^(True|False|None)$/, "") || undefined;
+    if (/^_{2,}$/.test(name)) {
+      return r("Ainda tem lacuna para preencher",
+        "O `___` é um espaço em branco que o Grimório deixou para VOCÊ completar. O Python não sabe o que colocar ali.",
+        "Troque cada `___` pelo que falta (a linha está marcada). Releia o Estudo se não lembrar o que vai ali.");
+    }
     if (name === "pd") {
       return r("Faltou importar o Pandas",
         "`pd` é o apelido do Pandas, mas ele só existe depois que você o chama para a aventura.",
@@ -368,7 +379,20 @@ function explainPython(stderr: string, ctx: ErrorContext): FriendlyError {
       `Você procurou \`${key}\`, mas ela não está lá dentro. O nome precisa ser igualzinho, com maiúsculas e acentos.`,
       "Confira como a chave foi escrita quando foi criada.");
   }
-  if (kind === "AttributeError" && (m = msg.match(/'(\w+)' (?:object )?has no attribute '(\w+)'/))) {
+  if (kind === "AttributeError" && (m = msg.match(/'([\w.]+)' (?:object )?has no attribute '(\w+)'/))) {
+    // nome em português: o Python sugeriria .median para .media — que é OUTRA conta (mediana)
+    const english = PT_METHODS[m[2].toLowerCase()];
+    if (english) {
+      return r(`Em Python é \`.${english}\``,
+        `Os comandos do Python e do Pandas são em inglês. \`.${m[2]}\` não existe — o nome certo é \`.${english}\`.`,
+        `Troque \`.${m[2]}\` por \`.${english}\`.`);
+    }
+    // ex.: df["raca"].count() devolve UM número, e o número não tem .items()
+    if (/^(int|float|numpy\.(int|float)\d*)$/.test(m[1])) {
+      return r("Isso virou um número só",
+        `Na linha marcada, a variável guarda um número só (um \`${m[1]}\`), e um número não tem \`.${m[2]}\`. Algum comando antes devolveu um total em vez de uma lista ou tabela — o \`.count()\`, por exemplo, conta TODAS as linhas de uma vez.`,
+        "Para contar quantas vezes CADA valor aparece, use `.value_counts()`. Confira no Estudo qual comando a fase pede.");
+    }
     const hint = msg.match(/Did you mean: '(\w+)'\?/)?.[1];
     const what = /^module/.test(msg) ? `o módulo \`${m[1]}\`` : `um \`${m[1]}\``;
     return r(hint ? `Era \`.${hint}\`?` : `\`.${m[2]}\` não existe aqui`,

@@ -57,3 +57,17 @@ export const EXPEDICOES = csvTable(
 8,1,Cripta Sul,140
 9,4,Salão dos Ossos,70`
 );
+
+/** Baús da antecâmara das Catacumbas (missão 17 — LIMIT). Os 3 mais ricos: Baú Real 340 · Baú do Mercador 210 · Baú Esquecido 180 */
+export const BAUS = csvTable(
+  "baus",
+  `id,nome,ouro
+1,Baú de Carvalho,120
+2,Baú Enferrujado,35
+3,Baú do Mercador,210
+4,Baú Rachado,15
+5,Baú Real,340
+6,Baú de Ferro,90
+7,Baú Esquecido,180
+8,Baú de Pedra,60`
+);

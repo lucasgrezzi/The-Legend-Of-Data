@@ -50,7 +50,8 @@ function validateTable(
     return { passed: false, feedback: "Nenhuma tabela retornada.", xpEarned: 0 };
   }
 
-  let expected: { headers: string[]; rowCount: number; firstRow?: string[] };
+  /** tooMany/tooFew: dica própria da fase quando vêm linhas a mais/a menos (no lugar da dica geral) */
+  let expected: { headers: string[]; rowCount: number; firstRow?: string[]; tooMany?: string; tooFew?: string };
   try {
     expected = JSON.parse(mission.expectedOutput);
   } catch {
@@ -72,9 +73,12 @@ function validateTable(
 
   if (tableData.rows.length !== expected.rowCount) {
     const more = tableData.rows.length > expected.rowCount;
+    const general = more
+      ? "Vieram linhas a mais. Confira:\n• o filtro (WHERE/HAVING) — falta alguma condição? O certo é > (maior) ou >= (maior ou igual)?\n• se misturou AND e OR, use parênteses para dizer o que vai junto\n• com JOIN, use JOIN simples — o LEFT JOIN traz também quem não tem par na outra tabela"
+      : "Vieram linhas a menos. Confira se o filtro não está apertado demais: talvez o certo seja >= em vez de >, ou tenha uma condição sobrando.";
     return {
       passed: false,
-      feedback: `Número de linhas incorreto.\nEsperado: ${expected.rowCount}\nObtido: ${tableData.rows.length}\n\n${more ? "Vieram linhas a mais. Confira:\n• o filtro (WHERE/HAVING) — falta alguma condição? O certo é > (maior) ou >= (maior ou igual)?\n• se misturou AND e OR, use parênteses para dizer o que vai junto\n• com JOIN, use JOIN simples — o LEFT JOIN traz também quem não tem par na outra tabela" : "Vieram linhas a menos. Confira se o filtro não está apertado demais: talvez o certo seja >= em vez de >, ou tenha uma condição sobrando."}`,
+      feedback: `Número de linhas incorreto.\nEsperado: ${expected.rowCount}\nObtido: ${tableData.rows.length}\n\n${(more ? expected.tooMany : expected.tooFew) ?? general}`,
       xpEarned: 0,
     };
   }
