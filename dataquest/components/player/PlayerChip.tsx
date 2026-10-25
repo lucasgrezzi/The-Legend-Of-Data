@@ -35,7 +35,7 @@ export default function PlayerChip({ profile, totalXP, coins }: PlayerChipProps)
           Nv {level} · {label} · <span style={{ color: "var(--color-xp)" }}>{totalXP} XP</span>
         </span>
       </span>
-      <span className="coin-pill" title="Moedas — ganhe concluindo missões, gaste em dicas do Grimório">
+      <span className="coin-pill" data-coin-target title="Moedas — ganhe concluindo missões, gaste em dicas do Grimório">
         <Sprite src="/assets/sprites/moedas.png" size={32} style={{ margin: "-6px -4px -6px -6px" }} />
         {coins}
       </span>

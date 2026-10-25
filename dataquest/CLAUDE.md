@@ -10,7 +10,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 
 ## 📍 Onde paramos (retomar aqui)
 
-> Última sessão: **2026-10-26** (com Claude Code). Leia esta seção primeiro ao retomar.
+> Última sessão: **2026-10-25** (Sessão 18, com Claude Code). Leia esta seção primeiro ao retomar.
 
 ### ⚠ Estado do repositório
 - **Sessões 1–3 commitadas e enviadas** ao GitHub (`master`, commit `10363cd`) em 2026-09-22.
@@ -31,6 +31,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessão 15 commitada e enviada** em 2026-10-26 (mapa corrigido + 5 fases novas de SQL e Pandas; Modo Teste local).
 - **Sessão 16 commitada e enviada** (`dc0d855`): Mapa-Múndi, uma tela por região e chefe do Data Viz (fase 22).
 - **Sessão 17 commitada e enviada** (redesign profissional de todas as telas; aprovado pelo usuário).
+- **Sessão 18 commitada e enviada**: batalha em toda fase, sons, juice, Mapa-Múndi com HUD e fundo novo em 4 biomas.
 - **Sessão 14 commitada e enviada** em 2026-10-24 (revisão das 17 fases). Em 2026-10-25, para liberar espaço no PC
   (disco 96% cheio), foram apagados `node_modules/`, `.next/` e o cache do npm: **rode `npm install` antes de
   `npm run dev`/`build`**. O script de revisão das fases foi salvo em `scripts/revisar_fases.mjs`.
@@ -418,6 +419,44 @@ Pedido do usuário: "deixar tudo mais profissional em relação ao design… ach
   personagem no mesmo padrão. Ranking: medalhas de ouro/prata/bronze desenhadas.
 - `friendlyErrors.ts`: no SQL, `___` agora vira "Ainda tem lacuna para preencher" (antes: "Não existe a coluna ___").
 - `scripts/revisar_fases.mjs` acha o botão de enviar por `data-tour="submit"` (o texto mudou) e espera até 120 s.
+
+### Sessão 18 — Toda fase é uma batalha + Mapa-Múndi de jogo (2026-10-25)
+Pedido do usuário: com as skills de gamedev, deixar o jogo "absurdo de RPG e programação": mais design, jogabilidade,
+alinhamento e animação, Mapa-Múndi com mais cara de game e o fundo sem árvores cortadas.
+- **Batalha** (`components/mission/right/BattleArena.tsx`, no lugar da barra do arquivo): cada fase tem um monstro
+  (`lib/monsters.ts`: nome, sprite, fala de entrada, provocações, fala de derrota; sprites CC0 do DCSS em
+  `public/assets/monsters/`). Só visual — a regra do jogo não mudou:
+  - Executar sem erro = feitiço (−18 a 30% da vida, nunca abaixo de 15%: só o Enviar vence) e lembra de enviar;
+  - erro = o monstro ri e se cura 10%;
+  - Enviar errado = contra-ataque (tremor, flash vermelho) e quebra um **escudo** — os 3 escudos são os 3 erros
+    que liberam a solução no Grimório (`SOLUTION_UNLOCK_FAILS`);
+  - Enviar certo = golpe final: hit-stop (silhueta branca), tremor forte, flash, partículas, "GOLPE FINAL!" /
+    "CHEFE DERROTADO!", o monstro cai e as moedas voam até o contador (`[data-coin-target]` no `PlayerChip`).
+    A janela de resultado espera 1,7 s (erro: 0,65 s) para a cena aparecer.
+  - Chefe: arena vermelha, vida maior (XP × 6; normais XP × 4) e coroa na cabeça (`Monster.head` = ponto medido no
+    sprite 32×32; `null` = o sprite já tem coroa, como o Rei Esquecido). Use `<MonsterSprite monster size boss>`.
+  - Fase já concluída: o monstro aparece caído, "Derrotado". Fase nova → criar o monstro dela em `MONSTERS[id]`.
+- **Juice** (`lib/juice.ts`): `shake`, `burst`, `coinsFly`, `floatText`, `flash` em DOM solto (`.juice-layer`), sem
+  bloquear cliques; respeitam `prefers-reduced-motion`. A raiz da tela da missão tem `data-shake-root`.
+- **Sons** (`lib/sfx.ts`): chiptune sintetizado com Web Audio (sem arquivos): cast, fizzle, hit, hurt, victory, coin,
+  levelup… `SoundToggle` (ícone de volume) na `TopBar` e na tela da missão; mudo em `localStorage["dataquest-som"]`.
+  Level up no diálogo de vitória toca fanfarra + chuva de faíscas.
+- **Mapa-Múndi** (`components/map/WorldHub.tsx`, saiu do `WorldMap.tsx`, que importa `WorldHub` e `usePinState`):
+  - HUD no topo: ficha do herói (retrato, guilda, XP, moedas, fases e chefes) + cartão **Próxima batalha** com o
+    monstro da próxima fase e o botão Batalhar (vermelho quando é chefe);
+  - cada região: brilho na cor da trilha, chefe de guarda ao lado (cai quando derrotado), uma estrela por fase
+    (losango vermelho = chefe), cartões de altura fixa; estrada com tracejado andando; nuvens passando;
+  - pontas em 13% / 87% para o herói da 1ª região não sair do quadro. Cabe em 1366×768.
+- **Fundo novo** (`public/assets/bg/mapa-mundo.png`, gerado por `scripts/gerar_mundo_biomas.py` com Kenney Tiny Town +
+  Tiny Dungeon, CC0): 4 biomas na ordem das regiões — floresta, cemitério com a entrada da cripta, forja com casas e
+  bigornas, praia com píer, mar e farol (pixel art própria). Só árvores inteiras, uma por tile, com a copa um pouco mais
+  escura que a grama (sobrepostas demais, só sobrava o contorno). Ver CREDITS.md para gerar de novo.
+- Botão Executar mostra o atalho `Ctrl+Enter`.
+- Testado: batalha na M3 via CDP (run ok 100→78, erro cura até 88, envio errado quebra 1 escudo, envio certo → 0 HP e
+  "Missão Concluída!", console sem erros); mapa e chefes em 1366×768; bloqueio de fase no build de produção sem
+  Supabase (fase 12 para quem só fez a 1 → "Missão Bloqueada"). O acesso livre a todas as fases é só o Modo Teste.
+- ⚠ O dev server do Modo Teste (3001) pode parar de recompilar o `globals.css` (estilos novos não aparecem num
+  carregamento novo da página): reiniciar o `npm run teste`.
 
 ### Próximos passos sugeridos
 1. **Rodar `supabase/2026-10-titulo-no-ranking.sql`** (tarefa do usuário) para o título aparecer no ranking.

@@ -8,8 +8,7 @@ import { useGate } from "@/hooks/useGate";
 import { MISSIONS, bossOf, isBoss, missionsOfTrack } from "@/lib/missions";
 import { TRACKS, TRACK_ORDER } from "@/lib/tracks";
 import { RACES } from "@/lib/races";
-import { computeLevel, isMissionUnlocked, missingRequirements } from "@/lib/xp";
-import XPBar from "@/components/ui/XPBar";
+import { missingRequirements } from "@/lib/xp";
 import Sprite from "@/components/ui/Sprite";
 import WorldBackground from "@/components/ui/WorldBackground";
 import CharacterCreation from "@/components/player/CharacterCreation";
@@ -18,7 +17,8 @@ import GateShell, { delay } from "@/components/ui/GateShell";
 import PlayerChip from "@/components/player/PlayerChip";
 import AccountButton from "@/components/account/AccountButton";
 import { useAccountStore } from "@/store/accountStore";
-import MissionPin, { type PinState } from "./MissionPin";
+import MissionPin from "./MissionPin";
+import WorldHub, { usePinState } from "./WorldHub";
 import MapFog, { useFogReveal } from "./MapFog";
 import { equippedLook } from "@/lib/shop";
 import TopBar from "@/components/ui/TopBar";
@@ -50,15 +50,6 @@ function GateLoading({ text }: { text: string }) {
       </section>
     </GateShell>
   );
-}
-
-/** Estado de cada fase a partir do progresso salvo */
-function usePinState() {
-  const { completedMissionIds, totalXP } = useGameStore();
-  return (m: Mission): PinState =>
-    completedMissionIds.includes(m.id) ? "completed"
-    : isMissionUnlocked(m, completedMissionIds, totalXP) ? "available"
-    : "locked";
 }
 
 /**
@@ -113,138 +104,6 @@ export default function WorldMap({ track }: { track?: Track }) {
 }
 
 // ─────────────────────────────── Mapa-Múndi ───────────────────────────────
-
-/** Onde cada lugar fica no Mapa-Múndi (% da largura, px do topo) — a estrada sobe e desce entre eles */
-const HUB_SPOTS = [
-  { x: 10, y: 300 }, { x: 30, y: 140 }, { x: 50, y: 300 }, { x: 70, y: 140 }, { x: 90, y: 300 },
-];
-const HUB_H = 516;
-const HUB_W = 1080;
-
-function WorldHub() {
-  const { profile, completedMissionIds, totalXP, equipped } = useGameStore();
-  const stateOf = usePinState();
-  const look = equippedLook(equipped);
-  const nextMission = MISSIONS.find((m) => stateOf(m) === "available");
-  const completedCount = completedMissionIds.filter((id) => MISSIONS.some((m) => m.id === id)).length;
-  const lvl = computeLevel(totalXP);
-  // o herói espera na região da próxima fase (ou na última, se tudo foi concluído)
-  const heroTrack = nextMission?.track ?? TRACK_ORDER[TRACK_ORDER.length - 1];
-
-  const spots = [...TRACK_ORDER.map((t) => ({ track: t as Track | null })), { track: null }]
-    .slice(0, HUB_SPOTS.length)
-    .map((s, i) => ({ ...s, ...HUB_SPOTS[i] }));
-
-  const regionOpen = (t: Track) => missionsOfTrack(t).some((m) => stateOf(m) !== "locked");
-
-  return (
-    <div className="mx-auto flex flex-col gap-5" style={{ maxWidth: HUB_W }}>
-      {/* ── Painel do jogador (compacto: o Mapa-Múndi inteiro cabe numa tela de notebook) ── */}
-      <section className="rpg-frame anim-rise flex items-center gap-5 mx-auto w-full" style={{ padding: "14px 18px 14px 16px", maxWidth: 860 }}>
-        <span className="level-badge" title={`Nível ${lvl.level}`}>{lvl.level}</span>
-        <div className="flex-1 min-w-0"><XPBar totalXP={totalXP} pixel /></div>
-        <span className="topbar-sep" style={{ height: 40 }} aria-hidden />
-        <div className="journey-stat shrink-0">
-          <b>{completedCount}<span style={{ fontSize: 14, color: "var(--color-muted)" }}> / {MISSIONS.length}</span></b>
-          <span>missões concluídas</span>
-        </div>
-        {nextMission ? (
-          <Link href={`/mission/${nextMission.id}`} className="btn-next shrink-0" title={`Próxima: ${nextMission.missionTitle}`}>
-            <Icon name="play" size={16} /> {completedCount === 0 ? "Começar" : "Continuar"}
-          </Link>
-        ) : (
-          <span className="chip is-done shrink-0" style={{ height: 32, fontSize: 13 }}><Icon name="check" size={14} /> Tudo concluído!</span>
-        )}
-      </section>
-
-      {/* ── O reino: uma região em cada lugar, ligadas por uma estrada ── */}
-      <section className="hub-world rpg-frame anim-rise" style={{ height: HUB_H, ...delay(150) }}>
-        <p className="hub-title pixel-label"><Icon name="map" size={15} /> Mapa-Múndi · escolha uma região</p>
-        <svg className="absolute inset-0" width="100%" height={HUB_H} viewBox={`0 0 ${VIEW_W} ${HUB_H}`} preserveAspectRatio="none" aria-hidden style={{ zIndex: 1 }}>
-          {spots.slice(1).map((b, i) => {
-            const a = spots[i];
-            const reached = b.track ? regionOpen(b.track) : false;
-            const midX = (a.x + b.x) / 2;
-            const d = `M ${a.x} ${a.y} C ${midX} ${a.y}, ${midX} ${b.y}, ${b.x} ${b.y}`;
-            return (
-              <g key={i}>
-                <path d={d} fill="none" stroke="rgba(8,10,14,0.7)" strokeWidth={reached ? 16 : 12} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-                <path d={d} fill="none" stroke={reached ? "#9c7a45" : "#3a4050"} strokeWidth={reached ? 11 : 7} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-                <path d={d} fill="none" stroke={reached ? "#ffe08a" : "#6b7385"} strokeWidth={3}
-                  strokeDasharray={reached ? "4 10" : "1 12"} strokeLinecap={reached ? "butt" : "round"} vectorEffect="non-scaling-stroke"
-                  style={reached ? { filter: "drop-shadow(0 0 3px rgba(240,192,64,0.8))" } : undefined} />
-              </g>
-            );
-          })}
-        </svg>
-
-        {spots.map((s, i) => {
-          if (!s.track) {
-            return (
-              <div key="breve" className="hub-place is-soon" style={{ left: `${s.x}%`, top: s.y }}>
-                <div className="hub-medal"><Sprite src="/assets/sprites/missao-bloqueada.png" size={64} /></div>
-                <div className="hub-card">
-                  <p className="pixel-label" style={{ margin: 0, color: "var(--color-muted)" }}>???</p>
-                  <p className="hub-name">Terras inexploradas</p>
-                  <p className="hub-line">Novas regiões em breve</p>
-                </div>
-              </div>
-            );
-          }
-          const t = s.track;
-          const info = TRACKS[t];
-          const list = missionsOfTrack(t);
-          const done = list.filter((m) => completedMissionIds.includes(m.id)).length;
-          const open = regionOpen(t);
-          const boss = bossOf(t);
-          const bossDown = boss ? completedMissionIds.includes(boss.id) : false;
-          const reasons = list[0] ? missingRequirements(list[0], completedMissionIds, totalXP, MISSIONS) : [];
-          const hereHero = t === heroTrack;
-
-          const place = (
-            <div
-              className={`hub-place${open ? "" : " is-locked"}${hereHero ? " is-here" : ""}`}
-              style={{ left: `${s.x}%`, top: s.y, "--tint": info.rgb } as React.CSSProperties}
-              title={open ? `Entrar em ${info.subtitle}` : `Bloqueada — ${reasons.join("; ")}`}
-            >
-              {hereHero && <span className="next-flag hub-flag"><Icon name="mapPin" size={12} /> VOCÊ ESTÁ AQUI</span>}
-              {hereHero && (
-                <div className="hub-hero">
-                  <Sprite src={RACES[profile!.race].sprite} size={64} />
-                  {look.pet && <span className="map-pet"><Sprite src={look.pet.value} size={32} /></span>}
-                </div>
-              )}
-              <div className="hub-medal"><Sprite src={info.sprite} size={72} alt={info.name} /></div>
-              <div className="hub-card">
-                <p className="pixel-label" style={{ margin: 0, color: open ? info.color : "var(--color-muted)" }}>
-                  Região {i + 1} · {info.name}
-                </p>
-                <p className="hub-name">{info.subtitle}</p>
-                {open ? (
-                  <>
-                    <div className="banner-progress" style={{ margin: "6px 0 4px" }}>
-                      <div style={{ width: `${(done / list.length) * 100}%`, background: info.color }} />
-                    </div>
-                    <p className="hub-line">{done} de {list.length} fases</p>
-                    {boss && (
-                      <p className="hub-line" style={{ color: bossDown ? "var(--color-run)" : "#ff8a80" }}>
-                        <Icon name={bossDown ? "check" : "crown"} size={13} />
-                        {bossDown ? "Chefe derrotado" : `Chefe: ${boss.missionTitle}`}
-                      </p>
-                    )}
-                  </>
-                ) : (
-                  <p className="hub-line"><Icon name="lock" size={13} /> {reasons.length ? `Vença o chefe anterior` : "Em breve"}</p>
-                )}
-              </div>
-            </div>
-          );
-          return open ? <Link key={t} href={`/regiao/${t}`} aria-label={info.subtitle}>{place}</Link> : <div key={t}>{place}</div>;
-        })}
-      </section>
-    </div>
-  );
-}
 
 // ─────────────────────────────── Trilha de uma região ───────────────────────────────
 

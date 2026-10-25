@@ -20,9 +20,32 @@ Licença CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/). Atribuiç
 | moedas.png | item/gold/gold_pile_3.png |
 
 ## Fundo (`bg/mapa-mundo.png`) — CC0
-Gerado por `scripts/gerar_fundo_mapa.py` a partir dos tiles Kenney **Tiny Town**
-(https://kenney.nl/assets/tiny-town, CC0 1.0). Para gerar de novo: baixar o zip, extrair e rodar o script
-na pasta extraída (usa `Tilemap/tilemap_packed.png`). Mudar `random.seed(...)` gera outra vila.
+O reino em 4 biomas (floresta, cemitério, forja e costa com farol), gerado por `scripts/gerar_mundo_biomas.py` a partir
+dos tiles Kenney **Tiny Town** e **Tiny Dungeon** (https://kenney.nl/assets/tiny-town e /tiny-dungeon, CC0 1.0).
+O mar, a areia e o farol são pixel art própria do script. Para gerar de novo: baixar e extrair os dois zips e rodar
+`python scripts/gerar_mundo_biomas.py <pasta tiny-town> <pasta tiny-dungeon> public/assets/bg/mapa-mundo.png`.
+(O gerador antigo, `scripts/gerar_fundo_mapa.py`, fazia uma vila só, com Tiny Town.)
+
+## Monstros (`monsters/`) — CC0 / domínio público
+Dungeon Crawl Stone Soup tiles (mesmo pacote dos `sprites/`, https://opengameart.org/content/dungeon-crawl-32x32-tiles).
+
+| Arquivo | Original (`dc-mon/`) | Arquivo | Original (`dc-mon/`) |
+|---|---|---|---|
+| acaro.png | animals/giant_mite | mumia.png | undead/mummy |
+| rato.png | animals/green_rat | carnical.png | undead/ghoul |
+| golem.png | nonliving/stone_golem | rei-esquecido.png | undead/ancient_lich |
+| morcego.png | animals/giant_bat | diabrete-ferro.png | demons/iron_imp |
+| diabrete.png | demons/imp | gargula.png | nonliving/molten_gargoyle |
+| serpente.png | unique/serpent_of_hell | salamandra.png | animals/salamander |
+| caveira.png | undead/flying_skull | hobgoblin.png | hobgoblin |
+| kobold.png | kobold | efreet.png | demons/efreet |
+| esqueleto.png | undead/skeletal_warrior | colosso.png | fire_giant |
+| fantasma.png | undead/ghost | olho.png | giant_eyeball |
+| harpia.png | harpy | kraken.png | animals/kraken_head |
+| boneco.png | statues/training_dummy | | |
+
+## Sons
+Sintetizados no navegador por `lib/sfx.ts` (Web Audio) — nenhum arquivo de áudio.
 
 ## Cursor (`cursors/luva.png`, `cursors/luva-hover.png`)
 - Manopla dourada em pixel art **criada para o DataQuest** por `scripts/gerar_cursor.py` (formas geométricas, sem assets de terceiros). Livre para uso no projeto.

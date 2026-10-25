@@ -7,6 +7,7 @@ import { BestiaryButton } from "@/components/glossary/Bestiary";
 import { supabase } from "@/lib/supabase";
 import { useGameStore } from "@/store/gameStore";
 import { SHOP_UNLOCK_MISSION_ID } from "@/lib/shop";
+import SoundToggle from "./SoundToggle";
 
 /** Logo do jogo: marca dourada + nome em pixel. Leva sempre ao Mapa-Múndi. */
 export function Brand({ tagline = false }: { tagline?: boolean }) {
@@ -58,7 +59,7 @@ export default function TopBar({ right }: { right?: React.ReactNode }) {
         <span className="topbar-sep" aria-hidden />
         <TopNav />
       </div>
-      <div className="flex items-center gap-3 shrink-0">{right}</div>
+      <div className="flex items-center gap-3 shrink-0"><SoundToggle />{right}</div>
     </header>
   );
 }

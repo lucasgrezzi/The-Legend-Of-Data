@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { Mission, RunResult } from "@/types";
 import { validateOutput } from "@/lib/validation";
@@ -21,6 +21,10 @@ import GuidedTour, { missionTourSteps, tourSeen } from "./GuidedTour";
 import { BestiaryButton } from "@/components/glossary/Bestiary";
 import { Brand } from "@/components/ui/TopBar";
 import Icon from "@/components/ui/Icon";
+import BattleArena, { type BattleEvent } from "./right/BattleArena";
+import { centerOf, coinsFly } from "@/lib/juice";
+import { play } from "@/lib/sfx";
+import SoundToggle from "@/components/ui/SoundToggle";
 
 /** O tutorial abre sozinho na primeira fase com código (depois, só pelo botão "Como jogar") */
 const FIRST_CODE_MISSION_ID = MISSIONS.find((m) => m.validationType !== "narrative")?.id;
@@ -75,6 +79,9 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
   const validated = alreadyCompleted || isNarrative;
   const [result, setResult] = useState<MissionResult | null>(null);
   const [tourOpen, setTourOpen] = useState(false);
+  const [battle, setBattle] = useState<BattleEvent | null>(null);
+  const battleSeq = useRef(0);
+  const fire = useCallback((kind: BattleEvent["kind"]) => setBattle({ kind, seq: ++battleSeq.current }), []);
 
   // Sem conta ou sem personagem → volta ao mapa (lá ficam o login e a criação de personagem)
   useEffect(() => {
@@ -128,7 +135,19 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
         if (validation.passed) completeMission(mission.id, xp, mission.coinReward);
         else recordFail(mission.id);
       }
-      setResult({
+      const show = (r: MissionResult) => setResult(r);
+      // Primeiro a batalha (golpe final ou contra-ataque), depois a janela de resultado
+      const delay = alreadyCompleted ? 0 : validation.passed ? 1700 : 650;
+      if (!alreadyCompleted) fire(validation.passed ? "victory" : "miss");
+      if (firstWin) {
+        setTimeout(() => {
+          const from = centerOf(document.querySelector(".battle-sprite"));
+          const to = centerOf(document.querySelector("[data-coin-target]"));
+          let n = 0;
+          coinsFly(from, to, 8, () => { if (n++ % 2 === 0) play("coin"); });
+        }, 420);
+      }
+      setTimeout(() => show({
         passed: validation.passed,
         feedback: validation.feedback,
         xpGained: firstWin ? xp : 0,
@@ -137,9 +156,9 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
         penalized: firstWin && solutionRevealed,
         fails: alreadyCompleted || validation.passed ? undefined : fails + 1,
         solutionRevealed,
-      });
+      }), delay);
     },
-    [mission, alreadyCompleted, completeMission, recordFail]
+    [mission, alreadyCompleted, completeMission, recordFail, fire]
   );
 
   if (gate !== "play" || !profile) {
@@ -159,7 +178,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
   const trackDone = trackMissions.filter((m) => completedMissionIds.includes(m.id)).length;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: "var(--color-bg)" }}>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: "var(--color-bg)" }} data-shake-root>
 
       {/* ── Top bar ── */}
       <div className="wood-bar flex items-center justify-between gap-5 px-5 shrink-0 relative z-10" style={{ height: 64 }}>
@@ -213,6 +232,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
               <Icon name="help" /><span className="hidden 2xl:inline">Como jogar</span>
             </button>
           )}
+          <SoundToggle />
           <div data-tour="bestiary"><BestiaryButton compact /></div>
           <div data-tour="player">
             <PlayerChip profile={profile} totalXP={totalXP} coins={coins} />
@@ -276,6 +296,18 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
               onRun={handleRun}
               onSubmit={handleSubmit}
               validated={validated}
+              onRunResult={(r) => fire(r.success ? "run-ok" : "run-error")}
+              renderArena={(fileTag) => (
+                <BattleArena
+                  key={mission.id}
+                  mission={mission}
+                  defeated={alreadyCompleted}
+                  event={battle}
+                  fails={attempts.fails}
+                >
+                  {fileTag}
+                </BattleArena>
+              )}
             />
           )}
         </div>

@@ -16,6 +16,10 @@ interface EditorPanelProps {
   /** Recebe o resultado do código ATUAL (sempre reexecutado antes de validar) */
   onSubmit: (result: RunResult, code: string) => void;
   validated: boolean;
+  /** Avisado a cada Executar (sem validar) — a arena de batalha reage */
+  onRunResult?: (result: RunResult) => void;
+  /** Arena de batalha no topo; recebe a aba do arquivo como filho */
+  renderArena?: (fileTag: React.ReactNode) => React.ReactNode;
 }
 
 const LANG_COLOR: Record<string, string> = {
@@ -35,6 +39,8 @@ export default function EditorPanel({
   onRun,
   onSubmit,
   validated,
+  onRunResult,
+  renderArena,
 }: EditorPanelProps) {
   const [code, setCode] = useState(mission.codeTemplate);
   const [result, setResult] = useState<RunResult | null>(null);
@@ -58,10 +64,11 @@ export default function EditorPanel({
       const r = await onRun(code);
       setRanCode(code);
       setResult(r);
+      onRunResult?.(r);
     } finally {
       setIsRunning(false);
     }
-  }, [busy, code, onRun]);
+  }, [busy, code, onRun, onRunResult]);
 
   const handleSubmit = useCallback(async () => {
     if (busy) return;
@@ -120,17 +127,26 @@ export default function EditorPanel({
   return (
     <div ref={containerRef} className="flex flex-col h-full" style={{ userSelect: dragging ? "none" : undefined }}>
 
-      {/* ── Aba do arquivo ── */}
-      <div className="tome-bar flex items-center justify-between gap-3 px-4 shrink-0" style={{ height: 50 }}>
-        <span className="file-tag" style={{ ["--tag-color" as string]: langColor }}>
-          <span aria-hidden style={{ width: 8, height: 8, borderRadius: 99, background: langColor, boxShadow: `0 0 8px ${langColor}` }} />
-          <span>{fileName}</span>
-        </span>
-        <span className="truncate flex items-center gap-2" style={{ fontSize: 12.5, fontWeight: 700, color: "var(--color-muted)" }}>
-          <Icon name="keyboard" size={15} /> Escreva seu código aqui ·
-          <span><span className="kbd">Ctrl</span> + <span className="kbd">Enter</span> executa</span>
-        </span>
-      </div>
+      {/* ── Arena (monstro da fase) ou só a aba do arquivo ── */}
+      {renderArena ? (
+        renderArena(
+          <span className="file-tag" style={{ ["--tag-color" as string]: langColor }} title="Ctrl + Enter executa">
+            <span aria-hidden style={{ width: 8, height: 8, borderRadius: 99, background: langColor, boxShadow: `0 0 8px ${langColor}` }} />
+            <span>{fileName}</span>
+          </span>
+        )
+      ) : (
+        <div className="tome-bar flex items-center justify-between gap-3 px-4 shrink-0" style={{ height: 50 }}>
+          <span className="file-tag" style={{ ["--tag-color" as string]: langColor }}>
+            <span aria-hidden style={{ width: 8, height: 8, borderRadius: 99, background: langColor, boxShadow: `0 0 8px ${langColor}` }} />
+            <span>{fileName}</span>
+          </span>
+          <span className="truncate flex items-center gap-2" style={{ fontSize: 12.5, fontWeight: 700, color: "var(--color-muted)" }}>
+            <Icon name="keyboard" size={15} /> Escreva seu código aqui ·
+            <span><span className="kbd">Ctrl</span> + <span className="kbd">Enter</span> executa</span>
+          </span>
+        </div>
+      )}
 
       {/* ── Banner de carregamento ── */}
       {isLoading && (
@@ -172,8 +188,9 @@ export default function EditorPanel({
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="btn-run btn-pixel is-compact" onClick={handleRun} disabled={busy} data-tour="run">
+          <button className="btn-run btn-pixel is-compact" onClick={handleRun} disabled={busy} data-tour="run" title="Executar (Ctrl + Enter): testa o código sem valer resposta">
             {isRunning ? <span className="spinner" aria-hidden style={{ width: 14, height: 14, borderColor: "rgba(4,35,15,0.25)", borderTopColor: "#04230f" }} /> : <Icon name="play" size={14} />} Executar
+            <span className="kbd-hint" aria-hidden>Ctrl+Enter</span>
           </button>
           <button className="btn-submit btn-pixel is-compact" onClick={handleSubmit} disabled={busy || validated} data-tour="submit">
             {validated ? <><Icon name="check" size={16} style={{ strokeWidth: 3 }} /> Concluída</> : isSubmitting ? "Verificando…" : <><Icon name="send" size={15} /> Enviar resposta</>}

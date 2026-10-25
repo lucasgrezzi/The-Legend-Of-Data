@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { computeLevel, SOLUTION_UNLOCK_FAILS } from "@/lib/xp";
 import XPBar from "./XPBar";
 import Sprite from "./Sprite";
 import Icon from "./Icon";
+import { play } from "@/lib/sfx";
+import { burst, centerOf } from "@/lib/juice";
 
 export interface MissionResult {
   passed: boolean;
@@ -50,6 +52,18 @@ function SuccessBody({ result, nextHref, onClose }: { result: MissionResult; nex
   const before = computeLevel(result.prevXP);
   const after = computeLevel(newXP);
   const leveledUp = after.level > before.level;
+  const levelRef = useRef<HTMLDivElement>(null);
+
+  // Subiu de nível: fanfarra + chuva de faíscas quando o aviso aparece
+  useEffect(() => {
+    if (!leveledUp) return;
+    const t = setTimeout(() => {
+      play("levelup");
+      const c = centerOf(levelRef.current);
+      burst(c.x, c.y, { count: 40, spread: 200, colors: ["#f5c451", "#fff3c4", "#ffffff", "#ff9f43"] });
+    }, 700);
+    return () => clearTimeout(t);
+  }, [leveledUp]);
 
   return (
     <>
@@ -86,6 +100,7 @@ function SuccessBody({ result, nextHref, onClose }: { result: MissionResult; nex
 
         {leveledUp && (
           <div
+            ref={levelRef}
             className="flex items-center gap-3 px-4 py-3"
             style={{
               background: "rgba(245,196,81,0.1)",
