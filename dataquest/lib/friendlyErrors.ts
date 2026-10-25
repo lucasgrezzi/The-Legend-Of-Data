@@ -234,6 +234,11 @@ function explainPython(stderr: string, ctx: ErrorContext): FriendlyError {
       "O `return` só existe dentro de uma função (`def`). Ele é a resposta que a função devolve.",
       "Coloque o `return` dentro da função, com recuo, ou troque por `print(...)`.");
   }
+  if (kind === "SyntaxError" && /^\s*(if|elif|while)\b.*[^=!<>]=[^=]/.test(lineText)) {
+    return r("Para comparar, use ==",
+      "Um `=` sozinho GUARDA um valor numa variável. Dentro de um `if`, para PERGUNTAR se duas coisas são iguais, o Python usa dois: `==`.",
+      "Troque o `=` da condição por `==`. Ex.: `if nivel == 10:` — e, se for True/False, nem precisa comparar: `if tem_chave:`");
+  }
   if (kind === "SyntaxError" || kind === "IndentationError") {
     const cap = lineText.match(/^\s*(If|Elif|Else|For|While|Def|Print|Return|In)\b/);
     if (cap) {
@@ -350,7 +355,8 @@ function explainPython(stderr: string, ctx: ErrorContext): FriendlyError {
       "Use uma posição menor que o tamanho da lista (`len(lista)`).");
   }
   if (kind === "KeyError") {
-    const key = msg.replace(/^['"]|['"]$/g, "");
+    // o Pandas às vezes embrulha: KeyError: 'Column not found: totl'
+    const key = msg.replace(/^['"]|['"]$/g, "").replace(/^Column\(?s?\)? not found:?\s*/i, "").replace(/^\[?['"]?|['"]?\]?$/g, "");
     const cols = (ctx.tables ?? []).flatMap((t) => t.headers);
     const similar = closest(key, cols);
     if (cols.length) {

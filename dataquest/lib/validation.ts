@@ -5,13 +5,39 @@ function normalize(s: string): string {
   return s.trim().replace(/\r\n/g, "\n").replace(/\n+$/, "");
 }
 
+const stripAccents = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+
+/** Onde e por que a saída difere — para o iniciante enxergar acento, maiúscula ou espaço trocado */
+export function describeDiff(got: string, want: string): string {
+  const g = normalize(got).split("\n");
+  const w = normalize(want).split("\n");
+  if (!normalize(got)) return "O código rodou, mas não mostrou nada. Faltou um print(...)?";
+  if (/\bNone\b/.test(got) && !/\bNone\b/.test(want)) {
+    return "Apareceu \"None\" na saída: isso acontece quando uma função não tem return. Dentro da função, troque o print(...) por return ... — a função precisa DEVOLVER o valor, e quem mostra é o print de fora.";
+  }
+  for (let i = 0; i < Math.max(g.length, w.length); i++) {
+    const a = g[i], b = w[i];
+    if (a === b) continue;
+    const n = i + 1;
+    if (a === undefined) return `Faltam linhas: a partir da linha ${n}, era para aparecer "${b}".`;
+    if (b === undefined) return `Linhas a mais: a linha ${n} ("${a}") não devia aparecer.`;
+    let why = "";
+    if (a.trim() === b.trim()) why = " — a diferença são espaços no começo ou no fim.";
+    else if (a.toLowerCase() === b.toLowerCase()) why = " — a diferença são letras maiúsculas/minúsculas.";
+    else if (stripAccents(a) === stripAccents(b)) why = " — a diferença é um acento.";
+    else if (a.replace(/\s+/g, "") === b.replace(/\s+/g, "")) why = " — a diferença são espaços entre as palavras.";
+    return `A primeira diferença está na linha ${n}: você mostrou "${a}", mas era "${b}"${why}`;
+  }
+  return "";
+}
+
 function validateExact(stdout: string, mission: Mission): ValidationResult {
   const passed = normalize(stdout) === normalize(mission.expectedOutput);
   return {
     passed,
     feedback: passed
       ? `Perfeito! +${mission.xpReward} XP conquistados!`
-      : `Saída incorreta.\n\nEsperado:\n${mission.expectedOutput}\n\nObtido:\n${stdout}`,
+      : `Saída incorreta.\n\n${describeDiff(stdout, mission.expectedOutput)}\n\nEsperado:\n${mission.expectedOutput}\n\nObtido:\n${stdout}`,
     xpEarned: passed ? mission.xpReward : 0,
   };
 }
@@ -35,17 +61,20 @@ function validateTable(
     tableData.headers.map((x) => x.toLowerCase()).includes(h.toLowerCase())
   );
   if (!headersMatch) {
+    const have = tableData.headers.map((x) => x.toLowerCase());
+    const missing = expected.headers.filter((h) => !have.includes(h.toLowerCase()));
     return {
       passed: false,
-      feedback: `Colunas incorretas.\nEsperado: ${expected.headers.join(", ")}\nObtido: ${tableData.headers.join(", ")}`,
+      feedback: `Colunas incorretas — faltou: ${missing.join(", ")}.\n\nEsperado: ${expected.headers.join(", ")}\nObtido: ${tableData.headers.join(", ")}\n\nAs colunas do resultado são as que você escreve no SELECT, separadas por vírgula. Para dar o nome pedido a uma conta, use AS (ex.: COUNT(*) AS total).`,
       xpEarned: 0,
     };
   }
 
   if (tableData.rows.length !== expected.rowCount) {
+    const more = tableData.rows.length > expected.rowCount;
     return {
       passed: false,
-      feedback: `Número de linhas incorreto.\nEsperado: ${expected.rowCount}\nObtido: ${tableData.rows.length}`,
+      feedback: `Número de linhas incorreto.\nEsperado: ${expected.rowCount}\nObtido: ${tableData.rows.length}\n\n${more ? "Vieram linhas a mais. Confira:\n• o filtro (WHERE/HAVING) — falta alguma condição? O certo é > (maior) ou >= (maior ou igual)?\n• se misturou AND e OR, use parênteses para dizer o que vai junto\n• com JOIN, use JOIN simples — o LEFT JOIN traz também quem não tem par na outra tabela" : "Vieram linhas a menos. Confira se o filtro não está apertado demais: talvez o certo seja >= em vez de >, ou tenha uma condição sobrando."}`,
       xpEarned: 0,
     };
   }

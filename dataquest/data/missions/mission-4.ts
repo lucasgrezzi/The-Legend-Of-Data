@@ -20,9 +20,14 @@ Forja é a oficina do ferreiro, onde metal bruto vira espada. Aqui é igual, só
 
 O ferreiro é o Brokk, um anão com uma barba que dá três voltas no pescoço. Ele acabou de receber o registro de vendas e não quer a lista inteira. Quer um número só. Anão é assim, direto ao ponto.`,
   realWorld: `Pandas é uma biblioteca de Python para trabalhar com tabelas — pense numa planilha que você controla com código. read_csv abre o arquivo e o filtro df[condição] mantém só as linhas que interessam. Analistas usam isso para responder perguntas como "quantos pedidos passaram de R$ 150?" em segundos.`,
-  theory: `Pandas é a biblioteca de Python para trabalhar com tabelas, chamadas DataFrames.
+  theory: `Uma biblioteca é um pacote de código pronto, feito por outras pessoas, que dá novos poderes ao Python. Pandas é a biblioteca para trabalhar com tabelas — no Pandas, uma tabela se chama DataFrame.
+
+Para usar uma biblioteca, você a chama com import no começo do código. O "as pd" dá um apelido curto, para não escrever pandas toda hora:
 
   import pandas as pd
+
+read_csv abre um arquivo de tabela (CSV) e guarda o DataFrame numa variável — por costume, df:
+
   df = pd.read_csv("caminho/do/arquivo.csv")
   print(df.head())     # mostra as primeiras linhas
 
@@ -48,12 +53,17 @@ O ferreiro espera ouvir apenas:
 df = pd.read_csv("/data/mission.csv")
 filtrado = df[df["valor"] > 150]
 print(len(filtrado))`,
-  codeTemplate: `import pandas as pd
+  codeTemplate: `# A Forja Desperta
+# Preencha as lacunas ___
+
+import pandas as pd
 
 # Leia o registro de vendas
+df = pd.read_csv(___)
 
 # Separe os produtos valiosos e conte-os
-`,
+filtrado = df[df["valor"] > ___]
+print(len(___))`,
   editorLanguage: "python",
   validationType: "exact",
   expectedOutput: "3",

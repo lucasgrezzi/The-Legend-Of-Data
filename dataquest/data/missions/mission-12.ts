@@ -49,7 +49,7 @@ Atenção: o JOIN só mantém as linhas que têm par nas duas tabelas.`,
   viagens    → quantas expedições ele fez
   ouro_total → o ouro somado de todas elas
 
-Do herói que trouxe mais ouro para o que trouxe menos.`,
+Do herói que trouxe mais ouro para o que trouxe menos. Devem aparecer 4 heróis.`,
   hints: [
     "Ligue as tabelas pela coluna que as conecta: expedicoes.heroi_id = herois.id. Com JOIN ... ON, cada expedição ganha o nome do seu herói.",
     "Depois do JOIN, agrupe por nome (GROUP BY h.nome) e use COUNT(*) AS viagens e SUM(e.ouro) AS ouro_total. Termine com ORDER BY ouro_total DESC.",

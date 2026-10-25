@@ -36,7 +36,7 @@ E para filtrar os GRUPOS? O WHERE não serve: ele age antes dos grupos existirem
 Resumindo a ordem: FROM → WHERE (linhas) → GROUP BY → HAVING (grupos) → ORDER BY.`,
   instructions: `Descubra quais criptas valem a pena abrir. Considere todas as relíquias, inclusive as amaldiçoadas.
 
-Para cada tipo, mostre as colunas tipo, quantidade e total (a soma dos valores). Fique só com os tipos cujo total passa de 300, do mais valioso para o menos valioso.`,
+Para cada tipo, mostre as colunas tipo, quantidade e total (a soma dos valores). Fique só com os tipos cujo total passa de 300, do mais valioso para o menos valioso. Devem sobrar 3 tipos.`,
   hints: [
     "Agrupe por tipo com GROUP BY tipo. No SELECT: tipo, COUNT(*) AS quantidade e SUM(valor) AS total.",
     "\"Passa de 300\" é um filtro sobre o grupo, então vai no HAVING: HAVING SUM(valor) > 300. Por último, ORDER BY total DESC.",

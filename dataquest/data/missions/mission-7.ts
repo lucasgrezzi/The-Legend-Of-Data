@@ -34,7 +34,12 @@ len() conta quantos itens a lista tem:
 E o for percorre a lista item por item:
 
   for f in feiticos:
-      print(f)`,
+      print(f)
+
+Para juntar texto e o tamanho da lista numa frase, use a vírgula do print (ou uma f-string — dentro das chaves pode ir até uma conta ou um len):
+
+  print("Feitiços:", len(feiticos))      # Feitiços: 3
+  print(f"Feitiços: {len(feiticos)}")    # Feitiços: 3`,
   instructions: `Sua mochila já tem tocha, corda e pocao. Neste salão você encontra um mapa antigo: guarde-o na mochila.
 
 Depois faça o inventário: mostre cada item, um por linha, e termine dizendo quantos itens você carrega. O código precisa continuar funcionando mesmo se a mochila tivesse 50 itens.

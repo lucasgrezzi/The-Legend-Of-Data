@@ -22,6 +22,8 @@ Por isso os Arquivistas inventaram o SQL: um jeito de PERGUNTAR para a tabela e 
   realWorld: `SQL é a língua usada para conversar com bancos de dados — é onde empresas guardam clientes, vendas e pedidos. SELECT escolhe as colunas, WHERE filtra as linhas e ORDER BY ordena. É como filtrar uma planilha, só que escrito, repetível e funcionando com milhões de linhas.`,
   theory: `SQL é a língua das Catacumbas: você pede os dados e o banco responde com uma tabela.
 
+Uma tabela é como uma planilha: cada LINHA é um registro (um herói, uma venda) e cada COLUNA é uma informação sobre ele (nome, nível, valor). Você vê a tabela desta fase na aba Dados.
+
 SELECT escolhe as colunas e FROM diz de qual tabela:
 
   SELECT nome, nivel
@@ -40,10 +42,12 @@ ORDER BY ordena o resultado. DESC = do maior para o menor; ASC = do menor para o
   WHERE nivel >= 10
   ORDER BY nivel DESC;
 
+O ; no fim marca onde a consulta termina. Palavras como SELECT podem ser escritas em maiúsculas ou minúsculas — o costume é maiúsculas, para destacar.
+
 As colunas da tabela desta missão estão na aba Dados.`,
   instructions: `A tabela vendas guarda as transações do Império. Encontre só as relíquias valiosas — as que valem mais de 150 — mostrando apenas o nome do produto e o valor, da mais cara para a mais barata.
 
-Consulte a aba Dados para ver as colunas disponíveis.`,
+Devem sobrar 3 produtos. Consulte a aba Dados para ver as colunas disponíveis.`,
   hints: [
     "Você precisa de duas colunas (produto e valor) e de um filtro com WHERE. Atenção: \"mais de 150\" é > 150, não >=.",
     "Para a mais cara aparecer primeiro, termine a consulta com ORDER BY na coluna valor, em ordem decrescente (DESC).",

@@ -30,9 +30,12 @@ Escreva as leis de novo para ele. Assim ele decide sozinho, seja quem for que ap
 
 Comparações: > maior, < menor, >= maior ou igual, <= menor ou igual, == igual, != diferente.
 
-and exige que as duas condições sejam verdadeiras ao mesmo tempo:
+True e False são os valores "verdadeiro" e "falso" do Python (sempre com a primeira letra maiúscula). Servem para guardar respostas de sim ou não — tipo "tem escudo? sim":
 
   tem_escudo = True
+
+and exige que as duas condições sejam verdadeiras ao mesmo tempo:
+
   if vida > 20 and tem_escudo:
       print("Pode continuar")`,
   instructions: `O Guardião recita suas leis, nesta ordem:

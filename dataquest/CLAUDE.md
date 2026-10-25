@@ -343,6 +343,18 @@ Pedido do usuário: "pode fazer todas as etapas e a gente verifica tudo depois".
 - ⚠ Neste Windows, `\n` dentro de heredoc no Bash às vezes vira quebra de linha real — para editar strings com `\n`
   em .ts, use o Edit (ou um script Python salvo em arquivo).
 
+### Sessão 14 — Revisão das 17 fases com o checklist de acessibilidade (2026-10-24)
+- **Textos:** M3 explica tabela/linha/coluna e o `;`, e a QUEST diz "Devem sobrar 3 produtos"; M4 (1ª de Pandas) ganhou
+  lacunas `___` (padrão da 1ª fase de cada trilha) e explica biblioteca/`import … as pd`; M6 explica True/False; M7 mostra
+  `len()` no print/f-string (era usado sem ter sido ensinado); M11 e M12 dizem quantas linhas devem sair.
+- **Feedback:** `describeDiff()` em `lib/validation.ts` aponta a 1ª linha diferente e o motivo (acento, maiúscula, espaço,
+  linha faltando/sobrando, "None" = função sem return). Tabela: diz qual coluna faltou e lembra do AS; linhas a mais/a
+  menos com dicas (> × >=, parênteses com AND/OR, LEFT JOIN). Grimório: `=` dentro de if/elif → "use ==" mesmo quando o
+  Python só diz "invalid syntax"; KeyError do Pandas sem o prefixo "Column not found:".
+- **Teste no navegador** (`review.mjs` no scratchpad: jogador novo, 17 fases em ordem, 23 erros típicos de iniciante):
+  as 16 soluções passam e nenhum erro passa por engano. As 3 últimas correções de mensagem foram conferidas só com teste
+  em Node (a 2ª rodada no navegador foi interrompida por falta de memória no PC).
+
 ### Próximos passos sugeridos
 1. **Rodar `supabase/2026-10-titulo-no-ranking.sql`** (tarefa do usuário) para o título aparecer no ranking.
 2. Mais fases: Pandas `merge`/`pivot_table` (o worker só injeta UM CSV — para merge, aceitar vários arquivos em
