@@ -459,6 +459,8 @@ alinhamento e animação, Mapa-Múndi com mais cara de game e o fundo sem árvor
   pedestal, brilho e pulinho na loja (`.pet-stage`), som + faíscas ao comprar. +4 mascotes CC0 (DCSS), liberados por
   chefes: Sapo Príncipe (fase 8, 90), Vaga-lume Ancião (14, 110), Grifinho (12, 150), Dragão Dourado (22, 200,
   lendário). Os 4 antigos ficaram (ids salvos no progresso). Catálogo de mascotes em ordem de preço.
+  Os 4 antigos (gato, slime, coruja, dragãozinho) foram redesenhados no `scripts/gerar_mascotes.py`: Scale2x de
+  16→32 px, luz/sombra nas cores do corpo (`BODY`) e detalhes à mão (`detalhes()`: brilho nos olhos, listras, penas…).
 - ⚠ O dev server do Modo Teste (3001) pode parar de recompilar o `globals.css` (estilos novos não aparecem num
   carregamento novo da página): reiniciar o `npm run teste`.
 
