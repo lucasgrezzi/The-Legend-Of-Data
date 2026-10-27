@@ -155,6 +155,8 @@ export default function BattleArena({ mission, defeated, event, fails, children 
       style={{ ["--track" as string]: track.color, ["--track-rgb" as string]: track.rgb }}
       data-tour="arena"
     >
+      {/* a cena da região atrás da batalha (a Masmorra Secreta fica com o roxo do portal) */}
+      {!mission.bonus && <span className={`battle-scene is-${mission.track}`} aria-hidden />}
       <div className="battle-foe" title={monster.name}>
         <div ref={spriteRef} className="battle-sprite">
           <MonsterSprite monster={monster} size={size} boss={boss} />

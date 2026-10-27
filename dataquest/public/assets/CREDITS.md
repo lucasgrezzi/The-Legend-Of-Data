@@ -26,6 +26,12 @@ O mar, a areia e o farol são pixel art própria do script. Para gerar de novo: 
 `python scripts/gerar_mundo_biomas.py <pasta tiny-town> <pasta tiny-dungeon> public/assets/bg/mapa-mundo.png`.
 (O gerador antigo, `scripts/gerar_fundo_mapa.py`, fazia uma vila só, com Tiny Town.)
 
+## Fundos das regiões (`bg/regiao-*.png`) — CC0
+Uma cena por região (floresta, catacumbas, forja e costa do farol), gerada por `scripts/gerar_regioes.py` com os mesmos
+tiles Kenney **Tiny Town** e **Tiny Dungeon** (CC0 1.0). Água, lava, piso de pedra, tochas, velas, teias, caveiras,
+fornalhas, postes, barcos, a ilhota e o farol são pixel art própria do script, assim como a luz. Para gerar de novo:
+`python scripts/gerar_regioes.py <pasta tiny-town> <pasta tiny-dungeon> public/assets/bg [python sql pandas dataviz]`.
+
 ## Monstros (`monsters/`) — CC0 / domínio público
 Dungeon Crawl Stone Soup tiles (mesmo pacote dos `sprites/`, https://opengameart.org/content/dungeon-crawl-32x32-tiles).
 

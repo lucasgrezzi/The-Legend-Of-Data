@@ -1184,6 +1184,121 @@ a:hover > .hub-place .hub-card { border-color: rgba(var(--tint), 0.55); transfor
   100% { opacity: 0; transform: translate(calc(var(--dx, 30px) * -0.5), -120px); }
 }
 
+/* ══════════════════════════════ Fundo de cada região ══════════════════════════════ */
+/* A cena tem a proporção da imagem (16:9) e cobre a tela como background-size: cover —
+   assim o facho do farol e as partículas ficam presos ao lugar certo da imagem. */
+.region-scene {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100vw, 177.78vh);
+  height: max(100vh, 56.25vw);
+  transform: translate(-50%, -50%);
+  animation: scene-breathe 40s ease-in-out infinite alternate;
+}
+@keyframes scene-breathe {
+  from { transform: translate(-50%, -50%) scale(1); }
+  to   { transform: translate(-50%, -50%) scale(1.035); }
+}
+.region-particle {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  animation: var(--dur, 12s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+/* Floresta: folhas caindo, girando (verde, dourada e um vaga-lume) */
+.region-bg.is-python .region-particle { animation-name: leaf-fall; border-radius: 1px 4px; }
+.region-bg.is-python .region-particle.is-tone-0 { background: #7fcf5a; }
+.region-bg.is-python .region-particle.is-tone-1 { background: #e0b24a; }
+.region-bg.is-python .region-particle.is-tone-2 { background: #ffe9a0; box-shadow: 0 0 6px 2px rgba(255,214,102,0.7); border-radius: 0; animation-name: firefly; }
+@keyframes leaf-fall {
+  0%   { opacity: 0; transform: translate(0, -40px) rotate(0deg); }
+  10%  { opacity: 0.85; }
+  50%  { transform: translate(var(--dx), 30vh) rotate(200deg); }
+  90%  { opacity: 0.85; }
+  100% { opacity: 0; transform: translate(calc(var(--dx) * -0.4), 60vh) rotate(420deg); }
+}
+/* Catacumbas: fogos-fátuos verdes subindo devagar + névoa no chão */
+.region-bg.is-sql .region-particle { animation-name: wisp; border-radius: 50%; background: #9dffd0; box-shadow: 0 0 10px 4px rgba(80,255,170,0.55); }
+.region-bg.is-sql .region-particle.is-tone-1 { background: #b8d4ff; box-shadow: 0 0 10px 4px rgba(120,170,255,0.5); }
+@keyframes wisp {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  20%  { opacity: 0.8; }
+  50%  { transform: translate(var(--dx), -50px) scale(1); }
+  80%  { opacity: 0.6; }
+  100% { opacity: 0; transform: translate(calc(var(--dx) * -0.6), -110px) scale(0.5); }
+}
+.crypt-mist {
+  position: absolute;
+  inset: auto -20% 0 -20%;
+  height: 45%;
+  background:
+    radial-gradient(40% 60% at 20% 80%, rgba(120,200,190,0.16), transparent 70%),
+    radial-gradient(35% 50% at 70% 90%, rgba(120,170,220,0.14), transparent 70%),
+    radial-gradient(30% 50% at 45% 70%, rgba(140,220,200,0.10), transparent 70%);
+  animation: mist-drift 26s ease-in-out infinite alternate;
+}
+@keyframes mist-drift { from { transform: translateX(-6%); } to { transform: translateX(6%); } }
+/* Forja: brasas subindo + o calor pulsando de baixo */
+.region-bg.is-pandas .region-particle { animation-name: ember; background: #ffb347; box-shadow: 0 0 6px 2px rgba(255,120,40,0.7); }
+.region-bg.is-pandas .region-particle.is-tone-1 { background: #ffe08a; }
+.region-bg.is-pandas .region-particle.is-tone-2 { background: #ff6a2b; }
+@keyframes ember {
+  0%   { opacity: 0; transform: translate(0, 40vh); }
+  15%  { opacity: 1; }
+  60%  { opacity: 0.8; transform: translate(var(--dx), 0); }
+  100% { opacity: 0; transform: translate(calc(var(--dx) * -0.5), -30vh); }
+}
+.forge-heat {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 40%;
+  background: linear-gradient(0deg, rgba(255,110,40,0.18), transparent);
+  animation: heat-pulse 3.2s ease-in-out infinite alternate;
+}
+@keyframes heat-pulse { from { opacity: 0.55; } to { opacity: 1; } }
+/* Costa do Farol: o facho girando + brilhos no mar e estrelas */
+.lighthouse-beam {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.lighthouse-beam::before {
+  content: "";
+  position: absolute;
+  left: -70vmax;
+  top: -70vmax;
+  width: 140vmax;
+  height: 140vmax;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(255,236,160,0.38) 0deg, rgba(255,236,160,0.12) 10deg, transparent 18deg, transparent 342deg, rgba(255,236,160,0.12) 350deg, rgba(255,236,160,0.38) 360deg);
+  -webkit-mask: radial-gradient(circle, #000 0 4%, rgba(0,0,0,0.85) 20%, transparent 60%);
+          mask: radial-gradient(circle, #000 0 4%, rgba(0,0,0,0.85) 20%, transparent 60%);
+  animation: spin 9s linear infinite;
+}
+.lighthouse-beam::after {
+  content: "";
+  position: absolute;
+  left: -26px;
+  top: -26px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,250,220,0.9), rgba(255,226,140,0.35) 45%, transparent 70%);
+  animation: heat-pulse 1.6s ease-in-out infinite alternate;
+}
+.region-bg.is-dataviz .region-particle { animation-name: twinkle; background: #eaf3ff; box-shadow: 0 0 6px 1px rgba(200,225,255,0.8); }
+.region-bg.is-dataviz .region-particle.is-tone-1 { background: #f8bbd0; box-shadow: 0 0 6px 1px rgba(244,143,177,0.8); }
+@keyframes twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50%      { opacity: 0.9; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .region-scene, .region-particle, .crypt-mist, .forge-heat, .lighthouse-beam::before, .lighthouse-beam::after { animation: none; }
+  .region-particle { display: none; }
+}
+
 /* ══════════════════════════════ Tela da missão ══════════════════════════════ */
 /* Coluna da esquerda: luz suave da cor da trilha no topo */
 .mission-stage {
@@ -1459,6 +1574,43 @@ a:hover > .hub-place .hub-card { border-color: rgba(var(--tint), 0.55); transfor
     var(--color-bg-2);
   overflow: hidden;
 }
+.battle-arena { isolation: isolate; }
+/* a cena da região atrás da batalha: um recorte da imagem da região, andando devagar, escurecida à direita
+   (onde ficam o nome, a vida e a fala do monstro) */
+.battle-scene {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-size: 190% auto;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  opacity: 0.85;
+  animation: arena-pan 30s ease-in-out infinite alternate;
+}
+.battle-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(10,13,20,0.15) 0%, rgba(10,13,20,0.55) 22%, rgba(10,13,20,0.82) 45%, rgba(10,13,20,0.9) 100%),
+    linear-gradient(0deg, rgba(10,13,20,0.4), transparent 40%);
+}
+.battle-arena.is-boss .battle-scene::after {
+  background:
+    radial-gradient(ellipse 220px 120% at 52px 100%, rgba(239,83,80,0.32), transparent 70%),
+    linear-gradient(90deg, rgba(10,13,20,0.15) 0%, rgba(10,13,20,0.55) 22%, rgba(10,13,20,0.82) 45%, rgba(10,13,20,0.9) 100%);
+}
+.battle-scene.is-python  { background-image: url(/assets/bg/regiao-python.png);  --bx: 6%;  --by: 22%; }
+.battle-scene.is-sql     { background-image: url(/assets/bg/regiao-sql.png);     --bx: 4%;  --by: 0%; }
+.battle-scene.is-pandas  { background-image: url(/assets/bg/regiao-pandas.png);  --bx: 6%;  --by: 12%; }
+.battle-scene.is-dataviz { background-image: url(/assets/bg/regiao-dataviz.png); background-position: 100% 8%; animation: none; transform: scaleX(-1); }
+/* a costa espelhada põe o farol do lado do monstro; o véu escuro também é espelhado para continuar à direita */
+.battle-scene.is-dataviz::after { transform: scaleX(-1); }
+@keyframes arena-pan {
+  from { background-position: var(--bx) var(--by); }
+  to   { background-position: calc(var(--bx) + 6%) var(--by); }
+}
+@media (prefers-reduced-motion: reduce) { .battle-scene { animation: none; background-position: var(--bx) var(--by); } }
 /* chão de pedra em pixel embaixo do monstro */
 .battle-arena::after {
   content: "";

@@ -93,7 +93,7 @@ export default function WorldMap({ track }: { track?: Track }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <WorldBackground />
+      <WorldBackground region={track} />
 
       <TopBar right={<PlayerChip profile={profile} totalXP={totalXP} coins={coins} />} />
 
