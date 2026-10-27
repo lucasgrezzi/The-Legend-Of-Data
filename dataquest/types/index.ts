@@ -43,9 +43,11 @@ export interface Mission {
   validationType: ValidationMode;
   xpReward: number;
   dataFile?: DataFilePreview;
-  /** SQL: tabelas extras além de `dataFile` (ex.: para JOIN). Aparecem também na aba Dados. */
+  /** Tabelas extras além de `dataFile` (SQL: views para JOIN · Python: /data/<filename>, ex.: merge). Aparecem também na aba Dados. */
   extraDataFiles?: DataFilePreview[];
   unlockCondition?: UnlockCondition;
+  /** Fase bônus da Masmorra Secreta: fica fora da trilha da região (não conta como chefe nem bloqueia nada) */
+  bonus?: boolean;
   /** Trechos obrigatórios no código (regex) — impede "resolver" só com print da resposta */
   requiredCode?: RequiredCode[];
 }
@@ -81,6 +83,10 @@ export interface ChartMeta {
   title: string;
   xlabel: string;
   ylabel: string;
+  /** Textos da legenda (vazio = sem legenda) */
+  legend?: string[];
+  /** Cor de cada linha, em hex */
+  lineColors?: string[];
 }
 
 export interface ValidationResult {

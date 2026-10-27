@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Mission, Track } from "@/types";
 import { useGameStore } from "@/store/gameStore";
-import { MISSIONS, bossOf, isBoss, missionsOfTrack } from "@/lib/missions";
+import { BONUS_MISSIONS, MISSIONS, SECRET_DUNGEON_TRACK, bossOf, isBoss, missionsOfTrack } from "@/lib/missions";
 import { TRACKS, TRACK_ORDER } from "@/lib/tracks";
 import { RACES } from "@/lib/races";
 import { isMissionUnlocked, missingRequirements } from "@/lib/xp";
@@ -57,6 +57,10 @@ export default function WorldHub() {
     .map((s, i) => ({ ...s, ...HUB_SPOTS[i] }));
 
   const regionOpen = (t: Track) => missionsOfTrack(t).some((m) => stateOf(m) !== "locked");
+  // Masmorra Secreta: aberta (chefe da região caiu) e ainda com sala por vencer → selo roxo pulsando no lugar
+  const dungeonBoss = bossOf(SECRET_DUNGEON_TRACK);
+  const dungeonCalling = !!dungeonBoss && completedMissionIds.includes(dungeonBoss.id)
+    && BONUS_MISSIONS.some((m) => !completedMissionIds.includes(m.id));
 
   return (
     <div className="mx-auto flex flex-col gap-4" style={{ maxWidth: HUB_W }}>
@@ -184,6 +188,11 @@ export default function WorldHub() {
             >
               <div className="hub-place-in anim-rise" style={delay(250 + i * 90)}>
                 <span className="hub-glow" aria-hidden />
+                {t === SECRET_DUNGEON_TRACK && dungeonCalling && (
+                  <span className="hub-secret" title="Masmorra Secreta aberta! Entre na região para encontrar o portal.">
+                    <Icon name="sparkle" size={13} /> Masmorra Secreta
+                  </span>
+                )}
                 {hereHero && <span className="next-flag hub-flag"><Icon name="mapPin" size={12} /> VOCÊ ESTÁ AQUI</span>}
                 {hereHero && (
                   <div className="hub-hero">

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import type { PlayerProfile, Race } from "@/types";
-import { RACES, RACE_ORDER } from "@/lib/races";
+import { AFFINITY_DISCOUNT, RACES, RACE_ORDER } from "@/lib/races";
+import { TRACKS } from "@/lib/tracks";
 import Sprite from "@/components/ui/Sprite";
 import GateShell, { delay } from "@/components/ui/GateShell";
 import Icon from "@/components/ui/Icon";
@@ -86,7 +87,9 @@ export default function CharacterCreation({ onConfirm, showSteps, corner }: Char
                 </div>
                 <span style={{ fontSize: 17, fontWeight: 900, color: selected ? info.color : "var(--color-text)" }}>{info.name}</span>
                 <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--color-text-2)" }}>{info.guild}</span>
-                
+                <span className="race-power" style={{ color: selected ? info.color : undefined }}>
+                  <Icon name="zap" size={12} /> {info.power.name}
+                </span>
               </button>
             );
           })}
@@ -95,8 +98,12 @@ export default function CharacterCreation({ onConfirm, showSteps, corner }: Char
         {/* Confirmação */}
         <div className="flex flex-wrap items-center justify-between gap-4 pt-4" style={{ borderTop: "1px solid var(--line)" }}>
           <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "var(--color-muted)", minHeight: 20 }}>
-            {ready && chosen ? (
-              <>Boas-vindas, <b style={{ color: "var(--color-text)" }}>{trimmed}</b>! Sua guilda: <b style={{ color: chosen.color }}>{chosen.guild}</b>.</>
+            {chosen ? (
+              <>
+                <b style={{ color: chosen.color }}>{chosen.power.name}:</b> {chosen.power.text}{" "}
+                Afinidade com <b style={{ color: TRACKS[chosen.affinity].color }}>{TRACKS[chosen.affinity].name}</b>: dicas {AFFINITY_DISCOUNT} moedas mais baratas lá.
+                {!ready && " Agora, um nome (mín. 2 letras)."}
+              </>
             ) : (
               "Escolha um nome (mín. 2 letras) e uma raça."
             )}

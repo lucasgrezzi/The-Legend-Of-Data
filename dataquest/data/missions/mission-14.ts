@@ -2,12 +2,12 @@ import type { Mission } from "@/types";
 import { PEDIDOS } from "@/data/forja";
 
 // Dificuldade 5/5 — CHEFE da Forja: coluna calculada + filtro + groupby + sum + sort_values. Template quase vazio.
-// Ordem de jogo: depois da 13 (O Fole das Regiões).
+// Ordem de jogo: depois da 24 (A Teia da Aranha Tecelã).
 const mission14: Mission = {
   id: 14,
   track: "pandas",
   type: "pandas",
-  chapterTitle: "A Forja de Dados — Capítulo VI (Chefe)",
+  chapterTitle: "A Forja de Dados — Capítulo VIII (Chefe)",
   missionTitle: "A Têmpera do Rei",
   concept: "Pandas: criar colunas com contas (chefe)",
   narrative: `Chegou carta do castelo. Selo vermelho, letra caprichada, cheiro de perfume caro. É do Rei — o atual, não o Esquecido.
@@ -70,7 +70,7 @@ for regiao, total in faturamento.items():
     { pattern: "\\.sort_values\\(", hint: "Ordene com .sort_values(ascending=False) — não ordene na mão." },
   ],
   dataFile: PEDIDOS,
-  unlockCondition: { requiredMissionIds: [13] },
+  unlockCondition: { requiredMissionIds: [24] },
 };
 
 export default mission14;

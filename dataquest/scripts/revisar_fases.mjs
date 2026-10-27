@@ -9,7 +9,7 @@ const SP = process.argv[2];
 const BASE = process.argv[3] ?? "http://localhost:3001";
 const ONLY = process.argv[4]?.split(",").map(Number);
 const ROOT = new URL("../data/missions/", import.meta.url);
-const ORDER = [0, 1, 5, 6, 2, 7, 8, 3, 17, 9, 18, 10, 11, 12, 4, 19, 20, 21, 13, 14, 15, 16, 22]
+const ORDER = [0, 1, 5, 6, 2, 7, 8, 26, 27, 3, 17, 9, 18, 10, 11, 12, 4, 19, 20, 21, 13, 23, 24, 14, 15, 16, 25, 22]
   .filter((id) => !ONLY || ONLY.includes(id));
 const solution = (id) => fs.readFileSync(new URL(`mission-${id}.ts`, ROOT), "utf-8").match(/solution: `([\s\S]*?)`,/)[1];
 
@@ -54,6 +54,19 @@ const MISTAKES = {
   22: [["sem ordenar", P.replace("import pandas", "import matplotlib.pyplot as plt\nimport pandas") + 't = df.groupby("porto")["caixas"].sum()\nplt.bar(t.index, t.values)\nplt.title("C")\nplt.xlabel("P")\nplt.ylabel("C")'],
        ["linha no lugar de barras", P.replace("import pandas", "import matplotlib.pyplot as plt\nimport pandas") + 't = df.groupby("porto")["caixas"].sum().sort_values(ascending=False)\nplt.plot(t.index, t.values)\nplt.title("C")\nplt.xlabel("P")\nplt.ylabel("C")'],
        ["totais à mão", 'import matplotlib.pyplot as plt\nplt.bar(["Norte", "Leste", "Sul", "Oeste"], [48, 35, 27, 14])\nplt.title("C")\nplt.xlabel("P")\nplt.ylabel("C")']],
+  23: [["sem merge", P + 't = df.groupby("cliente")["peca_id"].sum().sort_values(ascending=False)\nfor c, v in t.items():\n    print(f"{c}: {v}")'],
+       ["caminho do catálogo", P + 'cat = pd.read_csv("catalogo.csv")'],
+       ["merge sem on certo", P + 'cat = pd.read_csv("/data/catalogo.csv")\nj = df.merge(cat, on="id")']],
+  24: [["sem aggfunc (média)", P + 'print(df.pivot_table(index="regiao", columns="arma", values="quantidade"))'],
+       ["linhas e colunas trocadas", P + 'print(df.pivot_table(index="arma", columns="regiao", values="quantidade", aggfunc="sum"))']],
+  25: [["uma linha só", P.replace("import pandas", "import matplotlib.pyplot as plt\nimport pandas") + 'plt.plot(df["mes"], df["norte"], color="blue", label="Norte")\nplt.legend()\nplt.title("P")'],
+       ["sem legend()", P.replace("import pandas", "import matplotlib.pyplot as plt\nimport pandas") + 'plt.plot(df["mes"], df["norte"], color="blue", label="Norte")\nplt.plot(df["mes"], df["sul"], color="orange", label="Sul")\nplt.title("P")'],
+       ["mesma cor", P.replace("import pandas", "import matplotlib.pyplot as plt\nimport pandas") + 'plt.plot(df["mes"], df["norte"], color="blue", label="Norte")\nplt.plot(df["mes"], df["sul"], color="blue", label="Sul")\nplt.legend()\nplt.title("P")']],
+  26: [["sem a cabeça nova", 'cabecas = 5\ngolpes = 0\nwhile cabecas > 0:\n    golpes = golpes + 1\n    cabecas = cabecas - 2\n    print(f"Golpe {golpes}: {cabecas} cabeças")\nprint(f"A Hidra caiu em {golpes} golpes!")'],
+       ["print fora do while", 'cabecas = 5\ngolpes = 0\nwhile cabecas > 0:\n    golpes = golpes + 1\n    cabecas = cabecas - 2\n    if cabecas > 0:\n        cabecas = cabecas + 1\nprint(f"Golpe {golpes}: {cabecas} cabeças")\nprint(f"A Hidra caiu em {golpes} golpes!")']],
+  27: [["chave sem aspas", 'gemas = {"rubi": 3, "safira": 5}\ngemas[esmeralda] = 2'],
+       ["esqueceu o pedágio", 'gemas = {"rubi": 3, "safira": 5}\ngemas["esmeralda"] = 2\nfor cor, qtd in gemas.items():\n    print(f"{cor}: {qtd}")\nprint(f"Total: {sum(gemas.values())}")'],
+       ["for sem items", 'gemas = {"rubi": 3, "safira": 5}\ngemas["esmeralda"] = 2\ngemas["safira"] = gemas["safira"] - 1\nfor cor, qtd in gemas:\n    print(f"{cor}: {qtd}")']],
   16: [["esqueceu xlabel", P.replace("import pandas", "import matplotlib.pyplot as plt\nimport pandas") + 'plt.plot(df["mes"], df["tempestades"])\nplt.title("T")\nplt.ylabel("Q")']],
 };
 

@@ -56,7 +56,10 @@ export function initPyodideWorker(): void {
   worker.onerror = () => broadcast("error");
 }
 
-export function runPython(code: string, csvData?: string): Promise<RunResult> {
+/** Arquivo extra gravado em /data/<name> antes de rodar o código */
+export type ExtraFile = { name: string; csv: string };
+
+export function runPython(code: string, csvData?: string, extraFiles: ExtraFile[] = []): Promise<RunResult> {
   return new Promise((resolve, reject) => {
     const doRun = () => {
       if (!worker) {
@@ -66,7 +69,7 @@ export function runPython(code: string, csvData?: string): Promise<RunResult> {
       const id = ++callId;
       broadcast("running");
       pending.set(id, { resolve, reject });
-      worker.postMessage({ id, code, csvData: csvData ?? null });
+      worker.postMessage({ id, code, csvData: csvData ?? null, extraFiles });
     };
 
     if (workerStatus === "ready") {

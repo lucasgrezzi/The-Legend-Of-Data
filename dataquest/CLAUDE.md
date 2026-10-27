@@ -10,7 +10,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 
 ## 📍 Onde paramos (retomar aqui)
 
-> Última sessão: **2026-10-25** (Sessão 18, com Claude Code). Leia esta seção primeiro ao retomar.
+> Última sessão: **2026-10-26** (Sessão 19, com Claude Code). Leia esta seção primeiro ao retomar.
 
 ### ⚠ Estado do repositório
 - **Sessões 1–3 commitadas e enviadas** ao GitHub (`master`, commit `10363cd`) em 2026-09-22.
@@ -32,10 +32,13 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessão 16 commitada e enviada** (`dc0d855`): Mapa-Múndi, uma tela por região e chefe do Data Viz (fase 22).
 - **Sessão 17 commitada e enviada** (redesign profissional de todas as telas; aprovado pelo usuário).
 - **Sessão 18 commitada e enviada**: batalha em toda fase, sons, juice, Mapa-Múndi com HUD e fundo novo em 4 biomas.
+- **Sessão 19 commitada e enviada**: +3 fases (merge, pivot_table, legenda), Masmorra Secreta (2 fases bônus) e
+  raças com golpe especial + afinidade. Ver "Sessão 19" abaixo.
 - **Sessão 14 commitada e enviada** em 2026-10-24 (revisão das 17 fases). Em 2026-10-25, para liberar espaço no PC
   (disco 96% cheio), foram apagados `node_modules/`, `.next/` e o cache do npm: **rode `npm install` antes de
   `npm run dev`/`build`**. O script de revisão das fases foi salvo em `scripts/revisar_fases.mjs`.
-- Hoje são **23 missões** (7 de Python, 7 de SQL, 6 Pandas, 3 Data Viz), em 4 regiões, cada uma terminando num chefe — ver "As 23 Missões". Os `expectedOutput` das
+- Hoje são **28 missões**: 26 na jornada (7 de Python, 7 de SQL, 8 Pandas, 4 Data Viz), em 4 regiões, cada uma terminando num
+  chefe, + **2 bônus** na Masmorra Secreta — ver "As Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
 ### Sessão 1 — Redesign da interface
@@ -465,15 +468,52 @@ alinhamento e animação, Mapa-Múndi com mais cara de game e o fundo sem árvor
   carregamento novo da página): reiniciar o `npm run teste`.
 
 ### Próximos passos sugeridos
-1. **Rodar `supabase/2026-10-titulo-no-ranking.sql`** (tarefa do usuário) para o título aparecer no ranking.
-2. Mais fases: Pandas `merge`/`pivot_table` (o worker só injeta UM CSV — para merge, aceitar vários arquivos em
-   `/data/`); Data Viz III (chefe: gráfico a partir de groupby, cores/legenda).
-3. Python extra (opcional): `while` e dicionários (fichas de personagem) como missões bônus.
-4. Talvez: dar efeito real às raças (hoje só visuais) — ex.: desconto em dicas de uma trilha.
-5. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px).
-6. Contas: validar XP no servidor (ex.: função no banco que recalcula a partir das missões) se o ranking virar
+1. Mais fases: SQL extra (subconsultas, LEFT JOIN, CASE WHEN) e uma 3ª sala da Masmorra Secreta (ex.: `try/except`).
+2. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px) — o usuário deixou para depois (2026-10-26).
+3. Contas: validar XP no servidor (ex.: função no banco que recalcula a partir das missões) se o ranking virar
    competição; tela de perfil; talvez ranking por guilda/raça.
-7. Limpeza: apagar as contas de teste `dataquest.teste.*@example.com` no Supabase (tarefa do usuário).
+4. Limpeza: apagar as contas de teste `dataquest.teste.*@example.com` no Supabase (tarefa do usuário).
+5. A tabela de níveis NÃO foi mexida: com 765 XP na jornada (840 com as bônus), o nível 10 (660) chega antes do fim.
+   Subir os limites rebaixaria quem já joga — se for mudar, pensar numa forma de não tirar nível de ninguém.
+
+### Sessão 19 — Fases novas, Masmorra Secreta e poderes das raças (2026-10-26)
+Pedido do usuário: "mais fases é essencial"; fases bônus de Python com animação épica; raças com efeito real e visual.
+Escolhas dele: **poder visual + bônus de jogo** para as raças; bônus como **Masmorra Secreta** fora da trilha.
+- **Fases novas na jornada** (ids 23–25):
+  - 23 `O Ettin dos Dois Livros` (Pandas, merge) e 24 `A Teia da Aranha Tecelã` (pivot_table), entre a 13 e o chefe 14
+    (o 14 agora pede a 24 e virou "Capítulo VIII (Chefe)").
+  - 25 `O Prisma Desbotado` (duas linhas, `color=`, `label=`, `plt.legend()`), entre a 16 e o chefe 22 (o 22 pede a 25).
+  - **Vários CSVs no Python:** `extraDataFiles` agora vale também para Pandas — o worker grava cada um em
+    `/data/<filename>` (a 23 lê `/data/catalogo.csv`). O principal continua em `/data/mission.csv`.
+  - **Gráfico com várias linhas:** `chartMeta` traz `legend` (textos) e `lineColors`; o `expectedOutput` de gráfico
+    aceita `series` (valores de cada linha, em qualquer ordem), `legend` (nº mínimo de nomes) e `distinctColors`.
+  - A 24 compara o `print()` do DataFrame: a 2ª linha (`regiao`) tem espaços no fim — conferido no Pyodide.
+- **Masmorra Secreta** (`BONUS_MISSIONS` em `lib/missions.ts`, fases com `bonus: true`):
+  - 26 `A Hidra Sem Fim` (while) e 27 `O Enigma da Esfinge` (dicionários, chefe bônus). Abrem depois do chefe do
+    Python (8), não bloqueiam nada e ficam fora da trilha: `missionsOfTrack`/`bossOf` ignoram as bônus,
+    `getNeighbors` navega só entre elas, `siblingsOf(m)` dá a lista certa para a tela da missão.
+  - `components/map/SecretDungeon.tsx`, no fim de `/regiao/python`: parede rachada (selada) até o chefe cair; na 1ª
+    vez aberta, a parede treme e desaba em pedras (`localStorage["dataquest-masmorra-vista"]`); depois, portal com as
+    salas. Clicar numa sala abre a **cinemática do portal** (anéis girando, runas, silhueta do monstro, clarão) e só
+    então navega. A tela da fase bônus abre saindo de um clarão roxo (`.portal-exit`), com arena roxa (`.is-secret`)
+    e o chip "Masmorra Secreta" no lugar da região.
+  - Mapa-Múndi: selo roxo "Masmorra Secreta" pulsando sob o Python enquanto houver sala por vencer.
+  - Recompensas na loja: títulos "Caçador de Hidras" (26) e "Decifrador de Enigmas" (27), mascote lendário Fênix (27).
+- **Raças com efeito real** (`lib/races.ts`: `power` e `affinity`):
+  - Golpe especial na batalha (`lib/powers.ts`, `raceStrike`/`powerBanner`): sai do botão Executar (versão leve) ou
+    Enviar (completa, com a faixa do nome do golpe). Elfo: Chuva de Flechas Lunares · Anão: Martelo Sísmico (vem
+    girando pela lateral — de cima sairia da tela, a arena fica no topo) · Orc: Investida Furiosa · Goblin: Bomba de
+    Engenhoca. Sons novos em `lib/sfx.ts` (arrows, quake, roar, boom, portal).
+  - Afinidade: dicas do Grimório custam `AFFINITY_DISCOUNT` (2) moedas a menos na região da raça (`hintCostFor` em
+    `lib/xp.ts`): Goblin → Python, Anão → SQL, Orc → Pandas, Elfo → Data Viz. Aparece na criação do personagem, na
+    ficha e no Grimório. Moedas não entram no ranking, então o ranking continua justo.
+  - A janela de vitória espera 2,3 s (antes 1,7) para o golpe terminar.
+- Grimório: nos erros de Python, as "tabelas" agora são os caminhos dos arquivos (`/data/mission.csv`,
+  `/data/catalogo.csv`); arquivo não encontrado lista todos; "values to unpack" explica o `.items()`.
+- Monstros novos (DCSS, CC0): ettin, aranha-tecela, prisma, hidra, esfinge; mascote fenix. Ver CREDITS.md.
+- Testado: `revisar_fases.mjs` nas 5 fases (soluções passam; erros típicos dão mensagem clara), capturas da masmorra,
+  do portal, da parede selada e dos 4 golpes; `tsc` e `build` ok.
+- ⚠ Se o Modo Teste der 404 em tudo (até no /map), pare o servidor, apague `.next` e rode `npm run teste` de novo.
 
 ### Como testar rapidamente
 - **Modo Teste: `npm run teste` → http://localhost:3001.** É o jeito de analisar as fases sem jogar tudo de novo.
@@ -643,7 +683,7 @@ dataquest/
 
 ---
 
-## As 23 Missões (na ordem de jogo)
+## As Missões (na ordem de jogo)
 
 Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Escudo 150, Pocao 80, Manto 200, Anel 180)
 
@@ -668,10 +708,15 @@ Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Esc
 | 17    | 20 | pandas | O Carvão da Semana       | Pandas: somar, média e maior      | 2/5    | +30 | +20    | 19          | `read_csv(`, `.sum(`, `.mean(`, `.max(` |
 | 18    | 21 | pandas | O Livro de Visitas       | Pandas: contar valores (value_counts)| 3/5 | +30 | +25    | 20          | `read_csv(`, `.value_counts(` |
 | 19    | 13 | pandas | O Fole das Regiões       | Pandas: groupby, sum e sort_values| 3/5    | +35 | +25    | 21          | `read_csv(`, `["status"]`, `.groupby(`, `.sum(`, `.sort_values(` |
-| 20    | 14 | pandas | A Têmpera do Rei         | Pandas: colunas com contas (chefe)| 5/5    | +40 | +30    | 13          | `read_csv(`, `df["x"] = … * …`, `["quantidade"] >=`, `.groupby(`, `.sort_values(` |
-| 21    | 15 | dataviz| O Farol se Acende        | Gráfico de barras com matplotlib  | 1/5    | +30 | +25    | 14          | `plt.bar(`, `plt.title(` (validação `chart`) |
-| 22    | 16 | dataviz| A Rota das Tempestades   | Gráfico de linha, título e eixos  | 2/5    | +35 | +25    | 15          | `read_csv(`, `plt.plot(` (validação `chart`) |
-| 23    | 22 | dataviz| O Conselho dos Portos    | Gráfico a partir de groupby (chefe)| 4/5   | +45 | +35    | 16          | `.groupby(`, `.sort_values(`, `plt.bar(`, `read_csv(` (validação `chart`) |
+| 20    | 23 | pandas | O Ettin dos Dois Livros  | Pandas: juntar tabelas com merge  | 4/5    | +35 | +25    | 13          | `read_csv(` do catálogo, `.merge(`, `.groupby(`, `.sort_values(` |
+| 21    | 24 | pandas | A Teia da Aranha Tecelã  | Pandas: pivot_table               | 4/5    | +35 | +25    | 23          | `read_csv(`, `pivot_table(` |
+| 22    | 14 | pandas | A Têmpera do Rei         | Pandas: colunas com contas (chefe)| 5/5    | +40 | +30    | 24          | `read_csv(`, `df["x"] = … * …`, `["quantidade"] >=`, `.groupby(`, `.sort_values(` |
+| 23    | 15 | dataviz| O Farol se Acende        | Gráfico de barras com matplotlib  | 1/5    | +30 | +25    | 14          | `plt.bar(`, `plt.title(` (validação `chart`) |
+| 24    | 16 | dataviz| A Rota das Tempestades   | Gráfico de linha, título e eixos  | 2/5    | +35 | +25    | 15          | `read_csv(`, `plt.plot(` (validação `chart`) |
+| 25    | 25 | dataviz| O Prisma Desbotado       | Duas linhas, cores e legenda      | 3/5    | +35 | +25    | 16          | `read_csv(`, `color=`, `label=`, `plt.legend(` (validação `chart` com `series`) |
+| 26    | 22 | dataviz| O Conselho dos Portos    | Gráfico a partir de groupby (chefe)| 4/5   | +45 | +35    | 25          | `.groupby(`, `.sort_values(`, `plt.bar(`, `read_csv(` (validação `chart`) |
+| bônus | 26 | python | A Hidra Sem Fim          | Repetição com while (Masmorra)    | 4/5    | +30 | +25    | 8           | `while`, no máx. 2 `print`, `if` |
+| bônus | 27 | python | O Enigma da Esfinge      | Dicionários (chefe bônus)         | 5/5    | +45 | +40    | 26          | `gemas["esmeralda"] =`, `gemas["safira"] =`, `.items()`, `sum(gemas.values())` |
 
 Tabelas SQL das missões 9–12 em `data/catacumbas.ts`: `reliquias` (12 linhas: id, nome, tipo, sala, valor,
 amaldicoada 'sim'/'nao'), `herois` (5) e `expedicoes` (9: id, heroi_id, destino, ouro).
@@ -711,6 +756,11 @@ Sul: 100"` (só `paga`, groupby regiao, sum ouro, desc)
 - M19: `"Cota de Malha\nMartelo de Guerra\nMachado Duplo"` (sort_values preco desc + head(3))
 - M20: `"Total: 57\nPor dia: 9.5\nRecorde: 15"` (sum, mean, max da coluna sacos; rótulos sem acento de propósito)
 - M21: `"anao: 5\nelfo: 3\norc: 2\ngoblin: 1"` (value_counts da coluna raca)
+- M23: `"Grosh: 200\nDurin: 190\nLia: 140\nZik: 40"` (merge pedidos_semana × catalogo por peca_id, groupby cliente, sum preco)
+- M24: print da pivot_table (regiao × arma, soma): `arma    arco  espada` / `regiao` (+ espaços) / `Leste 6 3` / `Norte 1 6` / `Sul 5 5`
+- M25 (chart): `{ kind: "line", series: [[4,6,5,8,9,7],[2,3,7,6,4,8]], legend: 2, distinctColors: true, title: true }`
+- M26: `"Golpe 1: 4 cabeças\nGolpe 2: 3 cabeças\nGolpe 3: 2 cabeças\nGolpe 4: 0 cabeças\nA Hidra caiu em 4 golpes!"`
+- M27: `"rubi: 3\nsafira: 4\nesmeralda: 2\nTotal: 9"`
 - M22 (chart, chefe do Farol): `{ kind: "bar", count: 4, values: [48, 35, 27, 14], title: true, xlabel: true, ylabel: true }`
   (CSV `cargas` em `data/farol.ts`; groupby porto, sum caixas, desc; a única novidade é `.index`/`.values`)
 
@@ -737,7 +787,7 @@ na 1ª vez e sempre preencher `realWorld`.
 Explorador de Criptas (200) → Arquivista (260) → Guardião do Saber (330) → Mestre da Forja (420) → Sábio dos Dados (530) →
 Mestre dos Dados (660). Calibrados pela jornada: fim do Python ≈ 155 XP (Nv 4), fim do SQL ≈ 305 (Nv 6), Forja I 335 (Nv 7), Forja II 370,
 chefe da Forja 410, Data Viz I 440 (Nv 8), Data Viz II 475; 9–10 esperam o conteúdo futuro — **ao adicionar missões, revisar a tabela**.
-Moedas possíveis hoje: 355.
+Moedas possíveis hoje: 570 na jornada + 65 nas bônus = 635.
 
 **Fluxo por missão:**
 1. Aluno digita código no editor
@@ -907,7 +957,7 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 
 ## Como Adicionar uma Nova Missão
 
-1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 23) — nunca reaproveitar/renumerar ids
+1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 28) — nunca reaproveitar/renumerar ids
    (são a chave do progresso salvo). Preencher `concept` com linguagem direta (o que a pessoa aprende).
    Campos de conteúdo (padrão da Sessão 4):
    - `narrative` — continua a história da missão anterior (ver "Arco da história"; tom meta e bem-humorado)
@@ -955,10 +1005,10 @@ O público inclui quem **nunca programou** e quem **nunca jogou RPG**. Nada pode
 ### Conteúdo
 - [ ] Módulo Data Viz: matplotlib, seaborn — validação por `"chart"`
 - [x] Missões Python de variáveis/contas e if/elif/else (ids 5 e 6)
-- [ ] Mais missões Python: listas, while, funções, dicionários (próximo foco)
+- [x] Mais missões Python: listas, funções (jornada); while e dicionários (Masmorra Secreta, ids 26–27)
 - [x] Missões SQL: AND/OR/IN, agregações, GROUP BY/HAVING, JOIN (ids 9–12)
 - [ ] SQL extra: subconsultas, LEFT JOIN, CASE WHEN
-- [ ] Missões Pandas: merge, pivot_table (groupby feito — id 13)
+- [x] Missões Pandas: merge (id 23), pivot_table (id 24)
 
 ### Funcionalidades
 - [x] Imagens RPG para trilhas SQL/Pandas/DataViz (sprites CC0)

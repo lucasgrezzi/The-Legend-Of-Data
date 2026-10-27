@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { EngineStatus, RunResult } from "@/types";
 import {
+  type ExtraFile,
   initPyodideWorker,
   runPython,
   getPyodideStatus,
@@ -21,8 +22,8 @@ export function usePyodide() {
     return unsub;
   }, []);
 
-  async function runCode(code: string, csvData?: string): Promise<RunResult> {
-    return runPython(code, csvData);
+  async function runCode(code: string, csvData?: string, extraFiles?: ExtraFile[]): Promise<RunResult> {
+    return runPython(code, csvData, extraFiles);
   }
 
   return { status, runCode };

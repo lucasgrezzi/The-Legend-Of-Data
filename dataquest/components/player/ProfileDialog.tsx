@@ -5,8 +5,8 @@ import { createPortal } from "react-dom";
 import { useGameStore } from "@/store/gameStore";
 import { useAccountStore } from "@/store/accountStore";
 import { supabase } from "@/lib/supabase";
-import { RACES } from "@/lib/races";
-import { MISSIONS } from "@/lib/missions";
+import { AFFINITY_DISCOUNT, RACES } from "@/lib/races";
+import { MISSIONS, missionsOfTrack } from "@/lib/missions";
 import { TRACKS, TRACK_ORDER } from "@/lib/tracks";
 import Sprite from "@/components/ui/Sprite";
 import XPBar from "@/components/ui/XPBar";
@@ -66,6 +66,10 @@ export default function ProfileDialog({ onClose }: { onClose: () => void }) {
             {look.title && <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 800, color: "var(--color-accent)" }}>“{look.title}”</p>}
             <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: race.color }}>{race.name} · {race.guild}</p>
             <p style={{ margin: "4px 0 0", fontSize: 12, fontStyle: "italic", color: "var(--color-muted)" }}>“{race.motto}”</p>
+            <p className="race-power-line">
+              <span style={{ color: race.color }}><Icon name="zap" size={12} /> {race.power.name}</span>
+              <span>Afinidade: <b style={{ color: TRACKS[race.affinity].color }}>{TRACKS[race.affinity].name}</b> (dicas −{AFFINITY_DISCOUNT} moedas)</span>
+            </p>
           </div>
         </div>
 
@@ -82,7 +86,7 @@ export default function ProfileDialog({ onClose }: { onClose: () => void }) {
           <div className="flex flex-col gap-1">
             {TRACK_ORDER.map((t) => {
               const info = TRACKS[t];
-              const ms = MISSIONS.filter((m) => m.track === t);
+              const ms = missionsOfTrack(t);
               const d = ms.filter((m) => completedMissionIds.includes(m.id)).length;
               return (
                 <div key={t} className="flex items-center gap-3" style={{ fontSize: 13 }}>

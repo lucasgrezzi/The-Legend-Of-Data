@@ -34,7 +34,11 @@ export function errorContext(mission: Mission, code: string): ErrorContext {
   return {
     code,
     language: mission.editorLanguage,
-    tables: missionDataFiles(mission).map((f) => ({ name: f.table ?? "vendas", headers: f.headers })),
+    // SQL: o nome da tabela · Python: o caminho do arquivo (o principal é sempre /data/mission.csv)
+    tables: missionDataFiles(mission).map((f, i) => ({
+      name: mission.editorLanguage === "sql" ? f.table ?? "vendas" : i === 0 ? "/data/mission.csv" : `/data/${f.filename}`,
+      headers: f.headers,
+    })),
   };
 }
 
@@ -409,7 +413,14 @@ function explainPython(stderr: string, ctx: ErrorContext): FriendlyError {
   if (kind === "FileNotFoundError") {
     return r("Arquivo não encontrado",
       "O caminho do arquivo está errado — o Python procurou e não achou nada lá.",
-      "O arquivo desta fase fica em `\"/data/mission.csv\"`.");
+      (ctx.tables?.length ?? 0) > 1
+        ? `Os arquivos desta fase ficam em ${ctx.tables!.map((t) => `\`"${t.name}"\``).join(" e ")} — com a barra e o /data/ na frente.`
+        : "O arquivo desta fase fica em `\"/data/mission.csv\"`.");
+  }
+  if (kind === "ValueError" && /(too many|not enough) values to unpack/.test(msg)) {
+    return r("O for esperava pares, mas recebeu outra coisa",
+      "Você pediu DUAS variáveis no `for` (ex.: `for cor, qtd in ...`), mas cada volta entregou um valor só. Num dicionário, o `for` sozinho percorre só as chaves.",
+      "Para receber a chave e o valor juntos, use `.items()`: `for cor, qtd in gemas.items():`");
   }
   if (kind === "ValueError" && /invalid literal for int\(\)/.test(msg)) {
     return r("Esse texto não vira número",

@@ -119,6 +119,12 @@ interface ChartExpectation {
   title?: string | boolean;
   xlabel?: string | boolean;
   ylabel?: string | boolean;
+  /** Várias linhas: os valores de cada uma (em qualquer ordem). Substitui count/values. */
+  series?: number[][];
+  /** Mínimo de nomes na legenda (plt.legend com label= em cada linha) */
+  legend?: number;
+  /** As linhas precisam ter cores diferentes */
+  distinctColors?: boolean;
 }
 
 const sameText = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
@@ -154,12 +160,16 @@ function validateChart(
     if (exp.kind === "bar" && meta.lines.length) {
       return fail("A missão pede só as BARRAS, mas o gráfico também tem uma linha.\n\nApague o plt.plot(...) e deixe só o plt.bar(...).");
     }
+    if (exp.series) {
+      const err = checkSeries(meta, exp);
+      if (err) return fail(err);
+    }
     const got = exp.kind === "line" ? line ?? [] : bars;
     const what = exp.kind === "line" ? "pontos na linha" : "barras";
-    if (exp.count !== undefined && got.length !== exp.count) {
+    if (!exp.series && exp.count !== undefined && got.length !== exp.count) {
       return fail(`O gráfico tem ${got.length} ${what}, mas eram para ser ${exp.count}.\n\nConfira se passou todos os dados (e só eles).`);
     }
-    if (exp.values && exp.values.some((v, i) => got[i] !== v)) {
+    if (!exp.series && exp.values && exp.values.some((v, i) => got[i] !== v)) {
       return fail(`Os valores do gráfico não batem.\n\nEsperado: ${exp.values.join(", ")}\nNo seu gráfico: ${got.map((v) => v ?? "?").join(", ")}\n\nConfira a ordem das listas e se os nomes e os valores não foram trocados.`);
     }
     const checkText = (label: string, wanted: string | boolean | undefined, have: string, how: string) => {
@@ -180,6 +190,53 @@ function validateChart(
     feedback: `Gráfico perfeito! +${mission.xpReward} XP conquistados!`,
     xpEarned: mission.xpReward,
   };
+}
+
+/** Gráfico com várias linhas: quantidade, valores de cada uma, legenda e cores. Devolve o erro ou null. */
+function checkSeries(meta: ChartMeta, exp: ChartExpectation): string | null {
+  const want = exp.series!;
+  const lines = meta.lines;
+  if (lines.length < want.length) {
+    return `O gráfico tem ${lines.length} linha${lines.length === 1 ? "" : "s"}, mas eram para ser ${want.length}.
+
+Use um plt.plot(...) para cada linha — os dois no mesmo gráfico.`;
+  }
+  if (lines.length > want.length) {
+    return `O gráfico tem ${lines.length} linhas, mas eram para ser só ${want.length}.
+
+Confira se não sobrou um plt.plot(...) a mais.`;
+  }
+  const same = (a: (number | null)[], b: number[]) => a.length === b.length && a.every((v, i) => v === b[i]);
+  const left = [...want];
+  for (const l of lines) {
+    const i = left.findIndex((w) => same(l, w));
+    if (i < 0) {
+      return `Uma das linhas não bate com os dados: ${l.map((v) => v ?? "?").join(", ")}.
+
+Esperado (uma linha para cada coluna): ${want.map((w) => w.join(", ")).join("  |  ")}
+
+Confira se usou as colunas certas no plt.plot(...).`;
+    }
+    left.splice(i, 1);
+  }
+  const legend = meta.legend ?? [];
+  if (exp.legend && !legend.length) {
+    return `O gráfico está sem legenda — com duas linhas, ninguém sabe qual é qual.
+
+Dê um nome a cada linha com label="..." dentro do plt.plot(...) e depois chame plt.legend().`;
+  }
+  if (exp.legend && legend.length < exp.legend) {
+    return `A legenda tem ${legend.length} nome, mas são ${exp.legend} linhas.
+
+Coloque label="..." em CADA plt.plot(...).`;
+  }
+  const colors = meta.lineColors ?? [];
+  if (exp.distinctColors && new Set(colors).size < colors.length) {
+    return `As linhas estão da MESMA cor — fica impossível separar uma da outra.
+
+Use uma cor diferente em cada plt.plot(..., color="...").`;
+  }
+  return null;
 }
 
 /** Primeiro padrão obrigatório que falta no código (ou null se todos aparecem) */

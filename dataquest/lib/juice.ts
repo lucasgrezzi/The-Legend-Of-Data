@@ -4,12 +4,12 @@
  * Com prefers-reduced-motion, tremor e partículas somem; números e flash ficam suaves.
  */
 
-function reduced() {
+export function reduced() {
   return typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 }
 
 let layer: HTMLDivElement | null = null;
-function overlay() {
+export function overlay() {
   if (!layer || !layer.isConnected) {
     layer = document.createElement("div");
     layer.className = "juice-layer";
@@ -89,6 +89,8 @@ export function coinsFly(from: { x: number; y: number }, to: { x: number; y: num
 
 /** Número/texto que sobe e some (dano, +XP, "ERROU!") */
 export function floatText(x: number, y: number, text: string, color = "#f5c451", big = false) {
+  // perto do topo (a arena fica logo abaixo da barra), o texto subiria para fora da tela
+  y = Math.max(y, big ? 150 : 100);
   const root = overlay();
   const t = document.createElement("span");
   t.className = `juice-text${big ? " is-big" : ""}`;

@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import type { Mission } from "@/types";
-import { SOLUTION_UNLOCK_FAILS, hintCost, solutionXP } from "@/lib/xp";
+import { SOLUTION_UNLOCK_FAILS, hintCost, hintCostFor, solutionXP } from "@/lib/xp";
+import { RACES } from "@/lib/races";
+import { useGameStore } from "@/store/gameStore";
 import Sprite from "@/components/ui/Sprite";
 import Icon from "@/components/ui/Icon";
 
@@ -38,7 +40,9 @@ export default function HintShop({
   const [confirming, setConfirming] = useState(false);
   const shown = free ? mission.hints.length : hintsBought;
   const nextIdx = shown < mission.hints.length ? shown : null;
-  const nextCost = nextIdx !== null ? hintCost(nextIdx) : 0;
+  const race = useGameStore((s) => s.profile?.race);
+  const nextCost = nextIdx !== null ? hintCostFor(nextIdx, race, mission.track) : 0;
+  const discounted = nextIdx !== null && nextCost < hintCost(nextIdx);
   const failsLeft = Math.max(0, SOLUTION_UNLOCK_FAILS - fails);
   const showSolution = free || solutionRevealed;
 
@@ -80,6 +84,11 @@ export default function HintShop({
             <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--color-muted)" }}>
               {coins >= nextCost ? "Selada. Compre para ler." : `Faltam ${nextCost - coins} moedas — conclua missões para ganhar mais.`}
             </p>
+            {discounted && race && (
+              <p className="affinity-note" style={{ ["--race" as string]: RACES[race].color }}>
+                <Icon name="sparkle" size={12} /> Afinidade {RACES[race].name}: −{hintCost(nextIdx!) - nextCost} moedas nesta região
+              </p>
+            )}
           </div>
           <button className="btn-next btn-pixel is-compact" disabled={coins < nextCost} onClick={() => onBuyHint(nextCost)}>
             Comprar · {nextCost}

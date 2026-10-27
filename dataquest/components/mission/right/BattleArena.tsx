@@ -8,6 +8,8 @@ import { TRACKS } from "@/lib/tracks";
 import { SOLUTION_UNLOCK_FAILS } from "@/lib/xp";
 import { play } from "@/lib/sfx";
 import { burst, centerOf, flash, floatText, shake } from "@/lib/juice";
+import { powerBanner, raceStrike } from "@/lib/powers";
+import { useGameStore } from "@/store/gameStore";
 import MonsterSprite from "@/components/ui/MonsterSprite";
 import Icon from "@/components/ui/Icon";
 
@@ -16,6 +18,7 @@ import Icon from "@/components/ui/Icon";
  * Executar sem erro = feitiço que fere (nunca mata: só a resposta enviada vence);
  * erro = o monstro ri e se cura; Enviar errado = contra-ataque que quebra um escudo
  * (os 3 escudos são os 3 erros que liberam a solução no Grimório).
+ * Os golpes do herói usam o poder da raça (lib/powers.ts): leve no Executar, completo no golpe final.
  */
 export type BattleEvent = { kind: "run-ok" | "run-error" | "miss" | "victory"; seq: number };
 
@@ -26,6 +29,9 @@ const RUN_LINES = [
 ];
 
 const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
+
+/** De onde sai o golpe do herói: o botão que lançou o feitiço */
+const origin = (sel: string, fallback: Element | null) => centerOf(document.querySelector(sel) ?? fallback);
 
 interface BattleArenaProps {
   mission: Mission;
@@ -39,6 +45,7 @@ interface BattleArenaProps {
 
 export default function BattleArena({ mission, defeated, event, fails, children }: BattleArenaProps) {
   const monster = monsterOf(mission.id);
+  const race = useGameStore((s) => s.profile?.race ?? "elfo");
   const boss = isBoss(mission);
   const track = TRACKS[mission.track];
   const maxHP = mission.xpReward * (boss ? 6 : 4);
@@ -62,7 +69,7 @@ export default function BattleArena({ mission, defeated, event, fails, children 
     if (event.kind === "run-ok") {
       const floor = Math.round(maxHP * 0.15);
       const dmg = Math.min(cur - floor, Math.round(maxHP * (0.18 + Math.random() * 0.12)));
-      play("cast");
+      const impact = raceStrike(race, origin(".btn-run", arenaRef.current), at, false);
       setTimeout(() => {
         play("hit");
         if (dmg > 0) {
@@ -77,7 +84,7 @@ export default function BattleArena({ mission, defeated, event, fails, children 
         );
         burst(at.x, at.y, { count: 10, colors: [track.color, "#fff"], spread: 60, size: 5 });
         say(pick(RUN_LINES));
-      }, 200);
+      }, impact);
     }
 
     if (event.kind === "run-error") {
@@ -115,19 +122,24 @@ export default function BattleArena({ mission, defeated, event, fails, children 
     }
 
     if (event.kind === "victory") {
-      play("hit");
-      // hit-stop: congela em silhueta branca, depois desaba
-      el?.animate([{ filter: "brightness(6) saturate(0)" }, { filter: "brightness(6) saturate(0)" }], { duration: 140 });
-      setHP(0);
+      // faixa com o nome do golpe → o golpe especial da raça → hit-stop → o monstro desaba
+      powerBanner(race, mission.bonus && boss ? "Golpe final · Masmorra Secreta" : undefined);
+      const impact = raceStrike(race, origin(".btn-submit", arenaRef.current), at, true);
+      setTimeout(() => {
+        play("hit");
+        // hit-stop: congela em silhueta branca, depois desaba
+        el?.animate([{ filter: "brightness(6) saturate(0)" }, { filter: "brightness(6) saturate(0)" }], { duration: 140 });
+        setHP(0);
+      }, impact);
       setTimeout(() => {
         shake(document.querySelector<HTMLElement>("[data-shake-root]"), "lg");
         flash("rgba(255,255,255,0.5)", 120);
         burst(at.x, at.y, { count: 34, colors: [track.color, "#f5c451", "#fff3c4", "#ffffff"], spread: 170, size: 7 });
-        floatText(at.x, at.y - 30, boss ? "CHEFE DERROTADO!" : "GOLPE FINAL!", "#f5c451", true);
+        floatText(at.x, at.y - 30, mission.bonus && boss ? "MASMORRA CONQUISTADA!" : boss ? "CHEFE DERROTADO!" : "GOLPE FINAL!", "#f5c451", true);
         play("victory");
         setDead(true);
         say(monster.defeat);
-      }, 140);
+      }, impact + 140);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event?.seq]);
@@ -139,7 +151,7 @@ export default function BattleArena({ mission, defeated, event, fails, children 
   return (
     <div
       ref={arenaRef}
-      className={`battle-arena${boss ? " is-boss" : ""}${dead ? " is-dead" : ""}`}
+      className={`battle-arena${boss ? " is-boss" : ""}${mission.bonus ? " is-secret" : ""}${dead ? " is-dead" : ""}`}
       style={{ ["--track" as string]: track.color, ["--track-rgb" as string]: track.rgb }}
       data-tour="arena"
     >

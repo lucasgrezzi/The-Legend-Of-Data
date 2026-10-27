@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Mission, Track } from "@/types";
 import { useGameStore } from "@/store/gameStore";
 import { useGate } from "@/hooks/useGate";
-import { MISSIONS, bossOf, isBoss, missionsOfTrack } from "@/lib/missions";
+import { MISSIONS, SECRET_DUNGEON_TRACK, bossOf, isBoss, missionsOfTrack } from "@/lib/missions";
 import { TRACKS, TRACK_ORDER } from "@/lib/tracks";
 import { RACES } from "@/lib/races";
 import { missingRequirements } from "@/lib/xp";
@@ -20,6 +20,7 @@ import { useAccountStore } from "@/store/accountStore";
 import MissionPin from "./MissionPin";
 import WorldHub, { usePinState } from "./WorldHub";
 import MapFog, { useFogReveal } from "./MapFog";
+import SecretDungeon from "./SecretDungeon";
 import { equippedLook } from "@/lib/shop";
 import TopBar from "@/components/ui/TopBar";
 import Icon from "@/components/ui/Icon";
@@ -265,6 +266,9 @@ function RegionTrail({ track }: { track: Track }) {
           )}
         </div>
       )}
+
+      {/* ── Masmorra Secreta (bônus): parede selada até o chefe cair, depois o portal ── */}
+      {track === SECRET_DUNGEON_TRACK && open && <SecretDungeon />}
     </div>
   );
 }

@@ -34,3 +34,15 @@ export const CARGAS = csvFile(
 8,Oeste,8
 9,Norte,10`
 );
+
+/** Peixes pescados por mês em dois portos (missão 25 — duas linhas com cor e legenda) */
+export const PESCARIA = csvFile(
+  "pescaria",
+  `mes,norte,sul
+Jan,4,2
+Fev,6,3
+Mar,5,7
+Abr,8,6
+Mai,9,4
+Jun,7,8`
+);

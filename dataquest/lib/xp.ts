@@ -1,4 +1,5 @@
-import type { Mission } from "@/types";
+import type { Mission, Race } from "@/types";
+import { AFFINITY_DISCOUNT, RACES } from "@/lib/races";
 import { TEST_MODE } from "@/lib/testMode";
 
 /** Após quantos envios errados a SOLUÇÃO completa do Grimório pode ser revelada */
@@ -9,6 +10,12 @@ export const solutionXP = (reward: number) => Math.floor(reward / 2);
 
 /** Preço (em moedas) da dica de índice i — cada dica custa mais que a anterior */
 export const hintCost = (i: number) => 5 * (i + 1);
+
+/** Preço da dica para o herói: na região de afinidade da raça, cada dica sai AFFINITY_DISCOUNT moedas mais barata */
+export function hintCostFor(i: number, race: Race | undefined, track: Mission["track"]): number {
+  const base = hintCost(i);
+  return race && RACES[race].affinity === track ? Math.max(1, base - AFFINITY_DISCOUNT) : base;
+}
 
 /**
  * Níveis calibrados pela jornada (XP acumulado na ordem de jogo):

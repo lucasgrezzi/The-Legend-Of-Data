@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { Mission, RunResult } from "@/types";
 import { validateOutput } from "@/lib/validation";
-import { MISSIONS, getNeighbors, missionDataFiles } from "@/lib/missions";
+import { MISSIONS, getNeighbors, missionDataFiles, siblingsOf } from "@/lib/missions";
 import { TRACKS } from "@/lib/tracks";
 import { isMissionUnlocked, missingRequirements, solutionXP } from "@/lib/xp";
 import { getAttempts, useGameStore } from "@/store/gameStore";
@@ -103,7 +103,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
     }
   }, [gate, unlocked, isNarrative, alreadyCompleted, mission, completeMission]);
 
-  const trackMissions = MISSIONS.filter((m) => m.track === mission.track);
+  const trackMissions = siblingsOf(mission);
   const trackIndex    = trackMissions.findIndex((m) => m.id === mission.id);
   const trackTotal    = trackMissions.length;
 
@@ -118,7 +118,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
             code,
             missionDataFiles(mission).map((f) => ({ name: f.table ?? "vendas", csv: f.rawCsv }))
           )
-        : runCode(code, mission.dataFile?.rawCsv),
+        : runCode(code, mission.dataFile?.rawCsv, (mission.extraDataFiles ?? []).map((f) => ({ name: f.filename, csv: f.rawCsv }))),
     [mission, runCode, runSQL]
   );
 
@@ -137,7 +137,8 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
       }
       const show = (r: MissionResult) => setResult(r);
       // Primeiro a batalha (golpe final ou contra-ataque), depois a janela de resultado
-      const delay = alreadyCompleted ? 0 : validation.passed ? 1700 : 650;
+      // (o golpe final começa com o golpe especial da raça, ~0,3–0,6 s antes do impacto)
+      const delay = alreadyCompleted ? 0 : validation.passed ? 2300 : 650;
       if (!alreadyCompleted) fire(validation.passed ? "victory" : "miss");
       if (firstWin) {
         setTimeout(() => {
@@ -145,7 +146,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
           const to = centerOf(document.querySelector("[data-coin-target]"));
           let n = 0;
           coinsFly(from, to, 8, () => { if (n++ % 2 === 0) play("coin"); });
-        }, 420);
+        }, 1000);
       }
       setTimeout(() => show({
         passed: validation.passed,
@@ -186,14 +187,20 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
         <div className="flex items-center gap-3 min-w-0">
           <Brand />
           <span className="crumb-sep" aria-hidden><Icon name="chevronRight" size={16} /></span>
-          <Link
-            href={`/regiao/${mission.track}`}
-            className="region-chip"
-            title={`Voltar para ${track.subtitle}`}
-            style={{ color: track.color, ["--tint" as string]: track.rgb }}
-          >
-            <Sprite src={track.sprite} size={32} style={{ margin: "-4px 0" }} /> {track.name}
-          </Link>
+          {mission.bonus ? (
+            <Link href={`/regiao/${mission.track}`} className="region-chip is-secret" title="Voltar ao portal da Masmorra Secreta">
+              <Icon name="sparkle" size={16} /> Masmorra Secreta
+            </Link>
+          ) : (
+            <Link
+              href={`/regiao/${mission.track}`}
+              className="region-chip"
+              title={`Voltar para ${track.subtitle}`}
+              style={{ color: track.color, ["--tint" as string]: track.rgb }}
+            >
+              <Sprite src={track.sprite} size={32} style={{ margin: "-4px 0" }} /> {track.name}
+            </Link>
+          )}
           <span className="crumb-sep" aria-hidden><Icon name="chevronRight" size={16} /></span>
           <span className="truncate" style={{ color: "var(--color-text-2)", fontSize: 14, fontWeight: 700 }}>
             {mission.missionTitle}
@@ -210,7 +217,7 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
               const seg = (
                 <span
                   className={`quest-gem${done ? " is-done" : ""}${current ? " is-current" : ""}${!done && !current && !canOpen ? " is-locked" : ""}`}
-                  style={{ ["--gem" as string]: track.color }}
+                  style={{ ["--gem" as string]: mission.bonus ? "#c9a7ff" : track.color }}
                 />
               );
               return canOpen && !current ? (
@@ -324,6 +331,9 @@ export default function MissionScreen({ mission }: MissionScreenProps) {
           onClose={() => setTourOpen(false)}
         />
       )}
+
+      {/* Fase bônus: chega-se pelo portal — a tela abre saindo de um clarão roxo */}
+      {mission.bonus && <div className="portal-exit" aria-hidden />}
 
       <MissionResultDialog
         result={result}

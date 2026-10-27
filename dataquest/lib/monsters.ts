@@ -104,6 +104,14 @@ export const MONSTERS: Record<number, Monster> = {
     "groupby sem soma? Nem uma faísca.",
     "Contou as pendentes! O fole riu de você.",
   ], "O fole é seu, mestre das regiões…"),
+  23: m("ettin", "Ettin dos Dois Livros", "EU leio os pedidos! EU leio os preços! NÓS não nos falamos!", [
+    "Sem merge? A cabeça da esquerda nunca vai contar pra direita!",
+    "Somou o número da peça? Até eu, com duas cabeças, sei que não é preço.",
+  ], "Nós… concordamos… pela primeira vez…"),
+  24: m("aranha-tecela", "Aranha Tecelã", "Lista comprida é coisa de minhoca. Eu só aceito GRADES.", [
+    "Apareceu .0? Isso é média, docinho. Eu pedi SOMA.",
+    "Linha no lugar de coluna! Minha teia ficou de cabeça pra baixo.",
+  ], "Que grade linda… vou emoldurar… *se enrola*"),
   14: m("colosso", "Colosso da Têmpera", "O Rei quer o faturamento. Eu quero esmagar quem errar a conta!", [
     "Coluna nova sem multiplicar? FRACO!",
     "Esqueceu o filtro! A ordem mudou, HAHAHA!",
@@ -119,11 +127,27 @@ export const MONSTERS: Record<number, Monster> = {
     "Barra onde era linha? Que vergonha.",
     "Eixo sem nome! Ninguém entende nada!",
   ], "A rota… está traçada… *voa embora*"),
+  25: m("prisma", "Prisma Desbotado", "Tudo cinza… tudo igual… ninguém sabe qual linha é qual…", [
+    "Duas linhas da mesma cor? Que tédio.",
+    "Sem legenda! Agora são gêmeas sem crachá.",
+  ], "Cores! Eu vejo CORES! *brilha em arco-íris*"),
   22: m("kraken", "O Kraken dos Portos", "Os capitães brigam e eu afundo os navios. Só um gráfico me para!", [
     "Esqueceu de agrupar! Quatro portos viraram quarenta!",
     "Ordem errada! Lá vai mais um navio pro fundo.",
     "Glub glub, que gráfico ruim.",
   ], "O Conselho… decidiu… glub…"),
+
+  // ── Masmorra Secreta (bônus) ──
+  26: m("hidra", "Hidra Sem Fim", "Corta uma, nascem outras. Quantos golpes? Nem EU sei!", [
+    "Seu loop parou cedo! Ainda tenho cabeça sobrando.",
+    "Loop sem fim? Eu adoro. Fico aqui para sempre.",
+    "Esqueceu a cabeça nova? Ela não esqueceu de nascer.",
+  ], "Zero… cabeças… como isso é possível…"),
+  27: m("esfinge", "A Esfinge dos Pares", "Cada gema tem seu nome. Cada nome tem seu número. Responda, mortal.", [
+    "Chave errada! No meu dicionário essa palavra não existe.",
+    "Esqueceu o pedágio? Eu não esqueço. Nunca.",
+    "Contou na mão? Que coisa mais… plebeia.",
+  ], "Enigma… decifrado. O tesouro é seu, Arquivista."),
 };
 
 // Onde a coroa senta em cada chefe (medido nos sprites)
@@ -131,6 +155,7 @@ MONSTERS[8].head = [16, 1];
 MONSTERS[12].head = null; // o Rei Esquecido já usa coroa
 MONSTERS[14].head = [14, 1];
 MONSTERS[22].head = [17, 0];
+MONSTERS[27].head = [8, 0];
 
 /**
  * Posição da coroa de chefe sobre o sprite desenhado em `size` px (centro do topo da cabeça),

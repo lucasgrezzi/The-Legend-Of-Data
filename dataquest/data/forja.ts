@@ -93,3 +93,49 @@ export const VISITAS = csvFile(
 10,Faelan,elfo
 11,Gimra,anao`
 );
+
+/**
+ * Livro de pedidos da semana (missão 23 — merge). Só tem o NÚMERO da peça; o preço está no catálogo.
+ * Gasto por freguês depois do merge: Grosh 200 · Durin 190 · Lia 140 · Zik 40 (sem empates).
+ * (Somar peca_id sem o merge dá Grosh 3 · Durin 9 · Lia 5 · Zik 5 — reprova.)
+ */
+export const PEDIDOS_SEMANA = csvFile(
+  "pedidos_semana",
+  `id,cliente,peca_id
+1,Durin,4
+2,Lia,2
+3,Grosh,1
+4,Durin,5
+5,Lia,3
+6,Zik,5
+7,Grosh,2`
+);
+
+/** Catálogo de preços da Forja (missão 23): lido em /data/catalogo.csv */
+export const CATALOGO = csvFile(
+  "catalogo",
+  `peca_id,peca,preco
+1,Espada,120
+2,Escudo,80
+3,Elmo,60
+4,Machado,150
+5,Adaga,40`
+);
+
+/**
+ * Entregas de armas às regiões (missão 24 — pivot_table). Soma por regiao × arma:
+ * Leste arco 6, espada 3 · Norte arco 1, espada 6 · Sul arco 5, espada 5 (todas as combinações existem: sem NaN).
+ * Sem aggfunc="sum" sai a MÉDIA (Norte espada 3.0) — erro típico, a saída mostra ".0".
+ */
+export const ENTREGAS = csvFile(
+  "entregas",
+  `id,regiao,arma,quantidade
+1,Norte,espada,4
+2,Sul,arco,2
+3,Leste,espada,3
+4,Norte,arco,1
+5,Sul,espada,5
+6,Leste,arco,6
+7,Norte,espada,2
+8,Sul,arco,3`
+);

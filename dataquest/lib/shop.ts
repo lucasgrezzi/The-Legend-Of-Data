@@ -51,6 +51,10 @@ export const SHOP_ITEMS: ShopItem[] = [
     requiresMissionId: 14, description: "Brokk aprova. E Brokk não aprova quase nada." },
   { id: "titulo-farol", slot: "titulo", name: "Guardião do Farol", price: 50, value: "Guardião do Farol",
     requiresMissionId: 22, description: "Dona Íris não elogia ninguém. Mas deixou você segurar a lente." },
+  { id: "titulo-hidra", slot: "titulo", name: "Caçador de Hidras", price: 40, value: "Caçador de Hidras",
+    requiresMissionId: 26, description: "Achou a parede rachada e voltou com zero cabeças de Hidra para contar a história." },
+  { id: "titulo-enigmas", slot: "titulo", name: "Decifrador de Enigmas", price: 70, value: "Decifrador de Enigmas",
+    requiresMissionId: 27, description: "A Esfinge perguntou. Você respondeu. Ela ainda está pensando em como você fez isso." },
   { id: "titulo-lenda", slot: "titulo", name: "Lenda do Arquivo", price: 150, value: "Lenda do Arquivo",
     description: "O título mais caro do reino. Ninguém sabe o que faz. Todo mundo quer." },
 
@@ -79,6 +83,8 @@ export const SHOP_ITEMS: ShopItem[] = [
     requiresMissionId: 12, description: "Ainda não cospe fogo. Só faíscas. Mas tem atitude." },
   { id: "mascote-grifo", slot: "mascote", name: "Grifinho", price: 150, value: "/assets/pets/grifo.png", rarity: "epico",
     requiresMissionId: 12, description: "Metade águia, metade leão, inteiro dramático. Voa em JOIN: junta duas criaturas numa só." },
+  { id: "mascote-fenix", slot: "mascote", name: "Fênix da Masmorra", price: 180, value: "/assets/pets/fenix.png", rarity: "lendario",
+    requiresMissionId: 27, description: "Guardava o baú da Esfinge. Renasce das cinzas a cada bug corrigido — ou seja, vive renascendo." },
   { id: "mascote-dragao-dourado", slot: "mascote", name: "Dragão Dourado", price: 200, value: "/assets/pets/dragao-dourado.png", rarity: "lendario",
     requiresMissionId: 22, description: "O guardião do Farol. Dorme em cima de gráficos de ouro e acorda só para os lendários." },
 ];

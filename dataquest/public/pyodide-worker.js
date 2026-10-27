@@ -18,7 +18,7 @@ init().catch((err) => {
 });
 
 self.onmessage = async (event) => {
-  const { id, code, csvData } = event.data;
+  const { id, code, csvData, extraFiles } = event.data;
 
   if (!pyodide) {
     self.postMessage({ type: "RESULT", id, stdout: "", chartBase64: null, tableJson: null, error: "Pyodide nao inicializado." });
@@ -28,6 +28,11 @@ self.onmessage = async (event) => {
   if (csvData) {
     pyodide.FS.mkdirTree("/data");
     pyodide.FS.writeFile("/data/mission.csv", csvData);
+  }
+  // Arquivos extras da missão (ex.: catalogo.csv para o merge), em /data/<nome>
+  for (const f of extraFiles ?? []) {
+    pyodide.FS.mkdirTree("/data");
+    pyodide.FS.writeFile(`/data/${f.name}`, f.csv);
   }
 
   // O código do aluno roda sozinho (sem embrulho) para os números de linha do erro baterem com o editor,
@@ -76,6 +81,8 @@ if _fignums:
             "title": _ax.get_title() or (_plt.gcf()._suptitle.get_text() if _plt.gcf()._suptitle else ""),
             "xlabel": _ax.get_xlabel(),
             "ylabel": _ax.get_ylabel(),
+            "legend": [t.get_text() for t in _ax.get_legend().get_texts()] if _ax.get_legend() else [],
+            "lineColors": [matplotlib.colors.to_hex(l.get_color()) for l in _ax.lines],
         })
     _imgbuf = _io.BytesIO()
     _plt.gcf().savefig(_imgbuf, format="png", bbox_inches="tight", dpi=96)

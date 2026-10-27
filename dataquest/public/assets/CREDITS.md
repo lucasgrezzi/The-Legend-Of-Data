@@ -44,6 +44,10 @@ Dungeon Crawl Stone Soup tiles (mesmo pacote dos `sprites/`, https://opengameart
 | harpia.png | harpy | kraken.png | animals/kraken_head |
 | boneco.png | statues/training_dummy | | |
 
+Sessão 19 (pacote "Dungeon Crawl Stone Soup Full", mesmo autor e licença CC0, pasta `monster/`):
+ettin.png ← ettin_new · aranha-tecela.png ← animals/orb_spider · prisma.png ← nonliving/fulminant_prism_1 ·
+hidra.png ← dragons/hydra_5_new · esfinge.png ← sphinx_new.
+
 ## Mascotes novos (`pets/`) — CC0 (Dungeon Crawl Stone Soup, mesmo pacote dos monstros)
 | Arquivo | Original (`dc-mon/`) |
 |---|---|
@@ -51,6 +55,7 @@ Dungeon Crawl Stone Soup tiles (mesmo pacote dos `sprites/`, https://opengameart
 | grifo.png | griffon |
 | vagalume.png | animals/giant_firefly |
 | dragao-dourado.png | golden_dragon |
+| fenix.png | phoenix (pacote Full, Sessão 19) |
 (gato, slime, coruja e dragao continuam sendo arte própria de `scripts/gerar_mascotes.py`.)
 
 ## Sons

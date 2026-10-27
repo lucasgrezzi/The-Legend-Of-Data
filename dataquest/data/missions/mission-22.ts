@@ -3,12 +3,12 @@ import { CARGAS } from "@/data/farol";
 
 // Dificuldade 4/5 — CHEFE do Farol: junta groupby + sort_values (Forja) com plt.bar, título e eixos (Farol).
 // Única novidade, explicada no Estudo: .index e .values de uma Series. Template quase vazio.
-// Ordem de jogo: depois da 16 (A Rota das Tempestades).
+// Ordem de jogo: depois da 25 (O Prisma Desbotado).
 const mission22: Mission = {
   id: 22,
   track: "dataviz",
   type: "dataviz",
-  chapterTitle: "O Farol da Verdade — Capítulo III (Chefe)",
+  chapterTitle: "O Farol da Verdade — Capítulo IV (Chefe)",
   missionTitle: "O Conselho dos Portos",
   concept: "Gráfico a partir de um groupby (chefe)",
   narrative: `Alguém bate na porta do farol. TOC. TOC. TOC. É o Conselho dos Portos: quatro capitães, quatro chapéus enormes e nenhuma paciência.
@@ -72,7 +72,7 @@ import matplotlib.pyplot as plt
     { pattern: "read_csv\\(", hint: "Leia o registro com pd.read_csv(\"/data/mission.csv\")." },
   ],
   dataFile: CARGAS,
-  unlockCondition: { requiredMissionIds: [16] },
+  unlockCondition: { requiredMissionIds: [25] },
 };
 
 export default mission22;
