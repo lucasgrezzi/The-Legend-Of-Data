@@ -2,19 +2,19 @@ import type { Mission } from "@/types";
 import { EXPEDICOES, HEROIS } from "@/data/catacumbas";
 
 // Dificuldade 5/5 — chefe da trilha SQL: JOIN entre duas tabelas + GROUP BY + ORDER BY.
-// Template quase vazio. Ordem de jogo: depois da 11; abre a Forja (Pandas).
+// Template quase vazio. Ordem de jogo: depois da 31; abre a Forja (Pandas). O JOIN foi ensinado na 30 e o LEFT JOIN na 31.
 const mission12: Mission = {
   id: 12,
   track: "sql",
   type: "sql",
-  chapterTitle: "As Catacumbas de Dados — Capítulo VII (Chefe)",
+  chapterTitle: "As Catacumbas de Dados — Capítulo XI (Chefe)",
   missionTitle: "O Rei Esquecido",
-  concept: "SQL: JOIN entre tabelas",
+  concept: "SQL: JOIN + GROUP BY (somar por herói)",
   narrative: `CHEFE DA REGIÃO. Solta a música dramática de novo. Mais alto.
 
 No coração das Catacumbas, num trono de pedra, está o Rei Esquecido — o primeiro Arquivista-Rei, que se trancou aqui durante a Grande Bagunça e esqueceu onde deixou a chave. Faz trezentos anos. Ele está levemente mal-humorado.
 
-"Quero saber quem trouxe mais ouro ao meu reino!", troveja, abrindo dois livros: a lista dos heróis e o Livro das Expedições. Só que o Livro não guarda nomes, só um número para cada herói: o heroi_id. Coisa de rei com preguiça de escrever.
+"Quero saber quem trouxe mais ouro ao meu reino!", troveja, abrindo dois livros: a lista dos heróis e o Livro das Expedições, aquele que só guarda o heroi_id. Coisa de rei com preguiça de escrever. Você já sabe juntar os dois; agora falta somar.
 
 Junte os dois livros, some o ouro de cada herói e ele libera a passagem para a Forja. Sem pressão. Só um rei morto-vivo te encarando.`,
   realWorld: `JOIN junta duas tabelas por uma coluna em comum. Uma loja guarda os clientes numa tabela e os pedidos em outra — e o pedido só tem o id do cliente. Para saber quanto cada cliente gastou, você junta as duas pelo id. É um dos comandos mais usados no SQL do dia a dia.`,
@@ -79,7 +79,7 @@ ORDER BY ouro_total DESC;`,
   ],
   dataFile: HEROIS,
   extraDataFiles: [EXPEDICOES],
-  unlockCondition: { requiredMissionIds: [11] },
+  unlockCondition: { requiredMissionIds: [31] },
 };
 
 export default mission12;

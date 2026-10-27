@@ -77,6 +77,26 @@ export const MONSTERS: Record<number, Monster> = {
     "HAVING no lugar de WHERE ou WHERE no lugar de HAVING? Hihi.",
     "Grupo errado, ganhei um lanchinho.",
   ], "Tudo… em… grupinhos… não!"),
+  28: m("lich", "Lich Avaliador", "Ouro, prata ou bronze? Eu carimbo tudo errado e ninguém percebe.", [
+    "Seu CASE pegou o primeiro WHEN que viu. Que pressa!",
+    "Esqueceu o END? Seu CASE nunca termina. Igual a mim.",
+    "Escudo do Rei com selo de prata? Ofensa real!",
+  ], "Os selos… estão… certos… *desfaz em pó*"),
+  29: m("vampiro", "Vampiro da Média", "Eu só bebo o que vale mais que a média. Qual é a média? Descubra.", [
+    "Escreveu 130 na mão? E se o tesouro mudar amanhã, espertinho?",
+    "Sua consulta de dentro esqueceu os parênteses. Que sede…",
+    "Abaixo da média! Bleh. Nem para o jantar serve.",
+  ], "A luz do SELECT… está… queimando…"),
+  30: m("guerreiro-espectral", "Guerreiro Espectral", "Eu marchei em todas as expedições. Mas quem estava comigo? Só o Livro sabe.", [
+    "Esqueceu o ON? Juntou cada linha com todas as outras. Que exército!",
+    "heroi_id = 3? Quem é 3? Eu quero NOMES!",
+    "Ordem errada! Quem trouxe mais ouro vem na frente da marcha.",
+  ], "Agora sei com quem marchei… posso descansar."),
+  31: m("sombra", "A Sombra dos Esquecidos", "Eu guardo quem nunca desceu. O JOIN comum nem sabe que eles existem.", [
+    "JOIN simples? Meus esquecidos sumiram de novo!",
+    "Esqueceu o IS NULL? Trouxe todo mundo, até quem já viajou.",
+    "= NULL não funciona, mortal. Vazio não é igual a nada.",
+  ], "Lembrados… finalmente… lembrados…"),
   12: m("rei-esquecido", "O Rei Esquecido", "Ousas ler o Livro das Expedições? JUNTA as tabelas, se puder.", [
     "Um JOIN sem ON… que plebeu.",
     "LEFT JOIN? Lyra não viajou, tolo!",
@@ -143,6 +163,11 @@ export const MONSTERS: Record<number, Monster> = {
     "Loop sem fim? Eu adoro. Fico aqui para sempre.",
     "Esqueceu a cabeça nova? Ela não esqueceu de nascer.",
   ], "Zero… cabeças… como isso é possível…"),
+  32: m("mimico", "O Baú Mímico", "Pode abrir! Algumas runas são de verdade. Outras são minha língua. Hehe.", [
+    "ValueError! Seu feitiço inteiro quebrou por causa de UMA runa falsa.",
+    "Colocou o try em volta de tudo? Parou na primeira runa quebrada!",
+    "Somou as runas quebradas também? Isso não é número, é baba.",
+  ], "Fui… desmascarado… pode ficar com as runas boas."),
   27: m("esfinge", "A Esfinge dos Pares", "Cada gema tem seu nome. Cada nome tem seu número. Responda, mortal.", [
     "Chave errada! No meu dicionário essa palavra não existe.",
     "Esqueceu o pedágio? Eu não esqueço. Nunca.",

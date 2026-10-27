@@ -50,8 +50,12 @@ function validateTable(
     return { passed: false, feedback: "Nenhuma tabela retornada.", xpEarned: 0 };
   }
 
-  /** tooMany/tooFew: dica própria da fase quando vêm linhas a mais/a menos (no lugar da dica geral) */
-  let expected: { headers: string[]; rowCount: number; firstRow?: string[]; tooMany?: string; tooFew?: string };
+  /** tooMany/tooFew: dica própria da fase quando vêm linhas a mais/a menos (no lugar da dica geral).
+   *  rows: todas as linhas esperadas, na ordem (confere a tabela inteira); wrongRow: dica quando uma delas não bate. */
+  let expected: {
+    headers: string[]; rowCount: number; firstRow?: string[]; rows?: string[][];
+    tooMany?: string; tooFew?: string; wrongRow?: string;
+  };
   try {
     expected = JSON.parse(mission.expectedOutput);
   } catch {
@@ -96,6 +100,25 @@ function validateTable(
         }
 Primeira linha esperada: ${expected.firstRow.join(", ")}
 Obtida: ${got.join(", ")}`,
+        xpEarned: 0,
+      };
+    }
+  }
+
+  if (expected.rows) {
+    // compara pelo NOME da coluna (a ordem das colunas no SELECT não importa)
+    const have = tableData.headers.map((x) => x.toLowerCase());
+    const cols = expected.headers.map((h) => have.indexOf(h.toLowerCase()));
+    const bad = expected.rows.findIndex((row, r) => row.some((v, c) => String(tableData.rows[r]?.[cols[c]] ?? "") !== String(v)));
+    if (bad >= 0) {
+      const got = cols.map((c) => String(tableData.rows[bad]?.[c] ?? "") || "(vazio)");
+      return {
+        passed: false,
+        feedback: `A linha ${bad + 1} não é a esperada.
+Esperada: ${expected.rows[bad].join(", ")}
+Obtida: ${got.join(", ")}
+
+${expected.wrongRow ?? "Confira o filtro, as contas e a ordem (ORDER BY)."}`,
         xpEarned: 0,
       };
     }

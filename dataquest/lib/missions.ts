@@ -27,6 +27,11 @@ import mission24 from "@/data/missions/mission-24";
 import mission25 from "@/data/missions/mission-25";
 import mission26 from "@/data/missions/mission-26";
 import mission27 from "@/data/missions/mission-27";
+import mission28 from "@/data/missions/mission-28";
+import mission29 from "@/data/missions/mission-29";
+import mission30 from "@/data/missions/mission-30";
+import mission31 from "@/data/missions/mission-31";
+import mission32 from "@/data/missions/mission-32";
 
 /**
  * Ordem de jogo. O `id` é estável (é a chave do progresso salvo) e NÃO define a ordem:
@@ -44,9 +49,13 @@ const MAIN_MISSIONS: Mission[] = [
   mission17, // SQL — LIMIT
   mission9,  // SQL — AND / OR / IN
   mission18, // SQL — LIKE
+  mission28, // SQL — CASE WHEN
   mission10, // SQL — agregações
+  mission29, // SQL — subconsulta
   mission11, // SQL — GROUP BY + HAVING
-  mission12, // SQL — JOIN (chefe)
+  mission30, // SQL — JOIN
+  mission31, // SQL — LEFT JOIN + IS NULL
+  mission12, // SQL — JOIN + GROUP BY (chefe)
   mission4,  // Pandas — ler CSV e filtrar
   mission19, // Pandas — sort_values + head
   mission20, // Pandas — sum, mean e max
@@ -67,6 +76,7 @@ const MAIN_MISSIONS: Mission[] = [
  */
 export const BONUS_MISSIONS: Mission[] = [
   mission26, // Python — while (Hidra)
+  mission32, // Python — try / except (Mímico)
   mission27, // Python — dicionários (Esfinge, chefe bônus)
 ];
 

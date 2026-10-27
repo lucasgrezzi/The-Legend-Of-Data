@@ -54,6 +54,10 @@ Sessão 19 (pacote "Dungeon Crawl Stone Soup Full", mesmo autor e licença CC0, 
 ettin.png ← ettin_new · aranha-tecela.png ← animals/orb_spider · prisma.png ← nonliving/fulminant_prism_1 ·
 hidra.png ← dragons/hydra_5_new · esfinge.png ← sphinx_new.
 
+Sessão 20 (pacote "crawl-tiles Oct-5-2010", `dc-mon/undead/`): lich.png ← lich · vampiro.png ← vampire ·
+guerreiro-espectral.png ← spectral_warrior · sombra.png ← shadow.
+mimico.png: baú-mímico do Kenney **Tiny Dungeon** (CC0, tile 92 do tilemap), ampliado 2× sem suavizar.
+
 ## Mascotes novos (`pets/`) — CC0 (Dungeon Crawl Stone Soup, mesmo pacote dos monstros)
 | Arquivo | Original (`dc-mon/`) |
 |---|---|

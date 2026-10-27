@@ -8,7 +8,7 @@ const mission27: Mission = {
   track: "python",
   type: "python",
   bonus: true,
-  chapterTitle: "A Masmorra Secreta — Sala II (Chefe Bônus)",
+  chapterTitle: "A Masmorra Secreta — Sala III (Chefe Bônus)",
   missionTitle: "O Enigma da Esfinge",
   concept: "Dicionários: chave e valor",
   narrative: `A última sala da Masmorra Secreta é um salão de pedra coberto de joias. No meio, deitada sobre um baú, está a Esfinge: corpo de leão, asas de águia e a paciência de uma professora no último dia de aula.
@@ -86,7 +86,7 @@ gemas = {"rubi": 3, "safira": 5}
     { pattern: "\\.items\\(\\)", hint: "Percorra a bolsa com for cor, qtd in gemas.items(): — assim funciona para qualquer número de gemas." },
     { pattern: "sum\\(\\s*gemas\\.values\\(\\)\\s*\\)|\\+=|=\\s*\\w+\\s*\\+\\s*\\w+", hint: "Calcule o total com sum(gemas.values()) — sem digitar o número." },
   ],
-  unlockCondition: { requiredMissionIds: [26] },
+  unlockCondition: { requiredMissionIds: [32] },
 };
 
 export default mission27;

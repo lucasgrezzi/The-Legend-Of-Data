@@ -201,7 +201,7 @@ function explainPython(stderr: string, ctx: ErrorContext): FriendlyError {
   }
   if (/expected ':'/.test(msg)) {
     return r("Faltaram os dois-pontos",
-      "Linhas que começam com `if`, `elif`, `else`, `for`, `while` ou `def` precisam terminar com `:`. É como o Python sabe que vem um bloco logo abaixo.",
+      "Linhas que começam com `if`, `elif`, `else`, `for`, `while`, `def`, `try` ou `except` precisam terminar com `:`. É como o Python sabe que vem um bloco logo abaixo.",
       "Coloque `:` no fim da linha. Ex.: `if xp >= 10:`");
   }
   if (/Perhaps you forgot a comma/.test(msg)) {
@@ -425,7 +425,9 @@ function explainPython(stderr: string, ctx: ErrorContext): FriendlyError {
   if (kind === "ValueError" && /invalid literal for int\(\)/.test(msg)) {
     return r("Esse texto não vira número",
       "O `int()` transforma texto em número, mas só se o texto for feito de algarismos (`\"42\"`). Esse aqui tem letras.",
-      "Passe só números para o `int()`.");
+      /\btry\s*:/.test(ctx.code)
+        ? "O `try` precisa ficar em volta do `int()`, dentro do `for`, com o `except ValueError:` logo abaixo e no mesmo recuo."
+        : "Se alguns textos podem não ser números, proteja o `int()` com `try:` e `except ValueError:`. Assim o programa avisa e continua.");
   }
   if (kind === "RecursionError") {
     return r("A função não para de se chamar",
@@ -531,6 +533,16 @@ function explainSql(stderr: string, ctx: ErrorContext): FriendlyError {
       .filter((w) => w.length >= 3 && !SQL_KEYWORDS.includes(w.toUpperCase()) && !allCols.includes(w) && !tables.some((t) => t.name === w))
       .map((w) => [w, closest(w.toUpperCase(), SQL_KEYWORDS)] as const)
       .find(([, k]) => k);
+    if (/\bCASE\b/i.test(bare) && !/\bEND\b/i.test(bare)) {
+      return r("Faltou o END do CASE",
+        "Todo `CASE` precisa terminar com `END`. Sem ele, o SQL não sabe onde a regra acaba.",
+        "Ex.: `CASE WHEN valor >= 200 THEN 'ouro' ELSE 'bronze' END AS selo`");
+    }
+    if (/(?:[<>=]|\bIN|\bWHERE)\s*SELECT\b/i.test(bare)) {
+      return r("A subconsulta vai entre parênteses",
+        "Um `SELECT` dentro de outro precisa ficar entre parênteses, para o SQL saber onde ele começa e termina.",
+        "Ex.: `WHERE valor > (SELECT AVG(valor) FROM reliquias)`");
+    }
     if (typo) {
       return r(`Era \`${typo[1]}\`?`,
         `O SQL não conhece a palavra \`${typo[0]}\`. Parece \`${typo[1]}\` com uma letra trocada.`,

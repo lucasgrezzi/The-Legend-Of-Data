@@ -9,7 +9,7 @@ const SP = process.argv[2];
 const BASE = process.argv[3] ?? "http://localhost:3001";
 const ONLY = process.argv[4]?.split(",").map(Number);
 const ROOT = new URL("../data/missions/", import.meta.url);
-const ORDER = [0, 1, 5, 6, 2, 7, 8, 26, 27, 3, 17, 9, 18, 10, 11, 12, 4, 19, 20, 21, 13, 23, 24, 14, 15, 16, 25, 22]
+const ORDER = [0, 1, 5, 6, 2, 7, 8, 26, 32, 27, 3, 17, 9, 18, 28, 10, 29, 11, 30, 31, 12, 4, 19, 20, 21, 13, 23, 24, 14, 15, 16, 25, 22]
   .filter((id) => !ONLY || ONLY.includes(id));
 const solution = (id) => fs.readFileSync(new URL(`mission-${id}.ts`, ROOT), "utf-8").match(/solution: `([\s\S]*?)`,/)[1];
 
@@ -36,6 +36,17 @@ const MISTAKES = {
   18: [["sem o %", "SELECT nome, sala FROM reliquias WHERE nome LIKE 'A' ORDER BY nome"],
        ["a minúsculo", "SELECT nome, sala FROM reliquias WHERE nome LIKE 'a%' ORDER BY nome"],
        ["aspas duplas", 'SELECT nome, sala FROM reliquias WHERE nome LIKE "A%" ORDER BY nome']],
+  28: [["WHEN na ordem errada", "SELECT nome, valor, CASE WHEN valor >= 100 THEN 'prata' WHEN valor >= 200 THEN 'ouro' ELSE 'bronze' END AS selo\nFROM reliquias WHERE amaldicoada = 'nao' ORDER BY valor DESC"],
+       ["sem o END", "SELECT nome, valor, CASE WHEN valor >= 200 THEN 'ouro' ELSE 'bronze' AS selo\nFROM reliquias WHERE amaldicoada = 'nao' ORDER BY valor DESC"],
+       ["sem o WHERE", "SELECT nome, valor, CASE WHEN valor >= 200 THEN 'ouro' WHEN valor >= 100 THEN 'prata' ELSE 'bronze' END AS selo\nFROM reliquias ORDER BY valor DESC"]],
+  29: [["número na mão", "SELECT nome, valor FROM reliquias WHERE valor > 130 ORDER BY valor DESC"],
+       ["subconsulta sem parênteses", "SELECT nome, valor FROM reliquias WHERE valor > SELECT AVG(valor) FROM reliquias ORDER BY valor DESC"]],
+  30: [["ON errado", "SELECT h.nome, e.destino, e.ouro FROM expedicoes e JOIN herois h ON e.id = h.id ORDER BY e.ouro DESC"],
+       ["sem ON", "SELECT h.nome, e.destino, e.ouro FROM expedicoes e, herois h ORDER BY e.ouro DESC"],
+       ["coluna ambígua", "SELECT nome, destino, ouro, id FROM expedicoes e JOIN herois h ON e.heroi_id = h.id ORDER BY ouro DESC"]],
+  31: [["JOIN simples", "SELECT h.nome, h.raca FROM herois h JOIN expedicoes e ON e.heroi_id = h.id WHERE e.id IS NULL ORDER BY h.nome"],
+       ["= NULL", "SELECT h.nome, h.raca FROM herois h LEFT JOIN expedicoes e ON e.heroi_id = h.id WHERE e.id = NULL ORDER BY h.nome"],
+       ["sem filtro", "SELECT h.nome, h.raca FROM herois h LEFT JOIN expedicoes e ON e.heroi_id = h.id ORDER BY h.nome"]],
   10: [["sem AS", "SELECT COUNT(*), SUM(valor), AVG(valor), MAX(valor)\nFROM reliquias\nWHERE amaldicoada = 'nao';"]],
   11: [["SUM no WHERE", "SELECT tipo, COUNT(*) AS quantidade, SUM(valor) AS total\nFROM reliquias\nWHERE SUM(valor) > 300\nGROUP BY tipo"]],
   12: [["LEFT JOIN", "SELECT h.nome, COUNT(e.id) AS viagens, SUM(e.ouro) AS ouro_total\nFROM herois h\nLEFT JOIN expedicoes e ON e.heroi_id = h.id\nGROUP BY h.nome\nORDER BY ouro_total DESC"]],
@@ -64,6 +75,10 @@ const MISTAKES = {
        ["mesma cor", P.replace("import pandas", "import matplotlib.pyplot as plt\nimport pandas") + 'plt.plot(df["mes"], df["norte"], color="blue", label="Norte")\nplt.plot(df["mes"], df["sul"], color="blue", label="Sul")\nplt.legend()\nplt.title("P")']],
   26: [["sem a cabeça nova", 'cabecas = 5\ngolpes = 0\nwhile cabecas > 0:\n    golpes = golpes + 1\n    cabecas = cabecas - 2\n    print(f"Golpe {golpes}: {cabecas} cabeças")\nprint(f"A Hidra caiu em {golpes} golpes!")'],
        ["print fora do while", 'cabecas = 5\ngolpes = 0\nwhile cabecas > 0:\n    golpes = golpes + 1\n    cabecas = cabecas - 2\n    if cabecas > 0:\n        cabecas = cabecas + 1\nprint(f"Golpe {golpes}: {cabecas} cabeças")\nprint(f"A Hidra caiu em {golpes} golpes!")']],
+  32: [["sem try", 'runas = ["7", "3", "x", "10", "??", "5"]\npoder = 0\nfor runa in runas:\n    poder = poder + int(runa)\nprint(f"Poder total: {poder}")'],
+       ["try em volta do for", 'runas = ["7", "3", "x", "10", "??", "5"]\npoder = 0\ntry:\n    for runa in runas:\n        poder = poder + int(runa)\nexcept ValueError:\n    print(f"Runa falsa: {runa}")\nprint(f"Poder total: {poder}")'],
+       ["except sem dois-pontos", 'runas = ["7", "3", "x", "10", "??", "5"]\npoder = 0\nfor runa in runas:\n    try:\n        poder = poder + int(runa)\n    except ValueError\n        print(f"Runa falsa: {runa}")\nprint(f"Poder total: {poder}")'],
+       ["soma sem int", 'runas = ["7", "3", "x", "10", "??", "5"]\npoder = 0\nfor runa in runas:\n    try:\n        poder = poder + runa\n    except ValueError:\n        print(f"Runa falsa: {runa}")\nprint(f"Poder total: {poder}")']],
   27: [["chave sem aspas", 'gemas = {"rubi": 3, "safira": 5}\ngemas[esmeralda] = 2'],
        ["esqueceu o pedágio", 'gemas = {"rubi": 3, "safira": 5}\ngemas["esmeralda"] = 2\nfor cor, qtd in gemas.items():\n    print(f"{cor}: {qtd}")\nprint(f"Total: {sum(gemas.values())}")'],
        ["for sem items", 'gemas = {"rubi": 3, "safira": 5}\ngemas["esmeralda"] = 2\ngemas["safira"] = gemas["safira"] - 1\nfor cor, qtd in gemas:\n    print(f"{cor}: {qtd}")']],

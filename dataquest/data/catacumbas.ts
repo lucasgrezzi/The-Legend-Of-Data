@@ -32,7 +32,7 @@ export const RELIQUIAS = csvTable(
 12,Elmo Partido,armadura,Norte,70,sim`
 );
 
-/** Heróis que já desceram às Catacumbas (missão 12 — chefe) */
+/** Heróis da Guilda (missões 30, 31 e 12). Lyra, Mirela e Fennick nunca fizeram expedição (a armadilha do LEFT JOIN) */
 export const HEROIS = csvTable(
   "herois",
   `id,nome,raca
@@ -40,10 +40,12 @@ export const HEROIS = csvTable(
 2,Kael,elfo
 3,Grom,orc
 4,Zix,goblin
-5,Lyra,elfo`
+5,Lyra,elfo
+6,Mirela,anao
+7,Fennick,goblin`
 );
 
-/** Livro das Expedições: cada linha é uma expedição; heroi_id aponta para herois.id (missão 12) */
+/** Livro das Expedições: cada linha é uma expedição; heroi_id aponta para herois.id (missões 30, 31 e 12) */
 export const EXPEDICOES = csvTable(
   "expedicoes",
   `id,heroi_id,destino,ouro
