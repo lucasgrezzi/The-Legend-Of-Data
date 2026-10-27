@@ -34,7 +34,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessão 18 commitada e enviada**: batalha em toda fase, sons, juice, Mapa-Múndi com HUD e fundo novo em 4 biomas.
 - **Sessão 20 commitada e enviada** (2026-10-27): fundo próprio por região, +4 fases de SQL (CASE WHEN, subconsulta,
   JOIN, LEFT JOIN), 3ª sala da Masmorra (try/except), XP do ranking calculado no servidor e a página /perfil.
-  ⚠ **O usuário precisa rodar `supabase/xp-no-servidor.sql` no SQL Editor** (ver Sessão 20).
+  `supabase/xp-no-servidor.sql` já foi rodado no Supabase pelo usuário (2026-10-27); rodar de novo a cada fase nova.
 - **Sessão 19 commitada e enviada**: +3 fases (merge, pivot_table, legenda), Masmorra Secreta (2 fases bônus) e
   raças com golpe especial + afinidade. Ver "Sessão 19" abaixo.
 - **Sessão 14 commitada e enviada** em 2026-10-24 (revisão das 17 fases). Em 2026-10-25, para liberar espaço no PC
@@ -471,7 +471,7 @@ alinhamento e animação, Mapa-Múndi com mais cara de game e o fundo sem árvor
   carregamento novo da página): reiniciar o `npm run teste`.
 
 ### Próximos passos sugeridos
-1. **Usuário:** rodar `supabase/xp-no-servidor.sql` no SQL Editor do Supabase (e de novo a cada fase nova — ver Sessão 20).
+1. A cada fase nova: `node scripts/gerar_sql_xp.mjs` e pedir ao usuário para colar `supabase/xp-no-servidor.sql` no SQL Editor.
 2. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px) — o usuário deixou para depois (2026-10-26 e 27).
 3. Ranking por guilda/raça; região nova Data Science (ver Sessão 16).
 4. Limpeza: apagar as contas de teste `dataquest.teste.*@example.com` no Supabase (tarefa do usuário).
