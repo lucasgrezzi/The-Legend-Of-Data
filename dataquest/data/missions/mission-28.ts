@@ -40,7 +40,7 @@ Três detalhes importantes:
 
   nome  → o nome da relíquia
   valor → o valor
-  selo  → 'ouro' se o valor for 200 ou mais, 'prata' se for 100 ou mais, e 'bronze' para o resto
+  selo  → 'ouro' (200 ou mais), 'prata' (100 ou mais) ou 'bronze'
 
 Da mais valiosa para a menos valiosa. Devem aparecer 8 relíquias, e a primeira é o Escudo do Rei, com selo de ouro.`,
   hints: [

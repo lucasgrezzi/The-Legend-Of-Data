@@ -10,7 +10,7 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 
 ## 📍 Onde paramos (retomar aqui)
 
-> Última sessão: **2026-10-26** (Sessão 19, com Claude Code). Leia esta seção primeiro ao retomar.
+> Última sessão: **2026-10-27** (Sessão 20, com Claude Code). Leia esta seção primeiro ao retomar.
 
 ### ⚠ Estado do repositório
 - **Sessões 1–3 commitadas e enviadas** ao GitHub (`master`, commit `10363cd`) em 2026-09-22.
@@ -32,13 +32,16 @@ Inspirada no Codédex. O jogo roda 100% no navegador; o **Supabase** (opcional) 
 - **Sessão 16 commitada e enviada** (`dc0d855`): Mapa-Múndi, uma tela por região e chefe do Data Viz (fase 22).
 - **Sessão 17 commitada e enviada** (redesign profissional de todas as telas; aprovado pelo usuário).
 - **Sessão 18 commitada e enviada**: batalha em toda fase, sons, juice, Mapa-Múndi com HUD e fundo novo em 4 biomas.
+- **Sessão 20 commitada e enviada** (2026-10-27): fundo próprio por região, +4 fases de SQL (CASE WHEN, subconsulta,
+  JOIN, LEFT JOIN), 3ª sala da Masmorra (try/except), XP do ranking calculado no servidor e a página /perfil.
+  ⚠ **O usuário precisa rodar `supabase/xp-no-servidor.sql` no SQL Editor** (ver Sessão 20).
 - **Sessão 19 commitada e enviada**: +3 fases (merge, pivot_table, legenda), Masmorra Secreta (2 fases bônus) e
   raças com golpe especial + afinidade. Ver "Sessão 19" abaixo.
 - **Sessão 14 commitada e enviada** em 2026-10-24 (revisão das 17 fases). Em 2026-10-25, para liberar espaço no PC
   (disco 96% cheio), foram apagados `node_modules/`, `.next/` e o cache do npm: **rode `npm install` antes de
   `npm run dev`/`build`**. O script de revisão das fases foi salvo em `scripts/revisar_fases.mjs`.
-- Hoje são **28 missões**: 26 na jornada (7 de Python, 7 de SQL, 8 Pandas, 4 Data Viz), em 4 regiões, cada uma terminando num
-  chefe, + **2 bônus** na Masmorra Secreta — ver "As Missões". Os `expectedOutput` das
+- Hoje são **33 missões**: 30 na jornada (7 de Python, 11 de SQL, 8 Pandas, 4 Data Viz), em 4 regiões, cada uma terminando num
+  chefe, + **3 bônus** na Masmorra Secreta — ver "As Missões". Os `expectedOutput` das
   5 missões originais não mudaram.
 
 ### Sessão 1 — Redesign da interface
@@ -468,13 +471,62 @@ alinhamento e animação, Mapa-Múndi com mais cara de game e o fundo sem árvor
   carregamento novo da página): reiniciar o `npm run teste`.
 
 ### Próximos passos sugeridos
-1. Mais fases: SQL extra (subconsultas, LEFT JOIN, CASE WHEN) e uma 3ª sala da Masmorra Secreta (ex.: `try/except`).
-2. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px) — o usuário deixou para depois (2026-10-26).
-3. Contas: validar XP no servidor (ex.: função no banco que recalcula a partir das missões) se o ranking virar
-   competição; tela de perfil; talvez ranking por guilda/raça.
+1. **Usuário:** rodar `supabase/xp-no-servidor.sql` no SQL Editor do Supabase (e de novo a cada fase nova — ver Sessão 20).
+2. Responsividade mobile (hoje o layout é pensado para desktop ≥ 1280px) — o usuário deixou para depois (2026-10-26 e 27).
+3. Ranking por guilda/raça; região nova Data Science (ver Sessão 16).
 4. Limpeza: apagar as contas de teste `dataquest.teste.*@example.com` no Supabase (tarefa do usuário).
-5. A tabela de níveis NÃO foi mexida: com 765 XP na jornada (840 com as bônus), o nível 10 (660) chega antes do fim.
+5. A tabela de níveis NÃO foi mexida: com 885 XP na jornada (995 com as bônus), o nível 10 (660) chega bem antes do fim.
    Subir os limites rebaixaria quem já joga — se for mudar, pensar numa forma de não tirar nível de ninguém.
+
+### Sessão 20 — Fundo por região, SQL avançado, 3ª sala, XP no servidor e perfil (2026-10-27)
+Pedido do usuário: fundo de cada região "bem legal para os usuários ficarem mais imersivos"; depois mais fases de SQL
+e a 3ª sala da Masmorra; XP conferido no servidor e tela de perfil. Mobile continua para depois. Um commit por etapa.
+- **Fundo de cada região** (`scripts/gerar_regioes.py` → `public/assets/bg/regiao-<trilha>.png`, 2048×1152, ~70–130 KB):
+  - Floresta dos Antigos (riacho, ponte, santuário de runas, casas da Guilda), Catacumbas (parede com tochas e
+    gárgulas, tapete do Rei, sarcófagos, velas, ossuário), Forja (rio de lava, fornalhas, casas de tijolo, bigornas) e
+    Costa do Farol (noite, lua no mar, píer, barcos, farol numa ilhota). Tiles Kenney (CC0) + pixel art e luz próprias
+    (luz em blocos de 4 px e em degraus). O meio da cena é calmo: é onde passam as fases.
+  - A parede das Catacumbas tem 7 fileiras porque a barra do topo cobre as 2 primeiras.
+  - `WorldBackground region={track}`: a imagem fica numa `.region-scene` com o enquadramento de `cover` (16:9), então o
+    facho do farol (`LIGHTHOUSE` = % da imagem) e as partículas ficam no lugar. Véu escurece o meio e deixa as laterais.
+    Partículas por região: folhas + vaga-lumes, fogos-fátuos + névoa, brasas + calor, facho girando + brilhos.
+  - Arena da batalha: `.battle-scene.is-<trilha>` = recorte da cena (190%), escurecido à direita; o do Data Viz é
+    espelhado (`scaleX(-1)`) para o mar ficar atrás do monstro. A Masmorra Secreta mantém a arena roxa.
+  - **Bug antigo corrigido:** a classe `-z-10` do `WorldBackground` não era gerada pelo Tailwind, então o fundo era
+    pintado por cima de tudo que não tinha `position` (só passava porque tudo ficava em painéis `.rpg-frame`). Agora é
+    `style={{ zIndex: -1 }}`.
+- **SQL: 4 fases novas** (ids 28–31), uma ideia nova em cada, entre a 18 e o chefe:
+  `18 → 28 CASE WHEN → 10 → 29 subconsulta → 11 → 30 JOIN → 31 LEFT JOIN + IS NULL → 12 chefe`.
+  O chefe 12 virou revisão (JOIN + GROUP BY). Capítulos renumerados (o chefe é o Cap. XI).
+  - `herois` ganhou Mirela e Fennick (sem expedição, como a Lyra): a 31 acha os 3; o JOIN da 12 não muda (4 linhas).
+  - **Validação de tabela com todas as linhas:** o JSON aceita `rows` (todas as linhas, na ordem; compara pelo nome da
+    coluna) e `wrongRow` (dica quando uma linha não bate). As 4 fases novas usam.
+- **Masmorra Secreta, Sala II: "O Baú Mímico"** (id 32, try/except + `int()`), entre a Hidra (26) e a Esfinge (27,
+  agora Sala III e ainda o chefe bônus).
+- Grimório: CASE sem END, subconsulta sem parênteses, `int()` sem `try` (ou com o `try` no lugar errado); `try`/`except`
+  entram na regra dos dois-pontos.
+- Monstros novos: lich, vampiro, guerreiro-espectral, sombra (DCSS) e mimico (Kenney, ampliado). Bestiário: lich,
+  CASE WHEN, subconsulta, LEFT JOIN, NULL, mímico, int(), try/except. JOIN passou a ser da fase 30.
+  Loja: títulos "Lembrança dos Esquecidos" (31) e "Domador de Mímicos" (32).
+- **XP no servidor** (`scripts/gerar_sql_xp.mjs` → `supabase/xp-no-servidor.sql`, idempotente):
+  - tabela `missions (id, xp)` + gatilho `saves_recalc_xp` (BEFORE INSERT/UPDATE em `saves`): `total_xp` e
+    `missions_done` são recalculados do `state` (fases que existem, uma vez cada; XP de cada uma = o do `xpByMission`,
+    nunca acima do da fase; save antigo sem registro = XP cheio). O que o navegador manda nesses campos é ignorado.
+  - nome e raça não mudam depois de criados (o gatilho mantém os antigos).
+  - Pré-requisitos NÃO são conferidos de propósito: fases novas entram no meio da trilha (quem tinha a 10 ainda não
+    tem a 28) e ninguém pode perder XP de fase vencida. Limite que sobra: dá para forjar a lista de fases concluídas
+    (teto = 995 XP); conferir as respostas exigiria rodar o código no servidor.
+  - **Ao criar ou mudar o XP de uma fase:** `node scripts/gerar_sql_xp.mjs` e colar o arquivo no SQL Editor.
+  - Testado com PGlite (Postgres em WASM) + schema.sql: 9 casos (save honesto com metade do XP, total inventado,
+    XP acima do valor, fase inexistente/repetida, save sem xpByMission, troca de nome/raça, JSON estranho, teto, ranking).
+- **Página /perfil** (`components/player/ProfilePage.tsx`, link "Perfil" na `TopNav` e "Perfil completo" na ficha):
+  herói + nível, números (XP, moedas, fases, chefes, vitórias sem a solução, posição no ranking), as 4 regiões com a
+  cena de fundo e o chefe, **parede de troféus** (um monstro por fase; não vencido = silhueta; ½ = venceu com a
+  solução; clique abre a fase), coleção da loja e a conta.
+- Testado: `revisar_fases.mjs` nas fases 28–32 e 12 (6 soluções passam, 16 erros típicos recusados com mensagem
+  clara); capturas das 4 regiões, das arenas, da masmorra com 3 salas, da trilha SQL e do perfil; `tsc` e `build` ok.
+- ⚠ O dev server do Modo Teste continuou servindo o CSS antigo mesmo reiniciado: foi preciso apagar `.next`.
+- ⚠ No Bash daqui, `\b` dentro de heredoc vira o caractere backspace: scripts Python que editam regex vão em arquivo (Write).
 
 ### Sessão 19 — Fases novas, Masmorra Secreta e poderes das raças (2026-10-26)
 Pedido do usuário: "mais fases é essencial"; fases bônus de Python com animação épica; raças com efeito real e visual.
@@ -700,23 +752,28 @@ Dataset `vendas.csv`: `id, produto, valor, regiao` — 5 linhas (Espada 300, Esc
 | 9     | 17 | sql    | A Sala dos Baús          | SQL: LIMIT (só as primeiras linhas)| 1/5   | +25 | +20    | 3           | `ORDER BY`, `LIMIT 3` |
 | 10    | 9  | sql    | O Salão dos Ossos        | SQL: WHERE com AND, OR e IN       | 2/5    | +25 | +20    | 17          | colunas `tipo`, `sala`, `amaldicoada` |
 | 11    | 18 | sql    | A Memória do Guardião    | SQL: LIKE (buscar por um pedaço)  | 2/5    | +25 | +20    | 9           | `LIKE`, `ORDER BY` |
-| 12    | 10 | sql    | O Inventário do Guardião | SQL: COUNT, SUM, AVG, MAX e AS    | 3/5    | +30 | +20    | 18          | `COUNT(`, `SUM(`, `AVG(`, `MAX(` |
-| 13    | 11 | sql    | As Criptas por Tipo      | SQL: GROUP BY e HAVING            | 4/5    | +30 | +25    | 10          | `GROUP BY`, `HAVING` |
-| 14    | 12 | sql    | O Rei Esquecido          | SQL: JOIN entre tabelas (chefe)   | 5/5    | +40 | +30    | 11          | `JOIN`, `ON … heroi_id`, `GROUP BY` |
-| 15    | 4  | pandas | A Forja Desperta         | Pandas: ler CSV e filtrar linhas  | 2/5    | +30 | +25    | 12          | `read_csv(`, filtro `["valor"] >`, `len(` |
-| 16    | 19 | pandas | A Vitrine de Brokk       | Pandas: ordenar e pegar as primeiras| 2/5  | +30 | +20    | 4           | `read_csv(`, `.sort_values(`, `.head(` |
-| 17    | 20 | pandas | O Carvão da Semana       | Pandas: somar, média e maior      | 2/5    | +30 | +20    | 19          | `read_csv(`, `.sum(`, `.mean(`, `.max(` |
-| 18    | 21 | pandas | O Livro de Visitas       | Pandas: contar valores (value_counts)| 3/5 | +30 | +25    | 20          | `read_csv(`, `.value_counts(` |
-| 19    | 13 | pandas | O Fole das Regiões       | Pandas: groupby, sum e sort_values| 3/5    | +35 | +25    | 21          | `read_csv(`, `["status"]`, `.groupby(`, `.sum(`, `.sort_values(` |
-| 20    | 23 | pandas | O Ettin dos Dois Livros  | Pandas: juntar tabelas com merge  | 4/5    | +35 | +25    | 13          | `read_csv(` do catálogo, `.merge(`, `.groupby(`, `.sort_values(` |
-| 21    | 24 | pandas | A Teia da Aranha Tecelã  | Pandas: pivot_table               | 4/5    | +35 | +25    | 23          | `read_csv(`, `pivot_table(` |
-| 22    | 14 | pandas | A Têmpera do Rei         | Pandas: colunas com contas (chefe)| 5/5    | +40 | +30    | 24          | `read_csv(`, `df["x"] = … * …`, `["quantidade"] >=`, `.groupby(`, `.sort_values(` |
-| 23    | 15 | dataviz| O Farol se Acende        | Gráfico de barras com matplotlib  | 1/5    | +30 | +25    | 14          | `plt.bar(`, `plt.title(` (validação `chart`) |
-| 24    | 16 | dataviz| A Rota das Tempestades   | Gráfico de linha, título e eixos  | 2/5    | +35 | +25    | 15          | `read_csv(`, `plt.plot(` (validação `chart`) |
-| 25    | 25 | dataviz| O Prisma Desbotado       | Duas linhas, cores e legenda      | 3/5    | +35 | +25    | 16          | `read_csv(`, `color=`, `label=`, `plt.legend(` (validação `chart` com `series`) |
-| 26    | 22 | dataviz| O Conselho dos Portos    | Gráfico a partir de groupby (chefe)| 4/5   | +45 | +35    | 25          | `.groupby(`, `.sort_values(`, `plt.bar(`, `read_csv(` (validação `chart`) |
+| 12    | 28 | sql    | Os Selos do Lich         | SQL: CASE WHEN                    | 3/5    | +25 | +20    | 18          | `CASE … WHEN … END`, `ORDER BY` (tabela com `rows`) |
+| 13    | 10 | sql    | O Inventário do Guardião | SQL: COUNT, SUM, AVG, MAX e AS    | 3/5    | +30 | +20    | 28          | `COUNT(`, `SUM(`, `AVG(`, `MAX(` |
+| 14    | 29 | sql    | O Vampiro da Média       | SQL: subconsulta                  | 3/5    | +30 | +20    | 10          | `(SELECT AVG(`, `ORDER BY` (tabela com `rows`) |
+| 15    | 11 | sql    | As Criptas por Tipo      | SQL: GROUP BY e HAVING            | 4/5    | +30 | +25    | 29          | `GROUP BY`, `HAVING` |
+| 16    | 30 | sql    | A Marcha dos Espectros   | SQL: JOIN                         | 3/5    | +30 | +25    | 11          | `JOIN`, `ON … heroi_id`, `ORDER BY` (tabela com `rows`) |
+| 17    | 31 | sql    | A Sombra dos Esquecidos  | SQL: LEFT JOIN + IS NULL          | 4/5    | +35 | +25    | 30          | `LEFT JOIN`, `IS NULL`, `ORDER BY` (tabela com `rows`) |
+| 18    | 12 | sql    | O Rei Esquecido          | SQL: JOIN + GROUP BY (chefe)      | 5/5    | +40 | +30    | 31          | `JOIN`, `ON … heroi_id`, `GROUP BY` |
+| 19    | 4  | pandas | A Forja Desperta         | Pandas: ler CSV e filtrar linhas  | 2/5    | +30 | +25    | 12          | `read_csv(`, filtro `["valor"] >`, `len(` |
+| 20    | 19 | pandas | A Vitrine de Brokk       | Pandas: ordenar e pegar as primeiras| 2/5  | +30 | +20    | 4           | `read_csv(`, `.sort_values(`, `.head(` |
+| 21    | 20 | pandas | O Carvão da Semana       | Pandas: somar, média e maior      | 2/5    | +30 | +20    | 19          | `read_csv(`, `.sum(`, `.mean(`, `.max(` |
+| 22    | 21 | pandas | O Livro de Visitas       | Pandas: contar valores (value_counts)| 3/5 | +30 | +25    | 20          | `read_csv(`, `.value_counts(` |
+| 23    | 13 | pandas | O Fole das Regiões       | Pandas: groupby, sum e sort_values| 3/5    | +35 | +25    | 21          | `read_csv(`, `["status"]`, `.groupby(`, `.sum(`, `.sort_values(` |
+| 24    | 23 | pandas | O Ettin dos Dois Livros  | Pandas: juntar tabelas com merge  | 4/5    | +35 | +25    | 13          | `read_csv(` do catálogo, `.merge(`, `.groupby(`, `.sort_values(` |
+| 25    | 24 | pandas | A Teia da Aranha Tecelã  | Pandas: pivot_table               | 4/5    | +35 | +25    | 23          | `read_csv(`, `pivot_table(` |
+| 26    | 14 | pandas | A Têmpera do Rei         | Pandas: colunas com contas (chefe)| 5/5    | +40 | +30    | 24          | `read_csv(`, `df["x"] = … * …`, `["quantidade"] >=`, `.groupby(`, `.sort_values(` |
+| 27    | 15 | dataviz| O Farol se Acende        | Gráfico de barras com matplotlib  | 1/5    | +30 | +25    | 14          | `plt.bar(`, `plt.title(` (validação `chart`) |
+| 28    | 16 | dataviz| A Rota das Tempestades   | Gráfico de linha, título e eixos  | 2/5    | +35 | +25    | 15          | `read_csv(`, `plt.plot(` (validação `chart`) |
+| 29    | 25 | dataviz| O Prisma Desbotado       | Duas linhas, cores e legenda      | 3/5    | +35 | +25    | 16          | `read_csv(`, `color=`, `label=`, `plt.legend(` (validação `chart` com `series`) |
+| 30    | 22 | dataviz| O Conselho dos Portos    | Gráfico a partir de groupby (chefe)| 4/5   | +45 | +35    | 25          | `.groupby(`, `.sort_values(`, `plt.bar(`, `read_csv(` (validação `chart`) |
 | bônus | 26 | python | A Hidra Sem Fim          | Repetição com while (Masmorra)    | 4/5    | +30 | +25    | 8           | `while`, no máx. 2 `print`, `if` |
-| bônus | 27 | python | O Enigma da Esfinge      | Dicionários (chefe bônus)         | 5/5    | +45 | +40    | 26          | `gemas["esmeralda"] =`, `gemas["safira"] =`, `.items()`, `sum(gemas.values())` |
+| bônus | 32 | python | O Baú Mímico             | try / except + int()              | 4/5    | +35 | +30    | 26          | `try:`, `except`, `int(`, `for … in runas`, no máx. 2 `print` |
+| bônus | 27 | python | O Enigma da Esfinge      | Dicionários (chefe bônus)         | 5/5    | +45 | +40    | 32          | `gemas["esmeralda"] =`, `gemas["safira"] =`, `.items()`, `sum(gemas.values())` |
 
 Tabelas SQL das missões 9–12 em `data/catacumbas.ts`: `reliquias` (12 linhas: id, nome, tipo, sala, valor,
 amaldicoada 'sim'/'nao'), `herois` (5) e `expedicoes` (9: id, heroi_id, destino, ouro).
@@ -761,6 +818,11 @@ Sul: 100"` (só `paga`, groupby regiao, sum ouro, desc)
 - M25 (chart): `{ kind: "line", series: [[4,6,5,8,9,7],[2,3,7,6,4,8]], legend: 2, distinctColors: true, title: true }`
 - M26: `"Golpe 1: 4 cabeças\nGolpe 2: 3 cabeças\nGolpe 3: 2 cabeças\nGolpe 4: 0 cabeças\nA Hidra caiu em 4 golpes!"`
 - M27: `"rubi: 3\nsafira: 4\nesmeralda: 2\nTotal: 9"`
+- M28: 8 linhas `nome, valor, selo` (não amaldiçoadas, desc): Escudo do Rei 260 ouro … Mapa das Criptas 40 bronze
+- M29: 5 linhas `nome, valor` acima da média (130): Escudo do Rei 260, Anel do Eclipse 210, Machado Rúnico 200, Lança do Vigia 170, Colar de Presas 150
+- M30: as 9 expedições `nome, destino, ouro` (desc), 1ª = Kael, Poço Sombrio, 200
+- M31: `nome, raca` = Fennick goblin, Lyra elfo, Mirela anao
+- M32: `"Runa falsa: x\nRuna falsa: ??\nPoder total: 25"`
 - M22 (chart, chefe do Farol): `{ kind: "bar", count: 4, values: [48, 35, 27, 14], title: true, xlabel: true, ylabel: true }`
   (CSV `cargas` em `data/farol.ts`; groupby porto, sum caixas, desc; a única novidade é `.index`/`.values`)
 
@@ -787,7 +849,7 @@ na 1ª vez e sempre preencher `realWorld`.
 Explorador de Criptas (200) → Arquivista (260) → Guardião do Saber (330) → Mestre da Forja (420) → Sábio dos Dados (530) →
 Mestre dos Dados (660). Calibrados pela jornada: fim do Python ≈ 155 XP (Nv 4), fim do SQL ≈ 305 (Nv 6), Forja I 335 (Nv 7), Forja II 370,
 chefe da Forja 410, Data Viz I 440 (Nv 8), Data Viz II 475; 9–10 esperam o conteúdo futuro — **ao adicionar missões, revisar a tabela**.
-Moedas possíveis hoje: 570 na jornada + 65 nas bônus = 635.
+Moedas possíveis hoje: 660 na jornada + 95 nas bônus = 755. XP: 885 na jornada + 110 nas bônus = 995.
 
 **Fluxo por missão:**
 1. Aluno digita código no editor
@@ -957,7 +1019,7 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 
 ## Como Adicionar uma Nova Missão
 
-1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 28) — nunca reaproveitar/renumerar ids
+1. Criar `data/missions/mission-N.ts` com o **próximo id livre** (hoje: 33) — nunca reaproveitar/renumerar ids
    (são a chave do progresso salvo). Preencher `concept` com linguagem direta (o que a pessoa aprende).
    Campos de conteúdo (padrão da Sessão 4):
    - `narrative` — continua a história da missão anterior (ver "Arco da história"; tom meta e bem-humorado)
@@ -979,7 +1041,8 @@ Todo texto sobre o fundo do mundo fica dentro de `.panel` / `.map-label` (fundo 
 6. Para `exact`, adicionar `requiredCode` (regex em string TS — **escapar em dobro**: `"\\bif\\s+"`) para que
    imprimir a resposta pronta não passe. Comentários do aluno são ignorados na checagem.
 7. Testar a solução real no navegador (Pyodide) — o `expectedOutput` precisa bater exatamente
-8. Acrescentar as palavras novas da fase em `lib/glossary.ts` (`missionId` = id da fase) e, se for chefe, pensar num
+8. Rodar `node scripts/gerar_sql_xp.mjs` e pedir ao usuário para colar `supabase/xp-no-servidor.sql` no SQL Editor
+9. Acrescentar as palavras novas da fase em `lib/glossary.ts` (`missionId` = id da fase) e, se for chefe, pensar num
    item da loja liberado por ela (`requiresMissionId`)
 
 ### ✅ Checklist de fase acessível (regra do usuário — vale para fases NOVAS e para REVISAR as existentes)
@@ -1007,18 +1070,18 @@ O público inclui quem **nunca programou** e quem **nunca jogou RPG**. Nada pode
 - [x] Missões Python de variáveis/contas e if/elif/else (ids 5 e 6)
 - [x] Mais missões Python: listas, funções (jornada); while e dicionários (Masmorra Secreta, ids 26–27)
 - [x] Missões SQL: AND/OR/IN, agregações, GROUP BY/HAVING, JOIN (ids 9–12)
-- [ ] SQL extra: subconsultas, LEFT JOIN, CASE WHEN
+- [x] SQL extra: CASE WHEN (28), subconsulta (29), JOIN (30), LEFT JOIN (31)
 - [x] Missões Pandas: merge (id 23), pivot_table (id 24)
 
 ### Funcionalidades
 - [x] Imagens RPG para trilhas SQL/Pandas/DataViz (sprites CC0)
 - [x] Fundo do mapa próprio e CC0 (substituiu a imagem Freepik com marca d'água)
 - [x] Animação de XP ao completar missão (counter animado + level up)
-- [ ] Tela de perfil / histórico de missões concluídas
+- [x] Tela de perfil (/perfil) com parede de troféus
 - [x] Contas (e-mail/senha), save na nuvem e ranking (Supabase)
 - [x] Login antes do personagem, telas de entrada animadas e compactas
 - [x] Cursor de RPG (manopla dourada)
-- [ ] Validação de XP no servidor (anti-trapaça do ranking)
+- [x] XP do ranking calculado no servidor (`supabase/xp-no-servidor.sql`; falta conferir as respostas)
 - [x] Hints/dicas desbloqueáveis por missão (Grimório: dicas por moedas; solução após 3 erros, −50% XP)
 - [x] Timer de execução visível no terminal
 - [x] Múltiplas tabelas por missão SQL (`extraDataFiles` + `table`)

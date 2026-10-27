@@ -22,7 +22,7 @@ export function Brand({ tagline = false }: { tagline?: boolean }) {
   );
 }
 
-/** Atalhos do jogo: Mapa, Bestiário, Loja e Ranking — o atual fica destacado */
+/** Atalhos do jogo: Mapa, Bestiário, Loja, Perfil e Ranking — o atual fica destacado */
 export function TopNav({ compact = false }: { compact?: boolean }) {
   const path = usePathname() ?? "";
   const shopOpen = useGameStore((s) => s.completedMissionIds.includes(SHOP_UNLOCK_MISSION_ID));
@@ -40,6 +40,9 @@ export function TopNav({ compact = false }: { compact?: boolean }) {
         title={shopOpen ? "Loja do Mercador: títulos, molduras e mascotes" : "Abre depois do Mercado da Vila"}
       >
         <Icon name="bag" />{label("Loja")}
+      </Link>
+      <Link href="/perfil" className={`icon-btn${on("/perfil")}`} title="Seu perfil: conquistas, troféus e coleção">
+        <Icon name="user" />{label("Perfil")}
       </Link>
       {supabase && (
         <Link href="/ranking" className={`icon-btn${on("/ranking")}`} title="Ranking dos jogadores">

@@ -124,7 +124,10 @@ export default function ProfileDialog({ onClose }: { onClose: () => void }) {
           <span style={{ fontSize: 12, fontWeight: 600, color: "var(--color-muted)" }}>
             Nome e raça são escolhidos uma única vez. Títulos, molduras e mascotes: <Link href="/loja" onClick={onClose} style={{ color: "var(--color-accent)" }}>Loja do Mercador</Link>.
           </span>
-          <button type="button" className="btn-nav" onClick={onClose} autoFocus>Fechar</button>
+          <span className="flex items-center gap-2 shrink-0">
+            <Link href="/perfil" className="btn-next btn-sm" onClick={onClose}><Icon name="user" size={14} /> Perfil completo</Link>
+            <button type="button" className="btn-nav btn-sm" onClick={onClose} autoFocus>Fechar</button>
+          </span>
         </div>
       </div>
     </div>,

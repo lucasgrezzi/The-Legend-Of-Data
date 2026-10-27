@@ -1,5 +1,6 @@
 -- DataQuest — banco do Supabase (contas + ranking)
 -- Rodar UMA vez no painel do Supabase: SQL Editor → New query → colar tudo → Run.
+-- Depois rode também supabase/xp-no-servidor.sql (XP do ranking calculado no banco; gerado por scripts/gerar_sql_xp.mjs).
 
 -- ── Progresso salvo de cada jogador (1 linha por conta) ──
 create table if not exists public.saves (

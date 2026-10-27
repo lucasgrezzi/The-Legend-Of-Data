@@ -33,7 +33,7 @@ const LIGHTHOUSE = { x: 86.5, y: 11.5 };
 export default function WorldBackground({ region }: { region?: Track }) {
   const src = region ? `/assets/bg/regiao-${region}.png` : "/assets/bg/mapa-mundo.png";
   return (
-    <div aria-hidden className={`fixed inset-0 -z-10${region ? ` region-bg is-${region}` : ""}`} style={{ background: "var(--color-bg)", overflow: "hidden" }}>
+    <div aria-hidden className={`fixed inset-0${region ? ` region-bg is-${region}` : ""}`} style={{ zIndex: -1, background: "var(--color-bg)", overflow: "hidden" }}>
       {/* a cena tem o mesmo enquadramento de background-size: cover, para as partículas ficarem no lugar certo da imagem */}
       <div className="region-scene">
         <div
