@@ -534,6 +534,10 @@ e a 3ª sala da Masmorra; XP conferido no servidor e tela de perfil. Mobile cont
   `.world-sea` do `WorldBackground` em `left: 78.90625%` (x = 808 de 1024), `steps(24, jump-none)` em 3,6 s.
   Se mudar a costa, o script imprime o novo x: ajustar `left`/`width` no CSS. A transição entre biomas virou dither
   de Bayer em blocos de 2 px (o degradê liso borrava a pixel art). A imagem fixa é o quadro 0.
+- **Árvores inteiras no Mapa-Múndi (mesmo dia):** a árvore alta da Tiny Town são DOIS tiles (3+15 laranja, 4+16
+  verde) e o gerador sorteava cada metade solta (copa sem tronco, tronco sem copa). Agora `TREE_SPRITES` monta a árvore
+  alta inteira, `tree_at` impede uma árvore de esconder metade da outra, e o escurecimento (`darker`) mexe só na cor
+  (antes deixava a árvore 86% opaca, com "fantasmas" onde sobrepunha).
 
 ### Sessão 19 — Fases novas, Masmorra Secreta e poderes das raças (2026-10-26)
 Pedido do usuário: "mais fases é essencial"; fases bônus de Python com animação épica; raças com efeito real e visual.

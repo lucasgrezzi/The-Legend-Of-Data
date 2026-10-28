@@ -2,8 +2,8 @@
 # Floresta (Python) → Cemitério das Catacumbas (SQL) → Terras da Forja (Pandas) → Costa do Farol (Data Viz).
 # Tiles CC0 da Kenney: Tiny Town e Tiny Dungeon (https://kenney.nl/assets/tiny-town, /tiny-dungeon).
 # Uso: python gerar_mundo_biomas.py <pasta tiny-town extraída> <pasta tiny-dungeon extraída> <saída.png>
-# Só árvores INTEIRAS (tiles de 1 bloco), espalhadas com deslocamento livre e desenhadas de trás para a frente:
-# a floresta fica densa sem as meias-árvores do mapa antigo. Requer Pillow.
+# Só árvores INTEIRAS (a alta é copa + tronco, dois tiles juntos), desenhadas de trás para a frente.
+# O 4º argumento (opcional) gera a folha de quadros do mar animado. Requer Pillow.
 import math
 import random
 import sys
@@ -254,18 +254,29 @@ for y in range(64):
 objs.append((lx * 16 + 10 - 32, ly * 16 - 60 + 16 - 32, glow, 1))
 
 # ── Árvores inteiras, densas nas bordas e esparsas perto da estrada ──
+# Na Tiny Town a árvore alta ocupa DOIS tiles (copa em cima, tronco embaixo: 3+15 laranja, 4+16 verde).
+# Cada árvore aqui é um sprite inteiro — nunca meia árvore solta.
+def stack(top, bottom):
+    t = Image.new("RGBA", (16, 32)); t.alpha_composite(town(top), (0, 0)); t.alpha_composite(town(bottom), (0, 16)); return t
+TREE_SPRITES = {"alta-laranja": stack(3, 15), "alta-verde": stack(4, 16), "laranja": town(27), "verde": town(28), "moita": town(5)}
 TREES = {
-    FOREST: [4, 16, 28, 5, 4, 16, 28, 15, 3],
-    GRAVE: [4, 28, 16, 5],
-    FORGE: [3, 15, 27, 3, 27],
-    COAST: [5, 16, 4],
+    FOREST: ["alta-verde", "verde", "moita", "alta-verde", "verde", "alta-laranja", "laranja", "verde"],
+    GRAVE: ["alta-verde", "verde", "moita", "verde"],
+    FORGE: ["alta-laranja", "laranja", "laranja", "alta-laranja", "moita"],
+    COAST: ["moita", "verde", "alta-verde"],
 }
 DECOR = {FOREST: [29, 17], GRAVE: [17], FORGE: [29], COAST: [17]}
+def darker(t, k):  # escurece só a cor; a transparência continua 0 ou 255 (sem árvore fantasma)
+    r, g, bl, a = t.split()
+    f = lambda v: int(v * k)
+    return Image.merge("RGBA", (r.point(f), g.point(f), bl.point(f), a))
 def near_path(x, y, r):
     for yy in range(y - r, y + r + 1):
         for xx in range(x - r, x + r + 1):
             if P(xx, yy): return True
     return False
+def blocked(x, y): return 0 <= x < W and 0 <= y < H and (occupied[y][x] or sea[y][x])
+tree_at = set()  # tiles que já têm árvore (a alta ocupa dois): uma árvore nunca esconde metade da outra
 for y in range(-1, H + 1):
     for x in range(-1, W + 1):
         tx, ty = min(max(x, 0), W - 1), min(max(y, 0), H - 1)
@@ -276,14 +287,19 @@ for y in range(-1, H + 1):
         if edge < 5: dens = max(dens, 0.82 if b != COAST else 0.45)
         if near_path(tx, ty, 1): dens *= 0.05
         elif near_path(tx, ty, 3): dens *= 0.4
-        if random.random() < dens:
-            ox, oy = random.randint(-3, 3), random.randint(-4, 2)
-            t = town(random.choice(TREES[b]))
+        if (x, y) not in tree_at and random.random() < dens:
+            ox, oy = random.randint(-1, 1), random.randint(-1, 1)
+            kind = random.choice(TREES[b])
+            # a copa da árvore alta sobe um tile: não pode cobrir outra árvore, casa, lápide, estrada nem o mar
+            if kind.startswith("alta") and ((x, y - 1) in tree_at or blocked(x, y - 1) or P(x, y - 1)): kind = kind.replace("alta-", "")
+            tree_at.add((x, y))
+            if kind.startswith("alta"): tree_at.add((x, y - 1))
+            t = TREE_SPRITES[kind]
             # copa um pouco mais escura que a grama; no cemitério, árvores secas/escuras
-            t = Image.eval(t, (lambda v: int(v * 0.72)) if b == GRAVE else (lambda v: int(v * 0.86)))
-            objs.append((x * 16 + ox, y * 16 + oy, t, 0))
-        if random.random() < 0.05 and not near_path(tx, ty, 1):
-            objs.append((x * 16 + random.randint(-4, 4), y * 16 + random.randint(-4, 4), town(random.choice(DECOR[b])), 0))
+            t = darker(t, 0.72 if b == GRAVE else 0.86)
+            objs.append((x * 16 + ox, (y + 1) * 16 - t.height + oy, t, 0))
+        elif random.random() < 0.05 and not near_path(tx, ty, 1):
+            objs.append((x * 16 + random.randint(-3, 3), y * 16 + random.randint(-3, 3), town(random.choice(DECOR[b])), 0))
 
 # sombra no chão sob cada objeto + desenho na ordem de y (de trás para a frente)
 objs.sort(key=lambda o: (o[3], o[1] + o[2].height))
@@ -295,7 +311,7 @@ def draw_objects(im, xmin=0):
     for x, y, t, layer in objs:
         if x + t.width + 2 <= xmin: continue
         if layer == 0 and t.width == 16:
-            im.alpha_composite(shadow, (max(0, x + 2), max(0, min(PH - 4, y + 13))))
+            im.alpha_composite(shadow, (max(0, x + 2), max(0, min(PH - 4, y + t.height - 3))))
         # recorta o que sai da imagem (árvores da borda ficam pela metade só FORA da tela, não no meio do mapa)
         cx, cy = max(0, -x), max(0, -y)
         cw, ch = min(t.width, PW - x), min(t.height, PH - y)
