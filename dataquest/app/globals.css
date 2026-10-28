@@ -1200,6 +1200,22 @@ a:hover > .hub-place .hub-card { border-color: rgba(var(--tint), 0.55); transfor
   from { transform: translate(-50%, -50%) scale(1); }
   to   { transform: translate(-50%, -50%) scale(1.035); }
 }
+/* Ondas do Mapa-Múndi: folha de 24 quadros gerada por scripts/gerar_mundo_biomas.py.
+   A faixa começa em x = 808 de 1024 px da imagem (78,90625%) e vai até a borda direita. */
+.world-sea {
+  position: absolute;
+  left: 78.90625%;
+  top: 0;
+  width: 21.09375%;
+  height: 100%;
+  background: url(/assets/bg/mapa-mar.png) 0 0 / 2400% 100% no-repeat;
+  image-rendering: pixelated;
+  animation: world-sea 3.6s steps(24, jump-none) infinite;
+}
+@keyframes world-sea {
+  from { background-position: 0 0; }
+  to   { background-position: 100% 0; }
+}
 .region-particle {
   position: absolute;
   opacity: 0;
@@ -1295,7 +1311,7 @@ a:hover > .hub-place .hub-card { border-color: rgba(var(--tint), 0.55); transfor
   50%      { opacity: 0.9; transform: scale(1); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .region-scene, .region-particle, .crypt-mist, .forge-heat, .lighthouse-beam::before, .lighthouse-beam::after { animation: none; }
+  .region-scene, .world-sea, .region-particle, .crypt-mist, .forge-heat, .lighthouse-beam::before, .lighthouse-beam::after { animation: none; }
   .region-particle { display: none; }
 }
 

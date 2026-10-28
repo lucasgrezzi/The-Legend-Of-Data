@@ -23,7 +23,8 @@ Licença CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/). Atribuiç
 O reino em 4 biomas (floresta, cemitério, forja e costa com farol), gerado por `scripts/gerar_mundo_biomas.py` a partir
 dos tiles Kenney **Tiny Town** e **Tiny Dungeon** (https://kenney.nl/assets/tiny-town e /tiny-dungeon, CC0 1.0).
 O mar, a areia e o farol são pixel art própria do script. Para gerar de novo: baixar e extrair os dois zips e rodar
-`python scripts/gerar_mundo_biomas.py <pasta tiny-town> <pasta tiny-dungeon> public/assets/bg/mapa-mundo.png`.
+`python scripts/gerar_mundo_biomas.py <pasta tiny-town> <pasta tiny-dungeon> public/assets/bg/mapa-mundo.png public/assets/bg/mapa-mar.png`
+(o 4º argumento gera `bg/mapa-mar.png`, os 24 quadros das ondas animadas).
 (O gerador antigo, `scripts/gerar_fundo_mapa.py`, fazia uma vila só, com Tiny Town.)
 
 ## Fundos das regiões (`bg/regiao-*.png`) — CC0

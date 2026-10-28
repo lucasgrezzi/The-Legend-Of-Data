@@ -527,6 +527,13 @@ e a 3ª sala da Masmorra; XP conferido no servidor e tela de perfil. Mobile cont
   clara); capturas das 4 regiões, das arenas, da masmorra com 3 salas, da trilha SQL e do perfil; `tsc` e `build` ok.
 - ⚠ O dev server do Modo Teste continuou servindo o CSS antigo mesmo reiniciado: foi preciso apagar `.next`.
 - ⚠ No Bash daqui, `\b` dentro de heredoc vira o caractere backspace: scripts Python que editam regex vão em arquivo (Write).
+- **Mar do Mapa-Múndi com ondas (mesmo dia):** `scripts/gerar_mundo_biomas.py` agora pinta a água em quadros
+  (`paint_sea(px, t, ground)`): faixas de profundidade, cristas andando até a praia (tracinhos longe, linha de espuma
+  perto), a onda quebra, sobe na areia, deixa a marca molhada e volta; brilhos piscando. O 4º argumento gera
+  `public/assets/bg/mapa-mar.png` (24 quadros de 216×576, transparente fora da faixa da água), colado pelo
+  `.world-sea` do `WorldBackground` em `left: 78.90625%` (x = 808 de 1024), `steps(24, jump-none)` em 3,6 s.
+  Se mudar a costa, o script imprime o novo x: ajustar `left`/`width` no CSS. A transição entre biomas virou dither
+  de Bayer em blocos de 2 px (o degradê liso borrava a pixel art). A imagem fixa é o quadro 0.
 
 ### Sessão 19 — Fases novas, Masmorra Secreta e poderes das raças (2026-10-26)
 Pedido do usuário: "mais fases é essencial"; fases bônus de Python com animação épica; raças com efeito real e visual.

@@ -77,47 +77,103 @@ for y in range(H):
         col = 0 if not lf else (2 if not rt else 1)
         img.alpha_composite(town([[12, 13, 14], [24, 25, 26], [36, 37, 38]][row][col]), (x * 16, y * 16))
 
-# ── Mar pintado em pixel: azul em faixas, espuma na praia, brilhos ──
+# ── Areia (estática). A água é pintada depois, em quadros: ver paint_sea ──
 px = img.load()
 for y in range(PH):
     sx = shore_x(y / 16) * 16
     sand_in = sx - 56 - 10 * math.sin(y / 23.0) - 6 * math.sin(y / 9.0)
-    for x in range(max(0, int(sand_in)), min(PW, int(sx))):
+    for x in range(max(0, int(sand_in)), min(PW, int(sx) + 1)):
         if path[y // 16][x // 16] and x < sand_in + 6: continue
         n = (x * 7 + y * 13) % 11
         c = (236, 210, 150, 255) if n else (214, 186, 126, 255)
         if x - sand_in < 3: c = (196, 178, 110, 255)  # borda grama/areia
         px[x, y] = c
-    for x in range(int(sx), PW):
-        d = x - sx
-        if d < 3: c = (236, 244, 246, 255)
-        elif d < 8: c = (110, 196, 214, 255)
-        elif d < 40: c = (64, 156, 196, 255)
-        else: c = (44, 118, 170, 255)
-        px[x, y] = c
-for _ in range(260):  # ondinhas
+# brilhos do mar: as mesmas posições sorteadas das antigas "ondinhas", agora piscando em quadros diferentes
+GLINTS = []
+for _ in range(260):
     x = random.randint(int(0.88 * PW), PW - 6); y = random.randint(0, PH - 1)
     if x > shore_x(y / 16) * 16 + 10:
-        for k in range(random.choice([3, 4, 5])): px[x + k, y] = (170, 222, 236, 255)
+        GLINTS.append((x, y, random.choice([3, 4, 5])))
 
 # ── Tons de bioma (cemitério mais frio e escuro, forja mais quente) ──
+# A transição é pontilhada (dither de Bayer em blocos de 2 px), e não um degradê liso:
+# o degradê borrava a pixel art e parecia uma mancha.
 TINTS = [(1, 1, 1), (0.60, 0.70, 0.78), (0.96, 0.86, 0.70), (1, 1, 1)]
 BLEND = 0.035  # largura da transição (fração da largura)
-def tint_at(fx):
-    m = [0.0, 0.0, 0.0]
+BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
+def tint_at(fx, x, y):
+    th = (BAYER[(y // 2) % 4][(x // 2) % 4] + 0.5) / 16
+    acc = 0.0
     for i in range(4):
         lo = BOUNDS[i - 1] if i else -9
         hi = BOUNDS[i] if i < 3 else 9
-        w = max(0.0, min(1.0, (fx - lo) / BLEND + 0.5)) * max(0.0, min(1.0, (hi - fx) / BLEND + 0.5))
-        for k in range(3): m[k] += w * TINTS[i][k]
-    return m
+        acc += max(0.0, min(1.0, (fx - lo) / BLEND + 0.5)) * max(0.0, min(1.0, (hi - fx) / BLEND + 0.5))
+        if th < acc: return TINTS[i]
+    return TINTS[3]
 for y in range(PH):
     for x in range(PW):
+        m = tint_at(biome_fx(x / 16, y / 16), x, y)
+        if m == (1, 1, 1): continue
         r, g, bl, a = px[x, y]
-        if bl > r and bl > 150: continue  # mar
-        m = tint_at(biome_fx(x / 16, y / 16))
-        if m == [1, 1, 1]: continue
         px[x, y] = (min(255, int(r * m[0])), min(255, int(g * m[1])), min(255, int(bl * m[2])), a)
+GROUND = img.copy()  # chão + estrada + areia, sem água e sem objetos
+
+# ── Mar animado: ondas chegando em linhas paralelas à praia, quebrando em espuma, subindo a areia e voltando ──
+# t vai de 0 a 1 e o ciclo fecha (o quadro t=1 é igual ao t=0). Em t=0 a crista chega na linha da praia.
+FRAMES = 24
+WAVE = 30  # distância entre as cristas, em px
+def h01(x, y):  # ruído fixo (não muda entre quadros)
+    v = (x * 73856093) ^ (y * 19349663) ^ 0x5bd1e995
+    v = (v ^ (v >> 13)) * 0x2545F491 & 0xffffffff
+    return (v & 0xffff) / 65535
+def runup_max(y): return 10 + 3 * math.sin(y / 17.0) + 2 * math.sin(y / 7.3)
+def sea_from(y):  # onde começa a área que muda entre quadros (água + areia molhada)
+    return int(shore_x(y / 16) * 16 - runup_max(y) - 3)
+def mix(a, b, k): return tuple(int(a[i] + (b[i] - a[i]) * k) for i in range(3)) + (255,)
+DEEP2, DEEP, MID, SHALLOW, CLEAR = (34, 96, 152), (42, 114, 168), (54, 140, 192), (74, 168, 208), (110, 200, 222)
+FOAM, CREST = (238, 246, 246, 255), (178, 226, 238, 255)
+
+def paint_sea(px, t, ground):
+    for y in range(PH):
+        sx = shore_x(y / 16) * 16
+        R = runup_max(y)
+        u = (t + 0.07 * math.sin(y / 45.0) + 0.03 * math.sin(y / 13.0)) % 1.0  # a onda bate em diagonal, não toda de uma vez
+        # quanto a água sobe na areia (rápido) e volta (devagar), e a marca molhada que fica
+        if u < 0.2: run = R * math.sin(u / 0.2 * math.pi / 2); wet = run
+        elif u < 0.65: run = R * (1 + math.cos(math.pi * (u - 0.2) / 0.45)) / 2; wet = max(run, R * (1 - (u - 0.2) / 0.75))
+        else: run = 0; wet = max(0.0, R * (1 - (u - 0.2) / 0.75))
+        jit = 2 * math.sin(y / 7.0) + 1.5 * math.sin(y / 3.1)
+        for x in range(sea_from(y), PW):
+            d = x - sx
+            if d < 0:  # areia
+                if d >= -run:
+                    edge = d + run
+                    if edge < 1.6 or (edge < 3.5 and h01(x, y // 2) < 0.45): px[x, y] = FOAM  # borda de espuma rendada
+                    else: px[x, y] = mix(ground[x, y], CLEAR, 0.55 if h01(x // 2, y // 2) < 0.8 else 0.3)
+                elif d >= -wet:
+                    g = ground[x, y]; px[x, y] = (int(g[0] * 0.8), int(g[1] * 0.78), int(g[2] * 0.72), 255)
+                else:
+                    px[x, y] = ground[x, y]
+                continue
+            dj = d + jit
+            c = CLEAR if dj < 7 else SHALLOW if dj < 20 else MID if dj < 52 else DEEP if dj < 130 else DEEP2
+            # cristas: andam em direção à praia; longe são tracinhos soltos, perto viram uma linha inteira de espuma
+            f = (d / WAVE + u) % 1.0
+            thick = (2.0 if d > 12 else 3.5) / WAVE
+            if f < thick:
+                show = 0.85 - min(d, 90) / 90 * 0.7
+                if h01(0, y // 5) < show or d < 10:
+                    c = FOAM[:3] if d < 14 else CREST[:3]
+            elif f < thick + 1.0 / WAVE and d < 40:
+                c = mix(c, (20, 70, 120), 0.35)[:3]  # sombrinha na frente da crista
+            # espuma fixa na beira, que cresce quando a onda quebra
+            fw = 2.5 + (5 if (u > 0.92 or u < 0.12) else 0)
+            if d < fw and h01(x // 2, y // 2 + int(t * FRAMES)) < (0.9 if d < 2 else 0.55): c = FOAM[:3]
+            px[x, y] = c + (255,)
+    k = int(round(t * FRAMES))
+    for i, (gx, gy, gl) in enumerate(GLINTS):  # brilhos: cada um aparece em 2 de cada 24 quadros
+        if (k - i * 7) % FRAMES < 2:
+            for j in range(gl): px[gx + j, gy] = (196, 234, 244, 255)
 
 # ── Objetos: lista (x_px, y_px, tile), desenhados por y para sobrepor direito ──
 objs = []
@@ -235,14 +291,35 @@ shadow = Image.new("RGBA", (12, 4), (0, 0, 0, 0)); sp = shadow.load()
 for x in range(12):
     for y in range(4):
         if (x - 5.5) ** 2 / 36 + (y - 1.5) ** 2 / 4 <= 1: sp[x, y] = (0, 0, 0, 60)
-for x, y, t, layer in objs:
-    if layer == 0 and t.width == 16:
-        img.alpha_composite(shadow, (max(0, x + 2), max(0, min(PH - 4, y + 13))))
-    # recorta o que sai da imagem (árvores da borda ficam pela metade só FORA da tela, não no meio do mapa)
-    cx, cy = max(0, -x), max(0, -y)
-    cw, ch = min(t.width, PW - x), min(t.height, PH - y)
-    if cw > cx and ch > cy:
-        img.alpha_composite(t.crop((cx, cy, cw, ch)), (max(0, x), max(0, y)))
+def draw_objects(im, xmin=0):
+    for x, y, t, layer in objs:
+        if x + t.width + 2 <= xmin: continue
+        if layer == 0 and t.width == 16:
+            im.alpha_composite(shadow, (max(0, x + 2), max(0, min(PH - 4, y + 13))))
+        # recorta o que sai da imagem (árvores da borda ficam pela metade só FORA da tela, não no meio do mapa)
+        cx, cy = max(0, -x), max(0, -y)
+        cw, ch = min(t.width, PW - x), min(t.height, PH - y)
+        if cw > cx and ch > cy:
+            im.alpha_composite(t.crop((cx, cy, cw, ch)), (max(0, x), max(0, y)))
 
+# imagem fixa = quadro 0 (é o que aparece sem animação)
+paint_sea(img.load(), 0.0, GROUND.load())
+draw_objects(img)
 img.resize((PW * 2, PH * 2), Image.NEAREST).convert("RGB").save(OUT, optimize=True)
 print("ok", OUT)
+
+# folha de quadros do mar: só a faixa que muda (água + areia molhada); o resto é transparente
+if len(sys.argv) > 4:
+    X0 = min(sea_from(y) for y in range(PH)) // 8 * 8
+    sheet = Image.new("RGBA", ((PW - X0) * FRAMES, PH), (0, 0, 0, 0))
+    gp = GROUND.load()
+    for f in range(FRAMES):
+        fr = GROUND.copy()
+        paint_sea(fr.load(), f / FRAMES, gp)
+        draw_objects(fr, X0)
+        crop = fr.crop((X0, 0, PW, PH)); cp = crop.load()
+        for y in range(PH):
+            for x in range(sea_from(y) - X0): cp[x, y] = (0, 0, 0, 0)
+        sheet.paste(crop, (f * (PW - X0), 0))
+    sheet.save(sys.argv[4], optimize=True)
+    print("ok", sys.argv[4], f"{FRAMES} quadros de {PW - X0}x{PH}, começa em x={X0} de {PW} ({X0 / PW * 100:.4f}%)")

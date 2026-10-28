@@ -40,6 +40,8 @@ export default function WorldBackground({ region }: { region?: Track }) {
           className="absolute inset-0"
           style={{ backgroundImage: `url(${src})`, backgroundSize: "100% 100%", imageRendering: "pixelated" }}
         />
+        {/* mar do reino: 24 quadros (mapa-mar.png) só da faixa da água, colados por cima do mesmo lugar da imagem */}
+        {!region && <span className="world-sea" />}
         {region === "dataviz" && (
           <span className="lighthouse-beam" style={{ left: `${LIGHTHOUSE.x}%`, top: `${LIGHTHOUSE.y}%` }} />
         )}
